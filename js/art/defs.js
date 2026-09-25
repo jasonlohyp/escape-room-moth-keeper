@@ -132,6 +132,12 @@
   <linearGradient id="gLegWood" x1="0" y1="0" x2="1" y2="0">
     <stop offset="0" stop-color="#2a190f"/><stop offset="0.35" stop-color="#7a4e30"/><stop offset="0.55" stop-color="#5a3824"/><stop offset="1" stop-color="#1f130c"/>
   </linearGradient>
+  <radialGradient id="gPaperAge" cx="50%" cy="45%" r="70%">
+    <stop offset="0.5" stop-color="#8a6a3a" stop-opacity="0"/><stop offset="1" stop-color="#8a6a3a" stop-opacity="0.45"/>
+  </radialGradient>
+  <linearGradient id="gDeskSheen" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset="0.45" stop-color="#fff" stop-opacity="0.06"/><stop offset="0.55" stop-color="#fff" stop-opacity="0.1"/><stop offset="0.7" stop-color="#fff" stop-opacity="0"/>
+  </linearGradient>
   <linearGradient id="gGlass" x1="0" y1="0" x2="1" y2="0">
     <stop offset="0" stop-color="#cfe3ff" stop-opacity="0.22"/><stop offset="0.18" stop-color="#cfe3ff" stop-opacity="0.05"/><stop offset="0.8" stop-color="#cfe3ff" stop-opacity="0.04"/><stop offset="1" stop-color="#cfe3ff" stop-opacity="0.18"/>
   </linearGradient>

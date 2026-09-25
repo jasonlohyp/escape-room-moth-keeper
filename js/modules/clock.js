@@ -9,7 +9,7 @@
   const CX = 800, CY = 290;               // close-up dial centre (stage coords)
   const R_EN = 226, R_ICON = 160;
   const HOUR_LEN = 126, MIN_LEN = 212;
-  const SOL_H = 8, SOL_M = 3, START_H = 0, START_M = 6;
+  const SOL_H = 8, SOL_M = 3, START_H = 10, START_M = 6;
   const DOOR = { x: 668, y: 604, w: 264, h: 208 };   // close-up case door
   const LEN = { x: 800, y: 668, r: 36 };              // lenticle (pendulum window)
   const OPEN_DEG = 112;
@@ -141,7 +141,7 @@
       <stop offset="0" stop-color="#d7eed8"/><stop offset="0.6" stop-color="#a8d8b0"/><stop offset="1" stop-color="#6fae8a"/>
     </radialGradient>
     <radialGradient id="ck-vign" cx="50%" cy="42%" r="75%">
-      <stop offset="0.45" stop-color="#05080a" stop-opacity="0"/><stop offset="0.85" stop-color="#05080a" stop-opacity="0.55"/><stop offset="1" stop-color="#05080a" stop-opacity="0.85"/>
+      <stop offset="0.38" stop-color="#05080a" stop-opacity="0"/><stop offset="0.75" stop-color="#05080a" stop-opacity="0.6"/><stop offset="1" stop-color="#05080a" stop-opacity="0.9"/>
     </radialGradient>
     <radialGradient id="ck-wallLight" cx="50%" cy="35%" r="55%">
       <stop offset="0" stop-color="#56634f" stop-opacity="0.35"/><stop offset="1" stop-color="#0e171b" stop-opacity="0"/>
@@ -458,6 +458,8 @@
     WO.m = root.querySelector('.ck-wm');
     WO.door = root.querySelector('.ck-wdoor');
     WO.pend = root.querySelector('.ck-wpend');
+    WO.edge = G.el('rect', { y: 362, height: 322, width: 0, x: 444, fill: '#7a4e30', stroke: INK, 'stroke-width': 1 }, WO.door.parentNode);
+    WO.door.parentNode.insertBefore(WO.edge, WO.door.nextSibling);
     // invisible hit area over the whole clock
     const hit = G.el('rect', { x: 306, y: 108, width: 188, height: 694, fill: 'transparent', 'pointer-events': 'all' }, g);
     G.hotspot(hit, { cursor: 'look', click() { G.go('clock'); } });
@@ -473,7 +475,9 @@
   }
   function setWallDoor(deg) {
     const c = Math.cos(rad(deg));
-    WO.door.setAttribute('transform', deg ? `translate(356,0) matrix(${c},${f1(-Math.sin(rad(deg)) * 0.04 * 100) / 100},0,1,0,0) translate(-356,0)` : '');
+    WO.door.setAttribute('transform', deg ? `translate(356,0) matrix(${c.toFixed(4)},0,0,1,0,0) translate(-356,0)` : '');
+    WO.edge.setAttribute('x', f1(356 + 88 * c));
+    WO.edge.setAttribute('width', f1(6 * Math.sin(rad(deg))));
   }
 
   // ------------------------------------------------------------------ CLOSE-UP VIEW
@@ -483,9 +487,9 @@
     let icons = '', medallions = '', florets = '';
     for (let i = 0; i < 12; i++) {
       const p = pol(R_ICON, i * 30, CX, CY);
-      medallions += `<circle cx="${f1(p[0])}" cy="${f1(p[1])}" r="31" fill="#f7f0dc" fill-opacity="0.55" stroke="#8a6a3a" stroke-width="1.3"/>
-                     <circle cx="${f1(p[0])}" cy="${f1(p[1])}" r="27.5" fill="none" stroke="#8a6a3a" stroke-width="0.6" stroke-dasharray="2 2.5"/>`;
-      icons += `<g class="ck-icon" data-i="${i}" transform="translate(${f1(p[0])},${f1(p[1])})">${ICONS[i]()}</g>`;
+      medallions += `<circle cx="${f1(p[0])}" cy="${f1(p[1])}" r="33" fill="#f7f0dc" fill-opacity="0.55" stroke="#8a6a3a" stroke-width="1.3"/>
+                     <circle cx="${f1(p[0])}" cy="${f1(p[1])}" r="29.5" fill="none" stroke="#8a6a3a" stroke-width="0.6" stroke-dasharray="2 2.5"/>`;
+      icons += `<g class="ck-icon" data-i="${i}" transform="translate(${f1(p[0])},${f1(p[1])}) scale(1.1)">${ICONS[i]()}</g>`;
       const q = pol(R_ICON + 2, i * 30 + 15, CX, CY);
       florets += `<g transform="translate(${f1(q[0])},${f1(q[1])}) rotate(${i * 30 + 15})"><path d="M0,-6 L2,0 L0,6 L-2,0Z" fill="#b8893a" stroke="#6e4d1c" stroke-width="0.6"/><circle r="1.4" fill="#6e4d1c"/></g>`;
     }
@@ -506,7 +510,7 @@
     // dial-plate damask behind bezel
     const root = G.svg(`
       <rect x="0" y="0" width="1600" height="900" fill="#1f2820"/>
-      <rect x="0" y="0" width="1600" height="900" fill="url(#ck-damask)" opacity="0.9"/>
+      <rect x="0" y="0" width="1600" height="900" fill="url(#ck-damask)" opacity="0.6"/>
       <rect x="0" y="0" width="1600" height="900" fill="url(#ck-wallLight)"/>
       <!-- wainscot hint at the bottom -->
       <rect x="0" y="770" width="1600" height="130" fill="#23160f"/>
