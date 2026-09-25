@@ -49,7 +49,7 @@ body.title-open .ui-hud, body.ending .ui-hud { opacity: 0 !important; visibility
 /* soft dark pool behind every chevron so it reads on any art */
 .ui-arrow::before, .ui-back::before {
   content: ""; position: absolute; pointer-events: none; transition: opacity .5s ease; opacity: .85;
-  background: radial-gradient(ellipse closest-side, rgba(3, 4, 5, .8), rgba(3, 4, 5, .55) 40%, rgba(3, 4, 5, .2) 75%, rgba(3, 4, 5, 0));
+  background: radial-gradient(ellipse closest-side, rgba(2, 3, 4, .9), rgba(2, 3, 4, .66) 38%, rgba(2, 3, 4, .22) 72%, rgba(2, 3, 4, 0));
 }
 .ui-arrow::before { left: -4%; right: -4%; top: 8%; bottom: 8%; }
 .ui-back::before { left: 12%; right: 12%; top: 0; bottom: -20%; }
@@ -150,6 +150,7 @@ body.busy .ui-slots > *, body.busy .ui-slot { pointer-events: none !important; }
   filter: drop-shadow(0 0 calc(var(--u) * 6) rgba(255, 196, 110, .4)) drop-shadow(0 calc(var(--u) * 4) calc(var(--u) * 4) rgba(0, 0, 0, .7)); }
 #ui-held.over svg { transform: scale(1.14); filter: drop-shadow(0 0 calc(var(--u) * 14) rgba(255, 214, 140, .95)) drop-shadow(0 calc(var(--u) * 5) calc(var(--u) * 5) rgba(0, 0, 0, .7)); }
 #ui-held.on { opacity: .97; }
+body.busy #ui-held, body.ending #ui-held, body.title-open #ui-held { opacity: 0 !important; transition: opacity .15s ease; }
 html body.item-selected #stage-wrap, html body.item-selected #stage-wrap *, html body.item-selected #stage-wrap *::before, html body.item-selected #stage-wrap *::after { cursor: none !important; }
 
 /* flying item on pickup */
@@ -301,14 +302,14 @@ body.busy .ui-hintbtn { pointer-events: none !important; opacity: .4; }
 
 /* ---------- ending: the finale's last frame stays, dims and softens beneath the words ---------- */
 #stage { transition: filter 6s ease; }
-body.ending #stage { filter: blur(2.5px) brightness(.55) saturate(.8); }
+body.ending #stage { filter: blur(2px) brightness(.72) saturate(.85); }
 #ui-ending {
   position: absolute; inset: 0; z-index: 12; overflow: hidden; opacity: 0; transition: opacity 4s var(--slow);
-  background: radial-gradient(ellipse 85% 80% at 50% 45%, rgba(6, 10, 16, .15), rgba(4, 7, 11, .72) 80%, rgba(2, 4, 6, .9));
+  background: radial-gradient(ellipse 85% 80% at 50% 45%, rgba(6, 10, 16, .05), rgba(4, 7, 11, .55) 80%, rgba(2, 4, 6, .85));
 }
 #ui-ending.show { opacity: 1; }
 .e-band { position: absolute; left: 0; right: 0; top: calc(var(--u) * 290); height: calc(var(--u) * 560); pointer-events: none;
-  background: linear-gradient(to bottom, rgba(4, 7, 11, 0), rgba(4, 7, 11, .55) 22%, rgba(4, 7, 11, .6) 78%, rgba(4, 7, 11, 0)); }
+  background: linear-gradient(to bottom, rgba(4, 7, 11, 0), rgba(4, 7, 11, .5) 22%, rgba(4, 7, 11, .55) 78%, rgba(4, 7, 11, 0)); }
 .e-body { position: absolute; left: calc(var(--u) * 160); right: calc(var(--u) * 160); top: calc(var(--u) * 340); display: flex; flex-direction: column; align-items: center; text-align: center; }
 .e-line { margin: 0 0 max(calc(var(--u) * 18), 6px); font-style: italic; font-size: max(calc(var(--u) * 50), 20px); line-height: 1.25; color: #f2f3ec; text-shadow: 0 0 calc(var(--u) * 24) rgba(150, 190, 230, .4), 0 2px 6px rgba(0, 0, 0, .9); }
 .e-line.l2 { font-size: max(calc(var(--u) * 40), 17px); color: rgba(236, 238, 230, .9); }

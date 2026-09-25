@@ -853,15 +853,17 @@
   // ================================================================== LIGHTING
   // per wall: where the moon & lamp read from, plus extra shapes
   function rainStreaks(seed, x, y, w, h, n, op, rx) {
-    // a seamless looping column of streaks (black, used inside screen groups = shadows of rain)
+    // seamless looping column of very soft elongated shadow ripples (black inside screen groups = rain shadows)
     const rnd = rng(seed);
-    let lines = '';
+    let blobs = '';
     for (let i = 0; i < n; i++) {
-      const lx = x + rnd() * w, ly = y + rnd() * h, len = 30 + rnd() * 90, sw = 1 + rnd() * 2.2;
-      const seg = (oy) => `<path d="M${r1(lx)},${r1(ly + oy)} l${r1(-rx * len / h)},${r1(len)}" stroke="#000" stroke-width="${r1(sw)}" stroke-linecap="round" opacity="${r1(op * (0.4 + rnd() * 0.6))}"/>`;
-      lines += seg(0) + seg(-h);
+      const lx = x + rnd() * w, ly = y + rnd() * h, ry = 16 + rnd() * 34, rxx = 3 + rnd() * 5;
+      const o = r1(op * (0.35 + rnd() * 0.65) * 10) / 10;
+      const ang = r1(Math.atan2(-rx, h) * 180 / Math.PI);
+      const one = (oy) => `<ellipse cx="${r1(lx)}" cy="${r1(ly + oy)}" rx="${r1(rxx)}" ry="${r1(ry)}" transform="rotate(${ang} ${r1(lx)} ${r1(ly + oy)})" fill="url(#gRipple)" opacity="${o}"/>`;
+      blobs += one(0) + one(-h);
     }
-    return `<g class="rl-rain" style="--rx:${-rx}px;--ry:${h}px;--rd:${(h / 260).toFixed(2)}s">${lines}</g>`;
+    return `<g class="rl-rain" style="--rx:${-rx}px;--ry:${h}px;--rd:${(h / 170).toFixed(2)}s">${blobs}</g>`;
   }
   function drips(seed, x, y, w, n) {
     const rnd = rng(seed);
@@ -913,8 +915,7 @@
       ${rad('winMaskG_w', 800, 360, 262, [[0.84, '#000'], [0.95, '#fff']])}`;
 
   const N_SHAFT = [[0, 120], [60, 150], [640, 900], [150, 900], [0, 560]];
-  const W_CONE = [[640, 470], [990, 540], [960, 900], [330, 900]];
-  const LIGHT = {
+    const LIGHT = {
     south: {
       cold: rad('lc_s', 1700, 300, 1500, [[0, '#9fb6c6'], [0.45, '#7a92a4'], [1, '#43566a']]),
       warm: rad('lw_s', 900, 400, 1150, [[0, '#fff8ec'], [0.22, '#f6e2c2'], [0.5, '#c8a888'], [0.8, '#7d7478'], [1, '#4d5160']]),
@@ -940,7 +941,7 @@
              <clipPath id="lmc_n"><polygon points="${polyStr(N_SHAFT, 0.85)}"/></clipPath>`,
       moonShapes: `<rect width="1600" height="900" fill="url(#lm2_n)"/>
              ${feather(N_SHAFT, 'url(#lm_n)', 7, 0.45)}
-             <g clip-path="url(#lmc_n)">${rainStreaks(22, -100, 120, 800, 620, 34, 0.28, -70)}</g>
+             <clipPath id="lmcw_n"><rect x="0" y="0" width="1600" height="585"/></clipPath><g clip-path="url(#lmc_n)"><g clip-path="url(#lmcw_n)">${rainStreaks(22, -100, 120, 800, 620, 30, 0.3, -70)}</g></g>
              <rect x="60" y="800" width="560" height="100" fill="url(#lp_n)"/>`,
       motesW: [33, 10, [300, 520, 1000, 300], 'gMoteW'],
       motesC: [34, 22, [40, 220, 520, 560], 'gMoteC'],
@@ -956,11 +957,11 @@
       moonBaseShapes: `<rect x="480" y="100" width="480" height="480" fill="url(#lp_e)"/>
              <g opacity="0.85">${wheel(720, 330, 1.9, 2.1, -8, 6)}</g>
              <clipPath id="lpc_e"><ellipse cx="720" cy="330" rx="186" ry="210" transform="rotate(-8 720 330)"/></clipPath>
-             <g clip-path="url(#lpc_e)">${rainStreaks(23, 520, 110, 400, 440, 30, 0.55, 30)}${drips(24, 540, 150, 360, 6)}</g>`,
+             <g clip-path="url(#lpc_e)">${rainStreaks(23, 520, 110, 400, 440, 26, 0.45, 30)}${drips(24, 540, 150, 360, 6)}</g>`,
       moon: `${rad('lm2_e', 800, 900, 1200, [[0, '#8fb3d9', 0.14], [1, '#8fb3d9', 0]])}${rad('lm3_e', 720, 330, 330, [[0, '#cfe3ff', 0.16], [1, '#cfe3ff', 0]])}`,
       moonShapes: `<rect width="1600" height="900" fill="url(#lm2_e)"/><rect width="1600" height="900" fill="url(#lm3_e)"/>
              <rect x="480" y="100" width="480" height="480" fill="url(#lp_e)" opacity="1.6"/><rect x="480" y="100" width="480" height="480" fill="url(#lp_e)"/>
-             <g clip-path="url(#lpc_e)">${rainStreaks(26, 520, 110, 400, 440, 30, 0.5, 40)}</g>`,
+             <g clip-path="url(#lpc_e)">${rainStreaks(26, 520, 110, 400, 440, 26, 0.4, 40)}</g>`,
       motesW: [35, 14, [1150, 250, 400, 450], 'gMoteW'],
       motesC: [36, 24, [540, 140, 360, 400], 'gMoteC'],
     },
@@ -973,13 +974,14 @@
       glowShapes: `<rect width="1600" height="900" fill="url(#lg_w)"/>`,
       moonBase: rad('lp_w', 800, 360, 480, [[0.45, '#8fb3d9', 0.16], [1, '#8fb3d9', 0]]),
       moonBaseShapes: `<rect width="1600" height="900" fill="url(#lp_w)"/>`,
-      moon: `${lin('lm_w', 0, 480, 0, 900, [[0, '#cfe3ff', 0.26], [0.6, '#a8c6ea', 0.14], [1, '#8fb3d9', 0.08]])}${rad('lm2_w', 800, 360, 720, [[0.3, '#cfe3ff', 0.22], [1, '#cfe3ff', 0]])}
-             ${rad('lp2_w', 700, 858, 330, [[0, '#dcebff', 0.4], [1, '#cfe3ff', 0]], 'gradientTransform="translate(700 858) scale(1 0.14) translate(-700 -858)"')}
-             <clipPath id="lmc_w"><polygon points="${polyStr(W_CONE, 0.85)}"/></clipPath>`,
+      moon: `${rad('lm2_w', 800, 360, 720, [[0.3, '#cfe3ff', 0.2], [1, '#cfe3ff', 0]])}
+             ${rad('lb_w', 770, 640, 470, [[0, '#9cc0ea', 0.26], [0.55, '#8fb3d9', 0.1], [1, '#8fb3d9', 0]], 'gradientTransform="translate(770 640) scale(1 0.72) translate(-770 -640)"')}
+             ${rad('lp2_w', 720, 860, 360, [[0, '#dcebff', 0.34], [0.6, '#cfe3ff', 0.14], [1, '#cfe3ff', 0]], 'gradientTransform="translate(720 860) scale(1 0.13) translate(-720 -860)"')}
+             ${lin('ltop_w', 0, 628, 0, 672, [[0, '#cfe3ff', 0.3], [1, '#cfe3ff', 0]])}`,
       moonShapes: `<rect width="1600" height="900" fill="url(#lm2_w)"/>
-             ${feather(W_CONE, 'url(#lm_w)', 7, 0.4)}
-             <rect x="300" y="800" width="800" height="100" fill="url(#lp2_w)"/>
-             <g clip-path="url(#lmc_w)">${rainStreaks(25, 300, 470, 700, 430, 26, 0.26, 20)}</g>`,
+             <rect width="1600" height="900" fill="url(#lb_w)"/>
+             <rect x="300" y="800" width="840" height="100" fill="url(#lp2_w)"/>
+             <path d="M530,632 H1070 L1072,664 H528 Z" fill="url(#ltop_w)"/>`,
       motesW: [37, 10, [80, 300, 500, 450], 'gMoteW'],
       motesC: [38, 30, [480, 520, 560, 330], 'gMoteC'],
     },

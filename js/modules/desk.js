@@ -102,7 +102,7 @@
   window.MOTHS.silhouettes = SIL;
 
   const DESK = window.DESK = window.DESK || {};
-  DESK.flame = { x: 900, y: 468 };
+  DESK.flame = { x: 900, y: 474 };
   DESK.lampUseHandlers = DESK.lampUseHandlers || [];
   DESK.onLampUse = fn => DESK.lampUseHandlers.push(fn);
 
@@ -156,6 +156,10 @@
       G.el('ellipse', { cx: 900, cy: 452, rx: 420, ry: 300, fill: 'url(#dkHalo)' }, R.halo);
       G.el('ellipse', { cx: 900, cy: 580, rx: 360, ry: 60, fill: 'url(#dkHalo)', opacity: 0.8 }, R.halo);
 
+      // faint dark cone either side of the shade (the shade body blocks the light)
+      R.cone = G.el('g', { opacity: 0, 'pointer-events': 'none', style: 'mix-blend-mode:multiply' }, g);
+      G.el('path', { d: 'M852 360 L360 90 L330 470 L800 442 Z', fill: '#1a1410', opacity: 0.22, filter: 'url(#blur20)' }, R.cone);
+      G.el('path', { d: 'M948 360 L1440 90 L1470 470 L1000 442 Z', fill: '#1a1410', opacity: 0.22, filter: 'url(#blur20)' }, R.cone);
       R.proj = G.el('g', { opacity: 0, 'pointer-events': 'none', style: 'mix-blend-mode:screen' }, g);
       // broad fan of light thrown up the wall by the shade's open top
       G.el('path', { d: 'M852 362 L380 60 Q900 -30 1420 60 L948 362 Z', fill: 'url(#dkWash)', filter: 'url(#dkBleed)' }, R.proj);
@@ -166,10 +170,11 @@
         const outer = G.el('g', { transform: `translate(${s.x} ${s.y}) rotate(${s.r}) scale(${s.s})` }, R.proj);
         const inner = G.el('g', {}, outer);
         const t = 'translate(-100 -70)';
-        G.el('path', { d: SIL[s.k], transform: t, fill: '#f0a24c', opacity: 0.55, filter: 'url(#dkBleed)' }, inner);
+        // penumbra (soft, slightly enlarged) + core + paper-grain shimmer
+        G.el('path', { d: SIL[s.k], transform: 'scale(1.05) ' + t, fill: '#f0a24c', opacity: 0.45, filter: 'url(#dkBleed)' }, inner);
         G.el('path', { d: SIL[s.k], transform: t, fill: 'url(#dkMothLight)', opacity: 0.92, filter: 'url(#dkSoft)' }, inner);
-        G.el('path', { d: SIL[s.k], transform: t, fill: '#fff6d8', opacity: 0.35, filter: 'url(#dkWeave)' }, inner);
-        R.moths.push({ outer, inner, s });
+        const weave = G.el('path', { d: SIL[s.k], transform: t, fill: '#fff6d8', opacity: 0.35, filter: 'url(#dkWeave)' }, inner);
+        R.moths.push({ outer, inner, s, weave });
       });
       // click target (only live when lit)
       R.projHot = G.el('path', { d: 'M440 110 H1160 V330 H440 Z', fill: 'transparent', 'pointer-events': 'none' }, g);
@@ -184,6 +189,7 @@
       if (lightingNow) return;
       R.proj.setAttribute('opacity', lit ? 1 : 0);
       R.halo.setAttribute('opacity', lit ? 1 : 0);
+      R.cone.setAttribute('opacity', lit ? 1 : 0);
       projShown = lit;
     },
   });
@@ -258,106 +264,135 @@
   });
 
   // ================================================================== OIL LAMP
+  // geometry: shade 356–446, glass chimney 436–498 (flame inside), collar 494–508, font 505–550, foot 561–577
+  const SHADE_D = 'M852 358 C870 354 930 354 948 358 L1002 436 C960 448 840 448 798 436 Z';
+  const CHIM_D = 'M880 498 C864 490 858 472 864 458 C868 448 878 444 884 436 L916 436 C922 444 932 448 936 458 C942 472 936 490 920 498 Z';
+  const FONT_D = 'M888 550 C852 547 841 532 846 520 C851 510 872 505 900 505 C928 505 949 510 954 520 C959 532 948 547 912 550 Z';
+  const FOOT_D = 'M844 577 C844 566 870 561 900 561 C930 561 956 566 956 577 Z';
+  const STEM_D = 'M884 562 C887 557 888 553 887 549 L913 549 C912 553 913 557 916 562 Z';
+  const COLLAR_D = 'M874 508 L875 497 C876 493 924 493 925 497 L926 508 Z';
+  function rng(seed) { let x = seed; return () => { x = (x * 16807) % 2147483647; return (x - 1) / 2147483646; }; }
   G.registerWallObject('south', {
     z: 6,
     build(g) {
       G.svg(`
         <defs>
           <linearGradient id="dkBrassH" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0" stop-color="#6e4d1c"/><stop offset="0.28" stop-color="#e7c476"/><stop offset="0.45" stop-color="#b8893a"/>
-            <stop offset="0.8" stop-color="#7a5620"/><stop offset="1" stop-color="#4a3210"/>
+            <stop offset="0" stop-color="#4a3210"/><stop offset="0.16" stop-color="#8a6526"/><stop offset="0.3" stop-color="#e7c476"/>
+            <stop offset="0.38" stop-color="#c99a45"/><stop offset="0.62" stop-color="#9a7030"/><stop offset="0.86" stop-color="#6e4d1c"/><stop offset="1" stop-color="#3a2608"/>
           </linearGradient>
+          <radialGradient id="dkPatina" cx="50%" cy="50%" r="50%">
+            <stop offset="0" stop-color="#3c3a1e" stop-opacity="0.55"/><stop offset="1" stop-color="#3c3a1e" stop-opacity="0"/>
+          </radialGradient>
           <linearGradient id="dkGlass" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0" stop-color="#cfe3ff" stop-opacity="0.18"/><stop offset="0.25" stop-color="#ffffff" stop-opacity="0.55"/>
-            <stop offset="0.4" stop-color="#cfe3ff" stop-opacity="0.08"/><stop offset="0.85" stop-color="#cfe3ff" stop-opacity="0.12"/>
-            <stop offset="1" stop-color="#ffffff" stop-opacity="0.35"/>
+            <stop offset="0" stop-color="#cfe3ff" stop-opacity="0.22"/><stop offset="0.22" stop-color="#ffffff" stop-opacity="0.5"/>
+            <stop offset="0.36" stop-color="#cfe3ff" stop-opacity="0.07"/><stop offset="0.84" stop-color="#cfe3ff" stop-opacity="0.12"/>
+            <stop offset="1" stop-color="#ffffff" stop-opacity="0.3"/>
           </linearGradient>
+          <radialGradient id="dkGlassLit" cx="50%" cy="68%" r="62%">
+            <stop offset="0" stop-color="#fff1c1" stop-opacity="0.95"/><stop offset="0.45" stop-color="#ffcf7a" stop-opacity="0.6"/><stop offset="1" stop-color="#e0853a" stop-opacity="0.25"/>
+          </radialGradient>
           <linearGradient id="dkShadeCold" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0" stop-color="#5b5a4c"/><stop offset="0.3" stop-color="#a39a7c"/><stop offset="0.6" stop-color="#8a8268"/><stop offset="1" stop-color="#3c3b33"/>
+            <stop offset="0" stop-color="#4e4c40"/><stop offset="0.3" stop-color="#9d9478"/><stop offset="0.62" stop-color="#857d64"/><stop offset="1" stop-color="#36352e"/>
           </linearGradient>
-          <radialGradient id="dkShadeLit" cx="50%" cy="80%" r="75%">
-            <stop offset="0" stop-color="#fff1c1"/><stop offset="0.45" stop-color="#ffcf7a"/><stop offset="0.85" stop-color="#e0853a"/><stop offset="1" stop-color="#9a4a1c"/>
+          <radialGradient id="dkShadeLit" cx="50%" cy="88%" r="80%">
+            <stop offset="0" stop-color="#fff1c1"/><stop offset="0.4" stop-color="#ffd88a"/><stop offset="0.78" stop-color="#e79a48"/><stop offset="1" stop-color="#9a4a1c"/>
           </radialGradient>
-          <radialGradient id="dkFlame" cx="50%" cy="72%" r="60%">
-            <stop offset="0" stop-color="#ffffff"/><stop offset="0.3" stop-color="#fff1c1"/><stop offset="0.7" stop-color="#ffcf7a"/><stop offset="1" stop-color="#e0853a"/>
+          <radialGradient id="dkFlame" cx="50%" cy="78%" r="70%">
+            <stop offset="0" stop-color="#fffbe8"/><stop offset="0.28" stop-color="#ffe7a6"/><stop offset="0.6" stop-color="#ffbf5c"/><stop offset="1" stop-color="#e0702a"/>
           </radialGradient>
-          <radialGradient id="dkBulbGlow" cx="50%" cy="60%" r="55%">
-            <stop offset="0" stop-color="#fff1c1" stop-opacity="0.95"/><stop offset="0.5" stop-color="#ffcf7a" stop-opacity="0.45"/><stop offset="1" stop-color="#e0853a" stop-opacity="0"/>
+          <radialGradient id="dkBulbGlow" cx="50%" cy="50%" r="50%">
+            <stop offset="0" stop-color="#fff1c1" stop-opacity="0.95"/><stop offset="0.45" stop-color="#ffcf7a" stop-opacity="0.45"/><stop offset="1" stop-color="#e0853a" stop-opacity="0"/>
           </radialGradient>
-          <clipPath id="dkShadeClip"><path d="M852 364 C870 360 930 360 948 364 L1002 446 C960 456 840 456 798 446 Z"/></clipPath>
+          <clipPath id="dkShadeClip"><path d="${SHADE_D}"/></clipPath>
+          <clipPath id="dkFontClip"><path d="${FONT_D}"/><path d="${FOOT_D}"/><path d="${COLLAR_D}"/></clipPath>
+          <clipPath id="dkChimClip"><path d="${CHIM_D}"/></clipPath>
+          <filter id="dkPaint" x="-10%" y="-10%" width="120%" height="120%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.08" numOctaves="3" seed="21" result="n"/>
+            <feDisplacementMap in="SourceGraphic" in2="n" scale="5" xChannelSelector="R" yChannelSelector="G"/>
+          </filter>
         </defs>`, g);
       const L = G.el('g', {}, g);
-      // contact shadow
-      G.el('ellipse', { cx: 900, cy: 576, rx: 78, ry: 8, fill: '#000', opacity: 0.5, filter: 'url(#blur6)' }, L);
+      G.el('ellipse', { cx: 900, cy: 577, rx: 82, ry: 8, fill: '#000', opacity: 0.55, filter: 'url(#blur6)' }, L);
+      // ---- brass body
       G.svg(`
         <g stroke="${INK}" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round" filter="url(#ink)">
-          <!-- foot -->
-          <path d="M846 574 C846 562 872 558 900 558 C928 558 954 562 954 574 Z" fill="url(#dkBrassH)"/>
-          <path d="M880 558 C884 550 886 546 886 540 L914 540 C914 546 916 550 920 558 Z" fill="url(#dkBrassH)"/>
-          <!-- font (oil reservoir) -->
-          <path d="M886 541 C850 538 842 518 848 506 C854 494 874 490 900 490 C926 490 946 494 952 506 C958 518 950 538 914 541 Z" fill="url(#dkBrassH)"/>
-          <path d="M852 516 C872 522 928 522 948 516" fill="none" stroke-width="1.4" opacity="0.7"/>
-          <!-- burner collar -->
-          <path d="M874 491 L874 480 C874 476 926 476 926 480 L926 491 Z" fill="url(#dkBrassH)"/>
-          <path d="M877 484 H923" stroke-width="1.2" opacity="0.6"/>
-          <!-- wick knob -->
-          <path d="M926 484 H940" stroke-width="3"/>
-          <ellipse cx="943" cy="484" rx="4" ry="8" fill="url(#dkBrassH)"/>
+          <path d="${FOOT_D}" fill="url(#dkBrassH)"/>
+          <path d="${STEM_D}" fill="url(#dkBrassH)"/>
+          <path d="${FONT_D}" fill="url(#dkBrassH)"/>
+          <path d="${COLLAR_D}" fill="url(#dkBrassH)"/>
+          <path d="M926 501 H938" stroke-width="3"/>
+          <ellipse cx="941" cy="501" rx="4" ry="7.5" fill="url(#dkBrassH)"/>
         </g>
-        <path d="M862 500 C858 512 860 526 872 534" fill="none" stroke="#fff1c1" stroke-width="3" stroke-linecap="round" opacity="0.35"/>
+        <g clip-path="url(#dkFontClip)" pointer-events="none">
+          <ellipse cx="930" cy="540" rx="22" ry="8" fill="url(#dkPatina)"/>
+          <ellipse cx="866" cy="536" rx="14" ry="7" fill="url(#dkPatina)"/>
+          <ellipse cx="930" cy="572" rx="18" ry="5" fill="url(#dkPatina)"/>
+          <path d="M858 522 C860 512 872 508 884 508" fill="none" stroke="#fff4cf" stroke-width="4" stroke-linecap="round" opacity="0.55" filter="url(#dkPaint)"/>
+          <path d="M852 530 C856 540 868 545 880 546" fill="none" stroke="#ffe7a6" stroke-width="2" stroke-linecap="round" opacity="0.35" filter="url(#dkPaint)"/>
+          <path d="M872 566 C882 563 894 563 902 563" fill="none" stroke="#fff4cf" stroke-width="2.4" stroke-linecap="round" opacity="0.5"/>
+          <path d="M880 499 L880 506" stroke="#fff4cf" stroke-width="3" opacity="0.45"/>
+          <path d="M920 516 C926 513 933 515 935 521" fill="none" stroke="#3a2608" stroke-width="2.2" stroke-linecap="round" opacity="0.6"/>
+          <path d="M921 519 C926 517 931 518 933 523" fill="none" stroke="#f3d48a" stroke-width="1.4" stroke-linecap="round" opacity="0.6"/>
+          <path d="M896 530 l14 -3 M902 536 l9 -1 M864 570 l10 -2" stroke="#f3d48a" stroke-width="0.8" opacity="0.5"/>
+        </g>
+        <path d="M850 524 C874 530 926 530 950 524" fill="none" stroke="${INK}" stroke-width="1.3" opacity="0.6"/>
+        <path d="M878 502 H922" stroke="${INK}" stroke-width="1.1" opacity="0.55"/>
       `, L);
-      // chimney bulb (glass) — flame lives inside
-      R.bulbGlow = G.el('ellipse', { cx: 900, cy: 458, rx: 46, ry: 40, fill: 'url(#dkBulbGlow)', opacity: 0 }, L);
-      R.wick = G.el('path', { d: 'M896 478 L897 470 L903 470 L904 478 Z', fill: '#2a1a10', stroke: INK, 'stroke-width': 1 }, L);
-      R.flameG = G.el('g', { opacity: 0 }, L);
+      R.brassLit = G.el('path', { d: 'M850 520 C866 540 934 540 950 520 C944 538 926 546 900 546 C874 546 856 538 850 520 Z', fill: '#ffcf7a', opacity: 0, filter: 'url(#blur2)', 'pointer-events': 'none' }, L);
+      // ---- chimney + flame
+      R.bulbGlow = G.el('ellipse', { cx: 900, cy: 474, rx: 58, ry: 46, fill: 'url(#dkBulbGlow)', opacity: 0 }, L);
+      R.glassLit = G.el('path', { d: CHIM_D, fill: 'url(#dkGlassLit)', opacity: 0 }, L);
+      G.el('path', { d: 'M895 496 L896 488 L904 488 L905 496 Z', fill: '#2a1a10', stroke: INK, 'stroke-width': 1 }, L);
+      R.flameG = G.el('g', { opacity: 0, 'clip-path': 'url(#dkChimClip)' }, L);
       R.flameInner = G.el('g', {}, R.flameG);
-      G.el('ellipse', { cx: 900, cy: 452, rx: 26, ry: 34, fill: '#ffcf7a', opacity: 0.45, filter: 'url(#blur6)' }, R.flameInner);
-      G.el('path', { d: 'M900 424 C906 438 914 452 911 462 C909 470 904 473 900 473 C896 473 891 470 889 462 C886 452 894 438 900 424 Z', fill: 'url(#dkFlame)', filter: 'url(#glow)' }, R.flameInner);
-      G.el('path', { d: 'M900 446 C903 454 905 461 903 466 C902 469 898 469 897 466 C895 461 897 454 900 446 Z', fill: '#8fb3d9', opacity: 0.55 }, R.flameInner);
+      G.el('ellipse', { cx: 900, cy: 472, rx: 24, ry: 30, fill: '#ffb34d', opacity: 0.5, filter: 'url(#blur6)' }, R.flameInner);
+      G.el('path', { d: 'M900 446 C904 456 914 468 913 478 C912 486 906 490 900 490 C894 490 888 486 887 478 C886 468 896 456 900 446 Z', fill: 'url(#dkFlame)', filter: 'url(#glow)' }, R.flameInner);
+      G.el('path', { d: 'M900 464 C903 471 906 478 905 482 C904 486 896 486 895 482 C894 478 897 471 900 464 Z', fill: '#fffbe8', opacity: 0.9 }, R.flameInner);
       G.svg(`
-        <path d="M878 478 C866 470 862 456 868 444 C872 436 880 432 884 426 L916 426 C920 432 928 436 932 444 C938 456 934 470 922 478 Z"
-          fill="url(#dkGlass)" stroke="${INK}" stroke-width="2" stroke-linejoin="round" opacity="0.95"/>
-        <path d="M874 462 C872 452 876 444 882 438" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" opacity="0.5"/>
+        <path d="${CHIM_D}" fill="url(#dkGlass)" stroke="${INK}" stroke-width="2" stroke-linejoin="round"/>
+        <path d="M870 480 C866 470 868 460 876 452" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" opacity="0.55"/>
+        <path d="M926 488 C932 480 933 470 930 462" fill="none" stroke="#ffffff" stroke-width="1.4" stroke-linecap="round" opacity="0.35"/>
       `, L);
-      // shade
+      // ---- shade (hand-made: irregular pleats, wobbly hem)
       const shade = G.el('g', {}, L);
-      R.shadeBase = G.el('path', { d: 'M852 364 C870 360 930 360 948 364 L1002 446 C960 456 840 456 798 446 Z', fill: 'url(#dkShadeCold)' }, shade);
-      R.shadeLit = G.el('path', { d: 'M852 364 C870 360 930 360 948 364 L1002 446 C960 456 840 456 798 446 Z', fill: 'url(#dkShadeLit)', opacity: 0 }, shade);
-      // paper/fabric pleats + holes, clipped to shade
+      R.shadeBase = G.el('path', { d: SHADE_D, fill: 'url(#dkShadeCold)' }, shade);
+      R.shadeLit = G.el('path', { d: SHADE_D, fill: 'url(#dkShadeLit)', opacity: 0 }, shade);
       const inner = G.el('g', { 'clip-path': 'url(#dkShadeClip)' }, shade);
-      let pleats = '';
-      for (let i = 0; i <= 14; i++) {
-        const t = i / 14; const xt = 852 + 96 * t, xb = 798 + 204 * t;
-        pleats += `M${xt.toFixed(1)} 362 L${xb.toFixed(1)} 452 `;
+      const rnd = rng(77);
+      let tt = 0; const ts = [0];
+      while (tt < 1) { tt += 0.045 + rnd() * 0.05; ts.push(Math.min(1, tt)); }
+      let bands = '', lines = '';
+      for (let i = 0; i < ts.length - 1; i++) {
+        const a0 = ts[i], a1 = ts[i + 1];
+        const xt0 = 852 + 96 * a0, xb0 = 798 + 204 * a0, xt1 = 852 + 96 * a1, xb1 = 798 + 204 * a1;
+        const wob = (rnd() - 0.5) * 6;
+        if (i % 2) bands += `<path d="M${xt0.toFixed(1)} 350 Q${((xt0 + xb0) / 2 + wob).toFixed(1)} 400 ${xb0.toFixed(1)} 452 L${xb1.toFixed(1)} 452 Q${((xt1 + xb1) / 2 + wob).toFixed(1)} 400 ${xt1.toFixed(1)} 350 Z" fill="#000" opacity="${(0.05 + rnd() * 0.07).toFixed(3)}"/>`;
+        lines += `<path d="M${xt0.toFixed(1)} 350 Q${((xt0 + xb0) / 2 + wob).toFixed(1)} 400 ${xb0.toFixed(1)} 452" fill="none" stroke="#3a2418" stroke-width="${(0.6 + rnd() * 0.8).toFixed(2)}" opacity="${(0.2 + rnd() * 0.3).toFixed(2)}"/>`;
       }
-      G.el('path', { d: pleats, stroke: '#3a2418', 'stroke-width': 0.9, opacity: 0.35, fill: 'none' }, inner);
-      // side shading (roundness)
+      G.svg(bands + lines, inner);
       G.svg(`
         <linearGradient id="dkShadeRound" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" stop-color="#000" stop-opacity="0.45"/><stop offset="0.3" stop-color="#000" stop-opacity="0"/>
-          <stop offset="0.7" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity="0.55"/>
+          <stop offset="0" stop-color="#000" stop-opacity="0.5"/><stop offset="0.28" stop-color="#000" stop-opacity="0"/>
+          <stop offset="0.7" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity="0.6"/>
         </linearGradient>
-        <rect x="790" y="355" width="220" height="110" fill="url(#dkShadeRound)"/>`, inner);
-      // hand-cut moth holes on the visible face
+        <rect x="790" y="350" width="220" height="110" fill="url(#dkShadeRound)"/>
+        <path d="M800 432 C840 444 960 444 1000 432" fill="none" stroke="#6e4d1c" stroke-width="1" opacity="0.4" stroke-dasharray="3 4"/>`, inner);
       R.holes = G.el('g', {}, inner);
-      [['atlas', 838, 414, 0.2, -10], ['luna', 884, 392, 0.19, -3], ['hawk', 922, 408, 0.18, 4], ['emperor', 964, 424, 0.17, 12]].forEach(h => {
+      [['atlas', 838, 406, 0.2, -10], ['luna', 884, 386, 0.19, -3], ['hawk', 922, 400, 0.18, 4], ['emperor', 964, 416, 0.17, 12]].forEach(h => {
         G.el('path', { d: SIL[h[0]], transform: `translate(${h[1]} ${h[2]}) rotate(${h[4]}) scale(${h[3]} ${h[3] * 0.9}) translate(-100 -70)` }, R.holes);
       });
       R.holes.setAttribute('fill', '#15100c');
       G.svg(`
-        <path d="M852 364 C870 360 930 360 948 364 L1002 446 C960 456 840 456 798 446 Z" fill="none" stroke="${INK}" stroke-width="2.6" stroke-linejoin="round" filter="url(#ink)"/>
-        <path d="M852 364 C870 368 930 368 948 364" fill="none" stroke="${INK}" stroke-width="1.6"/>
-        <path d="M798 446 C840 456 960 456 1002 446" fill="none" stroke="#b8893a" stroke-width="3"/>
-        <path d="M800 449 C842 459 958 459 1000 449" fill="none" stroke="${INK}" stroke-width="1.2" opacity="0.7"/>
+        <path d="${SHADE_D}" fill="none" stroke="${INK}" stroke-width="2.6" stroke-linejoin="round" filter="url(#ink)"/>
+        <path d="M852 358 C870 363 930 363 948 358" fill="none" stroke="${INK}" stroke-width="1.6"/>
+        <path d="M798 436 C822 441 846 446 872 445 C900 448 932 446 960 444 C978 442 992 439 1002 436" fill="none" stroke="#b8893a" stroke-width="3.2" filter="url(#ink)"/>
+        <path d="M800 439 C842 450 958 450 1000 439" fill="none" stroke="${INK}" stroke-width="1.2" opacity="0.7"/>
       `, shade);
-      // cold tint overlay (unlit)
-      R.cold = G.el('path', {
-        d: 'M852 362 L948 362 L1004 448 L940 460 L934 478 L926 491 L952 506 C958 518 950 538 914 541 L920 558 C928 558 954 562 954 576 L846 576 C846 562 872 558 880 558 L886 541 C850 538 842 518 848 506 L874 491 L866 478 L860 460 L796 448 Z',
-        fill: '#0e1a22', opacity: 0.42, 'pointer-events': 'none', style: 'mix-blend-mode:multiply',
-      }, L);
-      // warm rim light on brass when lit
-      R.brassLit = G.el('path', { d: 'M852 512 C866 532 934 532 948 512 C942 530 924 538 900 538 C876 538 858 530 852 512 Z', fill: '#ffcf7a', opacity: 0, filter: 'url(#blur2)' }, L);
-      // match (animation prop)
+      // ---- cold tint (unlit): union of lamp parts, blended as one layer
+      R.cold = G.el('g', { opacity: 0.42, 'pointer-events': 'none', style: 'mix-blend-mode:multiply' }, L);
+      [SHADE_D, CHIM_D, COLLAR_D, FONT_D, STEM_D, FOOT_D].forEach(d => G.el('path', { d, fill: '#0e1a22' }, R.cold));
+      // ---- match (animation prop); head at local 0,0
       R.match = G.el('g', { opacity: 0, 'pointer-events': 'none' }, g);
       G.svg(`
         <path d="M0 0 L70 -3" stroke="#c9a877" stroke-width="4.5" stroke-linecap="round"/>
@@ -368,8 +403,7 @@
       G.el('path', { d: 'M-4 -22 C0 -14 4 -8 2 -2 C0 2 -8 2 -10 -2 C-12 -8 -8 -14 -4 -22 Z', fill: 'url(#dkFlame)' }, R.matchFlame);
       R.sparks = G.el('g', { opacity: 0, fill: '#ffe2a0', 'pointer-events': 'none' }, g);
 
-      // hotspot
-      const hot = G.el('path', { d: 'M792 356 H1008 V452 H940 V580 H846 V452 H792 Z', fill: 'transparent' }, g);
+      const hot = G.el('path', { d: 'M792 350 H1008 V452 H944 V580 H842 V452 H792 Z', fill: 'transparent' }, g);
       G.hotspot(hot, {
         cursor: 'use',
         click() {
@@ -387,7 +421,6 @@
           return false;
         },
       });
-      R.lampRoot = L;
     },
     update() {
       if (lightingNow) return;
@@ -398,6 +431,7 @@
   function applyLit(k) {
     R.flameG.setAttribute('opacity', k);
     R.bulbGlow.setAttribute('opacity', k);
+    R.glassLit.setAttribute('opacity', 0.8 * k);
     R.shadeLit.setAttribute('opacity', k * 0.92);
     R.cold.setAttribute('opacity', 0.42 * (1 - k));
     R.brassLit.setAttribute('opacity', 0.35 * k);
@@ -432,7 +466,7 @@
     await G.tween(260, t => R.matchFlame.setAttribute('transform', `scale(${0.3 + 0.9 * t})`), 'outBack');
     await G.wait(250);
     // carry flame to wick
-    await G.tween(620, t => place(990 - 80 * t, 558 - 88 * t, -14 + 34 * t), 'inOut');
+    await G.tween(700, t => place(990 - 86 * t, 558 - 70 * t - 30 * Math.sin(t * Math.PI), -14 + 30 * t), 'inOut');
     await G.wait(180);
     G.sfx('lampWhoosh');
     G.take('matches');
@@ -440,10 +474,11 @@
     R.projHot.setAttribute('pointer-events', 'all');
     await G.tween(700, t => {
       applyLit(t);
-      R.flameInner.setAttribute('transform', `translate(900 473) scale(${0.2 + 0.8 * t}) translate(-900 -473)`);
+      R.flameInner.setAttribute('transform', `translate(900 490) scale(${0.2 + 0.8 * t}) translate(-900 -490)`);
       R.halo.setAttribute('opacity', t);
+      R.cone.setAttribute('opacity', t);
       m.setAttribute('opacity', 1 - t);
-      place(910 + 70 * t, 470 + 50 * t, 20 + 30 * t);
+      place(904 + 76 * t, 488 + 40 * t, 16 + 30 * t);
     }, 'out');
     R.flameInner.removeAttribute('transform');
     // projection fades in, moths appear one by one
@@ -481,12 +516,14 @@
     const t = now / 1000;
     const f = flick(t), f2 = flick(t * 0.7 + 5);
     R.flameInner.setAttribute('transform',
-      `translate(900 473) skewX(${(f2 * 3).toFixed(2)}) scale(${(1 - 0.035 * f).toFixed(3)} ${(1 + 0.07 * f).toFixed(3)}) translate(-900 -473)`);
+      `translate(900 490) skewX(${(f2 * 3).toFixed(2)}) scale(${(1 - 0.035 * f).toFixed(3)} ${(1 + 0.07 * f).toFixed(3)}) translate(-900 -490)`);
+    R.glassLit.setAttribute('opacity', (0.74 + 0.1 * f).toFixed(3));
     R.bulbGlow.setAttribute('opacity', (0.85 + 0.12 * f).toFixed(3));
     R.shadeLit.setAttribute('opacity', (0.88 + 0.06 * f).toFixed(3));
     R.halo.setAttribute('opacity', (0.9 + 0.08 * f).toFixed(3));
     if (projShown) {
       R.proj.setAttribute('opacity', (0.93 + 0.06 * f).toFixed(3));
+      R.moths.forEach((mm, i) => mm.weave.setAttribute('opacity', (0.3 + 0.14 * flick(t * 0.9 + i * 1.7)).toFixed(3)));
       const dx = (-f2 * 1.4).toFixed(2), dy = (-f * 1.2).toFixed(2), sc = (1 + 0.006 * f).toFixed(4);
       R.proj.setAttribute('transform', `translate(${dx} ${dy}) translate(900 372) scale(${sc}) translate(-900 -372)`);
     }

@@ -132,6 +132,9 @@
   <linearGradient id="gLegWood" x1="0" y1="0" x2="1" y2="0">
     <stop offset="0" stop-color="#2a190f"/><stop offset="0.35" stop-color="#7a4e30"/><stop offset="0.55" stop-color="#5a3824"/><stop offset="1" stop-color="#1f130c"/>
   </linearGradient>
+  <radialGradient id="gRipple" cx="50%" cy="50%" r="50%">
+    <stop offset="0" stop-color="#000" stop-opacity="0.8"/><stop offset="0.5" stop-color="#000" stop-opacity="0.35"/><stop offset="1" stop-color="#000" stop-opacity="0"/>
+  </radialGradient>
   <radialGradient id="gPaperAge" cx="50%" cy="45%" r="70%">
     <stop offset="0.5" stop-color="#8a6a3a" stop-opacity="0"/><stop offset="1" stop-color="#8a6a3a" stop-opacity="0.45"/>
   </radialGradient>

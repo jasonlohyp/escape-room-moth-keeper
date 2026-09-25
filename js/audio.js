@@ -555,6 +555,18 @@
     try { if (master && !muted) master.gain.setTargetAtTime(volume, ctx.currentTime, 0.08); } catch (e) { }
   }
 
+  // ambience ducks ~4 dB under longer SFX so they read clearly
+  const DUCK = { step: 0.5, pickup: 0.9, chime: 4.5, clockOpen: 1, match: 1.2, lampWhoosh: 1.2, drawerOpen: 1, lockClick: 0.4, lockFail: 0.4,
+    keyTurn: 0.8, windowCreak: 2, paper: 0.4, pageTurn: 0.5, boxOpen: 0.9, cocoonCrack: 1.4, mothFlutter: 2.5, magic: 2, doorUnlock: 3,
+    doorOpen: 4, success: 2.5, hint: 1 };
+  let duckUntil = 0;
+  function duck(t, len) {
+    const p = ambBus.gain, end = Math.max(duckUntil, t + len);
+    duckUntil = end;
+    p.cancelScheduledValues(t);
+    p.setTargetAtTime(0.63, t, 0.03);
+    p.setTargetAtTime(1, end, 0.5);
+  }
   const lastPlay = {};
   function play(name, o) {
     try {
@@ -568,6 +580,7 @@
       o = Object.assign({}, o || {});
       if (o.vol == null && o.volume != null) o.vol = o.volume;
       fn(KS, now + 0.01 + (o.delay || 0), o);
+      if (DUCK[name]) duck(now + (o.delay || 0), DUCK[name]);
       if (name === 'cocoonCrack') A.cracked = true;
       if (name === 'mothFlutter' && A.cracked) setMusicStage(Math.max(M.stage, 2));
     } catch (e) { /* silent */ }
@@ -576,7 +589,7 @@
   /* =====================================================================================
    *  Ambience
    * ===================================================================================== */
-  const AMB_LEVEL = 0.32;
+  const AMB_LEVEL = 0.32, RAIN_CLOSED = 2800;
   const A = { on: false, started: false, nodes: [], timers: [], L: {}, cracked: false, win: false, lamp: false, finished: false };
   function later(fn, sec) {
     const id = setTimeout(() => { const i = A.timers.indexOf(id); if (i >= 0) A.timers.splice(i, 1); if (A.on) { try { fn(); } catch (e) { } } }, sec * 1000);
@@ -609,9 +622,10 @@
     const send = n => { const s = G_(0.25); n.connect(s); s.connect(roomRev); };
 
     // ---- rain ----
-    L.rainTone = BQ('lowpass', 2000, 0.4);
+    L.rainTone = BQ('lowpass', RAIN_CLOSED, 0.4);
     L.rainGain = G_(0.9);
-    chain(L.rainTone, L.rainGain, L.amb); send(L.rainGain);
+    const lift = BQ('peaking', 2200, 0.7); lift.gain.value = 4.5;   // presence for small speakers
+    chain(L.rainTone, lift, L.rainGain, L.amb); send(L.rainGain);
     [-0.75, 0.75].forEach(p => chain(loopSrc(nb.white, rr(0.97, 1.03)), BQ('bandpass', rr(1200, 1500), 0.45), G_(0.16), PAN(p), L.rainTone));
     chain(loopSrc(nb.brown), BQ('lowpass', 380), G_(0.35), L.rainTone);            // roof body
     L.patter = G_(0.18);
@@ -621,6 +635,12 @@
     L.drops = G_(0.9);
     chain(L.drops, L.winLP, L.winPan, L.rainTone);
     L.KD = { c, out: L.drops, wet: roomRev, nb };
+    // droplet texture: three pre-rendered stereo loops of different lengths (no per-drop nodes)
+    L.dropLayers = [[5.3, 14, 1], [6.7, 14, 1], [7.9, 27, 0]].map(([len, rate, on]) => {
+      const src = loopSrc(dropBuf(c, len, rate), rr(0.96, 1.04)), g = G_(on);
+      chain(src, g, L.drops);
+      return { src, g };
+    });
 
     // ---- room tone ----
     chain(loopSrc(nb.brown, 0.8), BQ('lowpass', 110), G_(0.22), L.amb);
@@ -645,8 +665,8 @@
     L.drone = G_(0); L.drone.connect(musBus); L.drone.gain.setTargetAtTime(1, now + 2, 4);
     L.droneLP = BQ('lowpass', 380, 0.8);
     L.droneLP.connect(L.drone);
-    [[mtof(38), 'sine', 0.05], [mtof(45), 'triangle', 0.025], [mtof(50), 'sawtooth', 0.012], [mtof(50) * 1.004, 'sawtooth', 0.012]].forEach(([f, ty, g]) => {
-      const o = c.createOscillator(); o.type = ty; o.frequency.value = f; o.start(); A.nodes.push(o);
+    [[mtof(38), 'sine', 0.05], [mtof(45), 'triangle', 0.025], [mtof(50), 'bow', 0.02], [mtof(50) * 1.004, 'bow', 0.02]].forEach(([f, ty, g]) => {
+      const o = c.createOscillator(); if (ty === 'bow') o.setPeriodicWave(bowWave(c)); else o.type = ty; o.frequency.value = f; o.start(); A.nodes.push(o);
       chain(o, G_(g), L.droneLP);
     });
     L.droneThird = G_(0); L.droneThird.connect(L.droneLP); // F (minor) or F# (major) added when warm
@@ -664,7 +684,7 @@
     chain(L.breath, G_(120), L.droneLP.frequency);
 
     // ---- schedulers ----
-    A.dropT = setInterval(dropTick, 60);
+    later(dropWander, 3);
     rainWander();
     later(thunder, rr(18, 35));
     later(houseCreak, rr(8, 20));
@@ -673,13 +693,13 @@
     later(windWander, 1);
     M.stage = -1;
     sync(true);
-    seqNext(rr(5, 8));
+    seqNext(rr(45, 60)); // the first minute is rain and room only
   }
 
   function stopAmbience(fade) {
     if (!A.on) return;
     A.on = false;
-    clearInterval(A.dropT); clearTimeout(M.timer);
+    clearTimeout(M.timer);
     A.timers.forEach(clearTimeout); A.timers = [];
     const nodes = A.nodes, L = A.L;
     A.nodes = [];
@@ -687,19 +707,40 @@
     setTimeout(() => { nodes.forEach(n => { try { n.stop(); } catch (e) { } }); try { L.amb.disconnect(); L.drone.disconnect(); L.shimmer.disconnect(); } catch (e) { } }, (fade || 0.3) * 1000 + 200);
   }
 
-  let dropDebt = 0;
-  function dropTick() {
-    if (!A.on || !running()) return;
-    const L = A.L, rate = (A.win ? 55 : 28) * (A.finished ? 0.2 : 1);
-    dropDebt += rate * 0.06;
-    const t0 = ctx.currentTime + 0.08;
-    while (dropDebt >= 1) {
-      dropDebt -= 1 + (R() - 0.5) * 0.5;
-      const t = t0 + R() * 0.06, o = { pan: rr(-0.9, 0.9) };
-      const v = voice(L.KD, o, 0);
-      if (R() < 0.72) noise(L.KD, v, { t, a: 0.0004, d: rr(0.002, 0.007), g: Math.pow(R(), 2) * 0.35 + 0.02, filters: [{ type: 'bandpass', f: rr(1800, 6500), q: 1.3 }] });
-      else tone(L.KD, v, { f: rr(1800, 4200), f1: rr(1100, 1600), glide: 0.012, t, d: rr(0.01, 0.02), g: rr(0.015, 0.05) });
+  // Stereo loop of droplets rendered in JS: resonant noise ticks (2-pole resonator) and small pitch-dropping plinks.
+  function dropBuf(c, dur, rate) {
+    const sr = c.sampleRate, n = Math.floor(dur * sr), b = c.createBuffer(2, n, sr);
+    const L = b.getChannelData(0), Rr = b.getChannelData(1), g = new Float32Array(Math.floor(sr * 0.03));
+    let t = R() * 0.1;
+    while (t < dur) {
+      t += -Math.log(1 - R() * 0.999) / rate;
+      const i0 = Math.floor(t * sr);
+      let len;
+      if (R() < 0.72) { // tick
+        const f = rr(1800, 6500), bw = f / 1.3, r = Math.exp(-Math.PI * bw / sr), cw = 2 * r * Math.cos(2 * Math.PI * f / sr);
+        const ex = Math.floor(sr * rr(0.002, 0.007)); len = Math.min(g.length, ex + Math.floor(sr * 0.004));
+        let y1 = 0, y2 = 0, pk = 1e-9;
+        for (let k = 0; k < len; k++) { const x = k < ex ? (R() * 2 - 1) * Math.exp(-k / (ex / 3)) : 0; const y = x + cw * y1 - r * r * y2; y2 = y1; y1 = y; g[k] = y; pk = Math.max(pk, Math.abs(y)); }
+        const amp = Math.pow(R(), 2) * 0.35 + 0.02;
+        for (let k = 0; k < len; k++) g[k] *= amp / pk;
+      } else { // plink
+        const f0 = rr(1800, 4200), f1 = rr(1100, 1600), d = rr(0.01, 0.02), amp = rr(0.015, 0.05);
+        len = Math.min(g.length, Math.floor(sr * (d + 0.004)));
+        let ph = 0;
+        for (let k = 0; k < len; k++) { const x = k / sr; const f = f0 * Math.pow(f1 / f0, Math.min(1, x / 0.012)); ph += 2 * Math.PI * f / sr; g[k] = Math.sin(ph) * amp * Math.min(1, k / 20) * Math.exp(-x / (d / 4)); }
+      }
+      const p = rr(-0.9, 0.9), gl = Math.cos((p + 1) * Math.PI / 4), gr = Math.sin((p + 1) * Math.PI / 4);
+      for (let k = 0; k < len; k++) { const j = (i0 + k) % n; L[j] += g[k] * gl; Rr[j] += g[k] * gr; }
     }
+    return b;
+  }
+  function dropWander() { // keeps the loops from sounding like loops: drift their speed and level
+    const L = A.L;
+    L.dropLayers.forEach((d, i) => {
+      ramp(d.src.playbackRate, rr(0.9, 1.1), rr(1, 3));
+      if (i < 2) ramp(d.g.gain, A.finished ? 0.2 : rr(0.6, 1.2), 2);
+    });
+    later(dropWander, rr(4, 9));
   }
   function rainWander() {
     const L = A.L;
@@ -795,7 +836,8 @@
     if (lamp !== A.lamp) { A.lamp = lamp; ramp(L.lampOn.gain, lamp ? 0.5 : 0, lamp ? 1.2 : 0.3); }
     if (win !== A.win) {
       A.win = win;
-      ramp(L.rainTone.frequency, win ? 6500 : 2000, initial ? 0.1 : 1.5);
+      ramp(L.rainTone.frequency, win ? 6500 : RAIN_CLOSED, initial ? 0.1 : 1.5);
+      ramp(L.dropLayers[2].g.gain, win ? 1 : 0, initial ? 0.1 : 1.5);
       ramp(L.rainGain.gain, win ? 1.5 : 0.9, initial ? 0.1 : 1.5);
       if (!win) ramp(L.windG.gain, 0, 0.5);
       else ramp(L.windG.gain, 0.15, 2);
@@ -809,62 +851,143 @@
    *  Music: music-box motif in D minor (major at the finale) + drone pad
    * ===================================================================================== */
   const MIN = [0, 2, 3, 5, 7, 8, 10], MAJ = [0, 2, 4, 5, 7, 9, 11];
-  // notes: [scale degree (0 = D5) | null rest, beats, accidental (minor only)]; chords per 3/4 bar: [root degree, 'M' = major triad]
+  // n: [scale degree (0 = D5) | null rest, beats, accidental (minor only)]
+  // ch: [beat offset, root degree, 'M' = force major triad]   (3/4 time)
   const PHR = {
-    A: { n: [[4, 1], [7, 1], [6, 1], [5, 1.5], [4, 0.5], [3, 1], [4, 1], [2, 2], [1, 2], [null, 1]], ch: [[0], [3], [0], [4, 'M']] },
-    B: { n: [[2, 1], [4, 1], [7, 1], [9, 2], [8, 1], [7, 1], [6, 1], [4, 1], [5, 3]], ch: [[2], [6], [0], [5]] },
-    A2: { n: [[4, 1], [7, 1], [6, 1], [5, 1], [4, 1], [3, 1], [2, 1], [1, 1], [0, 1], [-1, 1, 1], [0, 2], [null, 3]], ch: [[0], [3], [5], [4, 'M'], [0]] },
-    C: { n: [[11, 2], [10, 1], [9, 1], [8, 1], [7, 1], [8, 2], [4, 1], [7, 3]], ch: [[0], [5], [4, 'M'], [0]] },
-    D: { n: [[0, 2], [2, 1], [1, 2], [-3, 1], [0, 3], [null, 3]], ch: [[0], [5], [0], [0]] },
+    A:  { n: [[4, 1], [7, 1], [6, 1], [5, 1.5], [4, 0.5], [3, 1], [4, 1], [2, 2], [1, 2], [null, 1]],
+          ch: [[0, 0], [3, 3], [6, 0], [9, 4, 'M']] },
+    B:  { n: [[2, 1], [4, 1], [7, 1], [9, 2], [8, 1], [7, 1], [6, 1], [4, 1], [5, 3]],
+          ch: [[0, 0], [3, 2], [6, 5], [9, 3]] },
+    A2: { n: [[4, 1], [7, 1], [6, 1], [5, 1], [4, 1], [3, 1], [2, 1], [1, 1], [0, 1], [-1, 1, 1], [0, 2], [null, 3]],
+          ch: [[0, 0], [3, 3], [6, 5], [9, 4, 'M'], [10, 0]], cad: true },
+    C:  { n: [[11, 2], [10, 1], [9, 1], [8, 1], [7, 1], [8, 2], [4, 1], [7, 3]],
+          ch: [[0, 0], [3, 5], [6, 4, 'M'], [9, 0]] },
+    D:  { n: [[0, 2], [2, 1], [1, 2], [-3, 1], [0, 3], [null, 3]],
+          ch: [[0, 0], [3, 4, 'M'], [6, 0]], cad: true },
+    E:  { n: [[7, 1.5], [6, 0.5], [5, 1], [4, 2], [null, 1], [5, 1], [4, 1], [3, 1], [2, 1], [1, 1], [4, 1], [0, 3]],
+          ch: [[0, 3], [3, 0], [6, 3], [9, 0], [10, 4, 'M'], [12, 0]], cad: true },
+    F:  { n: [[0, 1], [4, 1], [2, 1], [3, 2], [2, 1], [1, 1], [4, 1], [1, 1], [2, 3], [null, 3]],
+          ch: [[0, 0], [3, 3], [6, 4, 'M'], [9, 0], [12, 5]] },
   };
-  const NEXT = { A: ['B', 'B', 'C', 'D'], B: ['A2'], A2: ['C', 'D', 'A'], C: ['A', 'D', 'A2'], D: ['A', 'C'] };
-  const M = { stage: -1, timer: null, last: null };
+  const PNAMES = Object.keys(PHR);
+  const M = { stage: -1, timer: null, last: null, recent: [], voices: null, bass: null };
   function degMidi(d, mode, acc) {
     const sc = mode === 'major' ? MAJ : MIN, o = Math.floor(d / 7), s = ((d % 7) + 7) % 7;
     return 74 + 12 * o + sc[s] + (mode === 'minor' && acc ? acc : 0);
   }
-  function chordMidis(ch, mode) {
-    const r = ch[0];
-    return [r, r + 2, r + 4].map((d, i) => degMidi(d, mode, i === 1 && ch[1] === 'M' && mode === 'minor' && (r === 4) ? 1 : 0));
+  // pitch classes of the triad (root, third, fifth)
+  function chordPcs(r, q, mode) {
+    const m = [r, r + 2, r + 4].map(d => degMidi(d, mode));
+    if (q === 'M' && m[1] - m[0] === 3) m[1]++;
+    return m.map(x => ((x % 12) + 12) % 12);
+  }
+  // Nearest-voice voicing: 3 upper voices (D3..A#4) + bass (D2..D3); penalises parallel 5ths/8ves.
+  function voiceChord(pcs, st) {
+    const inRange = (pc, lo, hi) => { const r = []; for (let m = lo; m <= hi; m++) if (m % 12 === pc) r.push(m); return r; };
+    const prev = st.voices || [57, 62, 65], pb = st.bass == null ? 50 : st.bass;
+    const bassOpts = inRange(pcs[0], 38, 50).concat(R() < 0.25 ? inRange(pcs[1], 40, 50) : []);
+    let best = null;
+    const lists = pcs.map(pc => inRange(pc, 50, 70));
+    for (const x of lists[0]) for (const y of lists[1]) for (const z of lists[2]) {
+      const v = [x, y, z].sort((p, q) => p - q);
+      if (v[2] - v[0] > 14) continue;
+      for (const bs of bassOpts) {
+        if (v[0] - bs < 5) continue;
+        const all = [bs].concat(v), pall = [pb].concat(prev);
+        let cost = Math.abs(bs - pb) * 0.35;
+        for (let i = 0; i < 3; i++) cost += Math.abs(v[i] - prev[i]);
+        for (let i = 0; i < 4; i++) for (let j = i + 1; j < 4; j++) {
+          const pi = ((pall[j] - pall[i]) % 12 + 12) % 12, ni = ((all[j] - all[i]) % 12 + 12) % 12;
+          const mi = all[i] - pall[i], mj = all[j] - pall[j];
+          if ((pi === 0 || pi === 7) && pi === ni && mi !== 0 && Math.sign(mi) === Math.sign(mj)) cost += 25;
+        }
+        cost += R() * 1.5;
+        if (!best || cost < best.cost) best = { cost, v, bs };
+      }
+    }
+    if (!best) best = { v: prev, bs: pb };
+    st.voices = best.v; st.bass = best.bs;
+    return best;
+  }
+  // Rhythmic displacement: turns some even pairs into dotted pairs.
+  function varyNotes(n, o) {
+    n = n.map(x => x.slice());
+    if (o.displace) for (let i = 0; i < n.length - 2; i++) {
+      if (n[i][0] != null && n[i + 1][0] != null && n[i][1] === 1 && n[i + 1][1] === 1 && R() < 0.35) { n[i][1] = 1.5; n[i + 1][1] = 0.5; i++; }
+    }
+    return n;
   }
   // Schedules a phrase in K starting at t0; returns its length in seconds.
   function playPhrase(K, dest, name, t0, o) {
     const ph = PHR[name], mode = o.stage >= 2 ? 'major' : 'minor', beat = o.beat || 1.02, oct = o.oct || 0;
+    const st = o.st || M;
+    let notes = varyNotes(ph.n, o);
+    let total = notes.reduce((a, x) => a + x[1], 0);
+    if (o.fragment) { // first two bars only
+      let acc = 0, k = 0;
+      while (k < notes.length && acc < 6) acc += notes[k++][1];
+      notes = notes.slice(0, k); total = acc;
+    }
     let t = t0, pos = 0;
-    ph.n.forEach(([d, len, acc], i) => {
-      const rit = i >= ph.n.length - 2 ? 1.18 : 1;
+    notes.forEach(([d, len, acc], i) => {
+      const rit = i >= notes.length - 2 ? 1.18 : 1;
       if (d != null) {
         const m = degMidi(d, mode, acc) + 12 * oct;
         const vel = (pos % 3 === 0 ? 0.42 : 0.33) * rr(0.85, 1.1) * (o.vel || 1);
         const tt = t + rr(-0.012, 0.025);
+        if (o.grace && pos % 3 === 0 && len >= 1 && R() < 0.3) mbNote(K, dest, tt - 0.07, mtof(degMidi(d + 1, mode) + 12 * oct), vel * 0.4, { decay: 0.8 });
         mbNote(K, dest, tt, mtof(m), vel, { decay: o.stage >= 3 ? 3.4 : 2.6 });
         if (o.stage >= 3) mbNote(K, dest, tt + 0.01, mtof(m + 12), vel * 0.3, { decay: 2 });
       }
       pos += len; t += len * beat * rit;
     });
-    const bar = 3 * beat;
-    ph.ch.forEach((ch, i) => {
-      const tb = t0 + i * bar, mids = chordMidis(ch, mode);
+    const chords = ph.ch.filter(c => c[0] < total);
+    chords.forEach((c, i) => {
+      const tb = t0 + c[0] * beat, nextB = i + 1 < chords.length ? chords[i + 1][0] : Math.max(total, c[0] + 3);
+      const len = (nextB - c[0]) * beat;
+      const vc = voiceChord(chordPcs(c[1], c[2], mode), st);
       if (o.stage >= 1) {
-        mids.forEach(m => padNote(K, dest, tb, mtof(m - 24), bar, o.stage >= 3 ? 0.03 : 0.022, o.stage >= 2, 0.9, 2.4));
-        padNote(K, dest, tb, mtof(mids[0] - 36), bar, 0.035, false, 0.4, 2);
-      } else if (i === 0 || (i === ph.ch.length - 1 && R() < 0.5)) {
-        tone(K, dest, { type: 'triangle', f: mtof(mids[0] - 36), t: tb, a: 0.6, hold: bar * 0.5, d: bar * 1.2, g: 0.06 });
+        vc.v.forEach(m => padNote(K, dest, tb, mtof(m), len, o.stage >= 3 ? 0.032 : 0.024, o.stage >= 2, Math.min(0.9, len * 0.5), 2.4));
+        padNote(K, dest, tb, mtof(vc.bs), len, 0.04, false, 0.35, 2);
+      } else if (i === 0 || (i === chords.length - 1 && R() < 0.5)) {
+        padNote(K, dest, tb, mtof(vc.bs), len * 1.4, 0.035, false, 0.8, 2.5);
       }
     });
     return t - t0;
+  }
+  function choosePhrase() {
+    if (!M.last) return pick(['A', 'D', 'F']);
+    const cand = PNAMES.filter(n => !M.recent.includes(n));
+    const w = cand.map(n => (n === 'A' || n === 'A2' ? 0.7 : 1));
+    let r = R() * w.reduce((a, b) => a + b, 0);
+    for (let i = 0; i < cand.length; i++) { r -= w[i]; if (r <= 0) return cand[i]; }
+    return cand[0];
+  }
+  function schedulePhrase(name, t0, extra) {
+    const o = Object.assign({
+      stage: M.stage, beat: M.stage >= 3 ? 1.12 : rr(0.96, 1.08), displace: R() < 0.3, grace: R() < 0.25,
+      fragment: M.stage < 3 && R() < 0.15,
+    }, extra || {});
+    if (o.oct == null) {
+      const hi = Math.max(...PHR[name].n.map(x => x[0] == null ? -99 : x[0]));
+      o.oct = M.stage < 3 && R() < 0.22 ? -1 : (hi <= 7 && R() < 0.12 ? 1 : 0);
+    }
+    if (o.oct === -1) o.vel = 1.25; else if (o.oct === 1) o.vel = 0.75;
+    M.last = name;
+    M.recent.push(name); if (M.recent.length > 3) M.recent.shift();
+    return playPhrase(KM, KM.out, name, t0, o);
   }
   function seqNext(delay) {
     clearTimeout(M.timer);
     M.timer = setTimeout(() => {
       if (!A.on || A.finished) return;
       if (!running()) { seqNext(2); return; }
-      const name = M.last ? pick(NEXT[M.last]) : 'A';
-      M.last = name;
-      const oct = M.stage < 3 && R() < 0.2 ? -1 : 0;
-      const dur = playPhrase(KM, KM.out, name, ctx.currentTime + 0.15, { stage: M.stage, beat: M.stage >= 3 ? 1.12 : rr(0.98, 1.06), oct, vel: oct ? 1.25 : 1 });
-      let gap = (name === 'A2' || name === 'D') ? rr(14, 26) : rr(4, 9);
-      if (M.stage >= 3) gap = rr(2, 5);
+      const t0 = ctx.currentTime + 0.15;
+      let dur = schedulePhrase(choosePhrase(), t0);
+      if (!PHR[M.last].cad && R() < 0.45) { const g = rr(1.2, 3); dur += g + schedulePhrase(choosePhrase(), t0 + dur + g); } // answer phrase
+      let gap = rr(20, 60);
+      if (M.stage >= 3) gap = rr(6, 12);
+      else if (M.stage === 2) gap = rr(10, 25);
       seqNext(dur + gap);
     }, delay * 1000);
   }
@@ -883,8 +1006,7 @@
       clearTimeout(M.timer);
       const t = now + 0.4;
       [50, 57, 62, 66, 69, 76].forEach(m => padNote(KM, KM.out, t, mtof(m), 7, 0.03, true, 3, 6));
-      M.last = 'A';
-      const d = playPhrase(KM, KM.out, 'A2', t + 1.5, { stage: 3, beat: 1.15 });
+      const d = schedulePhrase('A2', t + 1.5, { stage: 3, beat: 1.15, displace: false, fragment: false, grace: false, oct: 0 });
       seqNext(d + 3);
     } else if (!initial && s === 2 && prev < 2) {
       clearTimeout(M.timer); seqNext(1.5);
@@ -902,10 +1024,12 @@
     clearTimeout(M.timer);
     try {
       const L = A.L;
-      if (A.on) { ramp(L.amb.gain, 0.0001, 2.2); ramp(L.drone.gain, 0.0001, 2.5); ramp(L.shimmer.gain, 0.0001, 3); }
+      if (A.on) { // leave a faint room with distant rain under the end card
+        ramp(L.amb.gain, AMB_LEVEL * 0.55, 2.2); ramp(L.rainGain.gain, 0.15, 2.5); ramp(L.windG.gain, 0, 2);
+        ramp(L.lampOn.gain, 0, 3); ramp(L.drone.gain, 0.0001, 2.5); ramp(L.shimmer.gain, 0.0001, 3);
+      }
       finalChord(KM, KM.out, ctx.currentTime + 0.6);
     } catch (e) { }
-    setTimeout(() => { if (A.finished) stopAmbience(1); }, 16000);
   }
 
   /* =====================================================================================
@@ -918,7 +1042,7 @@
     try { if (!ctx) return; if (document.hidden) ctx.suspend(); else ctx.resume(); } catch (e) { }
   });
   if (window.G && G.on) {
-    G.on('start', () => { try { if (A.on) stopAmbience(0.3); A.started = true; A.cracked = false; M.last = null; A.win = false; A.lamp = false; setTimeout(maybeStartAmb, A.on ? 600 : 0); } catch (e) { } });
+    G.on('start', () => { try { if (A.on) stopAmbience(0.3); A.started = true; A.cracked = false; M.last = null; M.recent = []; M.voices = null; M.bass = null; A.win = false; A.lamp = false; setTimeout(maybeStartAmb, A.on ? 600 : 0); } catch (e) { } });
     G.on('flag', (k) => { try { if (k !== 'finished') sync(false); } catch (e) { } });
     G.on('view', (id) => { try { onView(id); } catch (e) { } });
     G.on('finish', () => { try { onFinish(); } catch (e) { } });
@@ -937,7 +1061,7 @@
     if (name.startsWith('music:')) {
       const [, ph, st] = name.split(':');
       const bus = c.createGain(); bus.gain.value = 0.55; bus.connect(out); const s = c.createGain(); s.gain.value = 0.6; bus.connect(s); s.connect(rev);
-      playPhrase(K, bus, ph, 0.05, { stage: +(st || 0) });
+      playPhrase(K, bus, ph, 0.05, { stage: +(st || 0), st: {} });
     } else if (name === 'final') {
       const bus = c.createGain(); bus.gain.value = 0.55; bus.connect(out); const s = c.createGain(); s.gain.value = 0.6; bus.connect(s); s.connect(rev);
       finalChord(K, bus, 0.05);
