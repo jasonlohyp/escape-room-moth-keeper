@@ -631,7 +631,6 @@
     <g fill="#9fb6cc" opacity=".35"><circle cx="1030" cy="708" r="2.5"/><circle cx="1056" cy="702" r="1.8"/><circle cx="640" cy="705" r="2"/></g>
   </g>`;
   CLOSE.openExtra = `
-    <polygon points="520,560 1080,560 1400,900 200,900" fill="url(#win-beamdown)" opacity=".10"/>
     <ellipse cx="800" cy="700" rx="380" ry="16" fill="url(#win-pool)" opacity=".75"/>
     <ellipse cx="800" cy="703" rx="330" ry="9" fill="#9fb6cc" opacity=".22"/>`;
   // lace curtain edges in the close-up
@@ -678,7 +677,7 @@
           else G.say('Rain streams down the old, rippled glass. The village beyond is dark.');
         },
       });
-      latchHot = G.el('rect', { x: 715, y: 490, width: 175, height: 170, rx: 30, fill: 'transparent' }, RC.root);
+      latchHot = G.el('rect', { x: 715, y: 465, width: 180, height: 190, rx: 30, fill: 'transparent' }, RC.root);
       G.hotspot(latchHot, {
         cursor: 'use',
         click() {
@@ -738,6 +737,21 @@
   }
 
   // ---------- moonbeams on the walls ----------
+  // A soft parallel shaft from P0 towards P1 (half-width w), cut at y = yEnd; edges fade via a cross-beam gradient.
+  let beamN = 0;
+  function shaft(P0, P1, w, yEnd, op) {
+    const id = 'win-shaft' + (beamN++);
+    const dx = P1[0] - P0[0], dy = P1[1] - P0[1], L = Math.hypot(dx, dy), d = [dx / L, dy / L], n = [d[1], -d[0]];
+    const A = [P0[0] + n[0] * w, P0[1] + n[1] * w], Bp = [P0[0] - n[0] * w, P0[1] - n[1] * w];
+    const toY = Q => { const t = (yEnd - Q[1]) / d[1]; return [Q[0] + d[0] * t, yEnd]; };
+    const C = toY(A), D = toY(Bp);
+    const M = [(P0[0] + P1[0]) / 2, (P0[1] + P1[1]) / 2];
+    return `<linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="${f(M[0] + n[0] * w)}" y1="${f(M[1] + n[1] * w)}" x2="${f(M[0] - n[0] * w)}" y2="${f(M[1] - n[1] * w)}">
+        <stop offset="0" stop-color="#cfe3ff" stop-opacity="0"/><stop offset=".22" stop-color="#cfe3ff" stop-opacity=".45"/>
+        <stop offset=".5" stop-color="#e4efff" stop-opacity="1"/><stop offset=".78" stop-color="#cfe3ff" stop-opacity=".45"/>
+        <stop offset="1" stop-color="#cfe3ff" stop-opacity="0"/></linearGradient>
+      <polygon points="${[A, C, D, Bp].map(q => f(q[0]) + ',' + f(q[1])).join(' ')}" fill="url(#${id})" opacity="${op}"/>`;
+  }
   function motes(n, box, seed, dir) {
     const r = rng(seed);
     let s = '';
@@ -786,25 +800,22 @@
 
   // south: diagonal shaft from the upper left, falling across the desk onto the journal
   beamObject('south', `
-    <polygon points="-40,40 330,-30 880,592 360,604" fill="url(#win-beam)" opacity=".07"/>
-    <polygon points="-40,95 260,20 820,590 430,600" fill="url(#win-beam)" opacity=".09"/>
-    <polygon points="-40,150 190,80 760,588 490,596" fill="url(#win-beam)" opacity=".11"/>
-    <polygon points="-40,190 140,125 715,586 540,592" fill="url(#win-beam)" opacity=".08"/>
-    <ellipse cx="630" cy="590" rx="210" ry="30" fill="url(#win-pool)" opacity=".55"/>
-    <ellipse cx="625" cy="588" rx="120" ry="16" fill="url(#win-pool)" opacity=".5"/>`,
-    [120, 120, 700, 560], [1, 1], 101);
-  // north: faint spill at the left edge
+    ${shaft([-100, 40], [610, 598], 150, 600, 0.13)}
+    ${shaft([-100, 60], [615, 596], 80, 598, 0.14)}
+    ${shaft([-100, 70], [620, 594], 34, 596, 0.10)}
+    <ellipse cx="615" cy="592" rx="200" ry="26" fill="url(#win-pool)" opacity=".5"/>
+    <ellipse cx="620" cy="589" rx="115" ry="14" fill="url(#win-pool)" opacity=".5"/>`,
+    [80, 140, 700, 560], [1, 0.8], 101);
+  // north: faint spill at the left edge, onto the floor
   beamObject('north', `
-    <polygon points="-10,150 90,120 360,900 -10,900" fill="url(#win-beamdown)" opacity=".07"/>
-    <polygon points="-10,220 40,200 240,900 -10,900" fill="url(#win-beamdown)" opacity=".06"/>
-    <ellipse cx="140" cy="850" rx="220" ry="42" fill="url(#win-pool)" opacity=".3"/>`,
-    [0, 250, 220, 780], [1, 1], 202);
-  // west: light pouring in from the open window down onto the floor
+    ${shaft([-160, 120], [200, 860], 110, 900, 0.10)}
+    <ellipse cx="150" cy="850" rx="230" ry="42" fill="url(#win-pool)" opacity=".3"/>`,
+    [0, 250, 220, 780], [0.6, 1], 202);
+  // west: moonlight falling from the open window onto the floor in front of it
   beamObject('west', `
-    <polygon points="600,430 1000,430 1180,900 420,900" fill="url(#win-beamdown)" opacity=".06"/>
-    <polygon points="660,470 940,470 1060,900 540,900" fill="url(#win-beamdown)" opacity=".05"/>
-    <ellipse cx="800" cy="858" rx="360" ry="46" fill="url(#win-pool)" opacity=".4"/>`,
-    [560, 620, 1040, 860], [0.3, 1], 303);
+    <ellipse cx="800" cy="860" rx="420" ry="52" fill="url(#win-pool)" opacity=".32"/>
+    <ellipse cx="800" cy="856" rx="250" ry="28" fill="url(#win-pool)" opacity=".3"/>`,
+    [560, 640, 1040, 860], [0.3, 1], 303);
 
   // ---------- hint + debug step ----------
   G.registerHint({

@@ -87,6 +87,7 @@
       <stop offset="0.42" stop-color="#fff" stop-opacity="0.12"/><stop offset="0.6" stop-color="#000" stop-opacity="0"/>
       <stop offset="0.8" stop-color="#000" stop-opacity="0.3"/><stop offset="1" stop-color="#000" stop-opacity="0.88"/>
     </linearGradient>
+    <linearGradient id="cabImprint" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#12040a"/><stop offset="1" stop-color="#2a0a10"/></linearGradient>
     <linearGradient id="cabVelvetG" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" stop-color="#1e0a0b"/><stop offset="0.45" stop-color="#4a1618"/><stop offset="1" stop-color="#6e2224"/>
     </linearGradient>`;
@@ -704,6 +705,14 @@
     el.style.mixBlendMode = lit ? 'soft-light' : 'multiply';
   }
 
+  function loosePins() {
+    const pins = [[360, 300, 20], [410, 318, -14], [1180, 470, 64], [1230, 262, 150]];
+    return pins.map(([x, y, a]) => `<g transform="translate(${x},${y}) rotate(${a})">
+      <path d="M2,3 L64,3" stroke="#000" stroke-width="3" opacity="0.35" filter="url(#cabBlur1)"/>
+      <path d="M0,0 L62,0" stroke="#b8b4ac" stroke-width="1.8" stroke-linecap="round"/><path d="M0,-0.6 L60,-0.6" stroke="#fff" stroke-width="0.6" opacity="0.7"/>
+      <ellipse cx="-2" cy="0" rx="4" ry="3.6" fill="#2a2622" stroke="#000" stroke-width="0.8"/></g>`).join('');
+  }
+
   // ================================================================ DRAWER CLOSE-UP
   const dr = { wheelEls: [] };
   const WX = [635, 745, 855, 965], WY = 468, WW = 78, WH = 116, DS = 78; // digit spacing
@@ -730,10 +739,14 @@
         <path d="M200,196 L1400,196 L1470,590 L130,590 Z" fill="#5e1a1c" opacity="0.5" filter="url(#cabVelvet)"/>
         <path d="M180,176 L200,196 L130,590 L96,590 Z" fill="#5a3824" stroke="${INK}" stroke-width="2"/>
         <path d="M1420,176 L1400,196 L1470,590 L1504,590 Z" fill="#4a2e1c" stroke="${INK}" stroke-width="2"/>
-        <path d="M200,196 L1400,196" stroke="#000" stroke-width="12" opacity="0.4" filter="url(#blur6)"/>
-        <g transform="translate(800,390) rotate(-8)">
-          <g transform="translate(6,10) scale(1.05)" fill="#1a0406" opacity="0.8" filter="url(#cabBlur1)"><g class="key-imprint">${keyArt('cabVelvetG', '#1a0406')}</g></g>
-          <g id="cab-key" transform="scale(1.05)">
+        <path d="M200,196 L1400,196" stroke="#000" stroke-width="30" opacity="0.5" filter="url(#blur6)"/>
+        <path d="M128,580 L1472,580 L1476,596 L124,596 Z" fill="#8a5a3a" stroke="${INK}" stroke-width="2"/>
+        <path d="M130,583 L1470,583" stroke="#c09068" stroke-width="1.6" opacity="0.6"/>
+        <ellipse cx="800" cy="400" rx="520" ry="170" fill="#ff9a5a" opacity="0.13" filter="url(#blur20)"/>
+        ${loosePins()}
+        <g transform="translate(790,385) rotate(-8)">
+          <g transform="translate(3,5) scale(1.32)" opacity="0.55" filter="url(#cabBlur1)"><g class="key-imprint">${keyArt('cabImprint', '#12040a')}</g></g>
+          <g id="cab-key" transform="scale(1.3)">
             <g opacity="0.45" filter="url(#cabShadow)" transform="translate(8,12)"><g fill="#000">${keyArt('cabVelvetG', '#000')}</g></g>
             ${keyArt('cabBrass', '#fff2c8')}
             <rect x="-200" y="-80" width="400" height="160" fill="transparent"/>
