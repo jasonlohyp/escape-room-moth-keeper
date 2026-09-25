@@ -540,7 +540,7 @@
       medallions += `<circle cx="${X}" cy="${Y}" r="33" fill="#f7f0dc" fill-opacity="0.55" stroke="#8a6a3a" stroke-width="1.3"/>
                      <circle cx="${X}" cy="${Y}" r="29.5" fill="none" stroke="#8a6a3a" stroke-width="0.6" stroke-dasharray="2 2.5"/>`;
       lits += `<g class="ck-lit" data-i="${i}" style="opacity:0;transition:opacity .35s ease">
-                 <circle cx="${X}" cy="${Y}" r="50" fill="url(#ck-iconGlow)"/>
+                 <circle cx="${X}" cy="${Y}" r="60" fill="url(#ck-iconGlow)"/>
                  <circle cx="${X}" cy="${Y}" r="33" fill="#ffe2a0" fill-opacity="0.55" stroke="#d9982e" stroke-width="3.2"/>
                </g>`;
       icons += `<g class="ck-icon" data-i="${i}" transform="translate(${X},${Y}) scale(1.1)">${ICONS[i]()}</g>`;
@@ -701,8 +701,7 @@
         <text x="${CX - 5}" y="${CY + 68}" font-family="IM Fell English, Georgia, serif" font-style="italic" font-size="24" fill="#3a2a1c" text-anchor="end">Jos.</text>
         <text x="${CX + 7}" y="${CY + 68}" font-family="IM Fell English, Georgia, serif" font-style="italic" font-size="24" fill="#3a2a1c" text-anchor="start">Vane</text>
         <path d="M${CX - 46},${CY + 78} q46,8 92,0" stroke="#6e5438" stroke-width="0.9" fill="none"/>
-        <text x="${CX - 9}" y="${CY + 96}" font-family="IM Fell English SC, IM Fell English, Georgia, serif" font-size="12" letter-spacing="4" fill="#5a4630" text-anchor="end">LON</text>
-        <text x="${CX + 11}" y="${CY + 96}" font-family="IM Fell English SC, IM Fell English, Georgia, serif" font-size="12" letter-spacing="4" fill="#5a4630" text-anchor="start">DON</text>
+        <text x="${CX + 2}" y="${CY + 96}" font-family="IM Fell English SC, IM Fell English, Georgia, serif" font-size="12" letter-spacing="5" fill="#5a4630" text-anchor="middle">LONDON</text>
         ${icons}
         <path d="${crack}" stroke="#fffaf0" stroke-width="1.2" fill="none" opacity="0.5" transform="translate(0.8,0.8)"/>
         <path d="${crack}" stroke="#3a2c1e" stroke-width="1.1" fill="none" stroke-linejoin="round"/>
@@ -841,7 +840,7 @@
   }
   function updateRims() {
     if (!V.rim) return;
-    const solvedOrBusy = !!G.get('clockSolved') || swinging;
+    const solvedOrBusy = !!G.get('clockSolved') || swinging || G.isBusy();
     ['h', 'm'].forEach(w => {
       const on = !solvedOrBusy && ((drag && drag.which === w && drag.moved) || hovered === w || lift[w] > 0.5);
       const idle = !solvedOrBusy && active === w;
@@ -1049,7 +1048,7 @@
       const hd = Math.atan2(x - px, -(y - py)) * 180 / Math.PI; px = x; py = y;
       const flap = 0.25 + 0.75 * Math.abs(Math.sin(t * 60));
       wings.setAttribute('transform', `scale(${flap.toFixed(2)},1)`);
-      mg.setAttribute('transform', `translate(${f1(x)},${f1(y)}) rotate(${f1(hd * 0.6)}) scale(${(1 + t * 0.5).toFixed(2)})`);
+      mg.setAttribute('transform', `translate(${f1(x)},${f1(y)}) rotate(${f1(hd * 0.6)}) scale(${(1.4 + t * 0.6).toFixed(2)})`);
       mg.setAttribute('opacity', (Math.min(1, t * 6) * Math.min(1, (1 - t) * 4)).toFixed(2));
     }, 'inOut').then(() => m.remove());
   }

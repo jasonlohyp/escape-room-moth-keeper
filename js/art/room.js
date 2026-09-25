@@ -696,6 +696,25 @@
       <ellipse cx="417" cy="272" rx="46" ry="20" transform="rotate(-12 417 272)" fill="none" stroke="${INK}" stroke-width="6"/>
       <ellipse cx="417" cy="272" rx="46" ry="20" transform="rotate(-12 417 272)" fill="none" stroke="#b8893a" stroke-width="3"/>
     </g>`;
+    // dried herb bundles hanging (upside-down) from the collar tie
+    s += [[236, 140, ['#6a7a4a', '#7d8a55', '#5a6a3a'], 0], [322, 120, ['#7a6a8a', '#8a7aa0', '#6a5a4a'], 1]].map(([x, len, cols, lav]) => {
+      const ty = 50 + len * 0.3;
+      let g = `<path d="M${x},50 V${ty}" stroke="#8a7a5a" stroke-width="1.4"/>`;
+      const rnd = rng(x);
+      for (let i = 0; i < 13; i++) {
+        const a = (i - 6) * 3.4 + (rnd() - 0.5) * 3, L = len * (0.55 + rnd() * 0.25);
+        const ex = x + Math.sin(a * Math.PI / 180) * L, ey = ty + Math.cos(a * Math.PI / 180) * L;
+        const c = cols[i % 3];
+        g += `<path d="M${x},${ty} Q${r1(x + (ex - x) * 0.4)},${r1(ty + (ey - ty) * 0.5)} ${r1(ex)},${r1(ey)}" stroke="${c}" stroke-width="1.6" fill="none"/>`;
+        for (let t = 0.45; t < 1.01; t += 0.11) {
+          const px = x + (ex - x) * t, py = ty + (ey - ty) * t;
+          g += lav ? `<ellipse cx="${r1(px)}" cy="${r1(py)}" rx="2.2" ry="3.4" fill="${c}"/>`
+            : `<ellipse cx="${r1(px - 3)}" cy="${r1(py)}" rx="4.5" ry="1.8" transform="rotate(${r1(-30 + a)} ${r1(px - 3)} ${r1(py)})" fill="${c}"/><ellipse cx="${r1(px + 3)}" cy="${r1(py)}" rx="4.5" ry="1.8" transform="rotate(${r1(30 + a)} ${r1(px + 3)} ${r1(py)})" fill="${c}"/>`;
+        }
+      }
+      g += `<path d="M${x - 7},${ty - 2} h14 v9 h-14 Z" fill="#a8845a" ${K} stroke-width="1"/><path d="M${x - 7},${ty + 2} h14" stroke="#5e2322" stroke-width="2"/>`;
+      return `<g>${g}</g>`;
+    }).join('');
     // stacked books on floor
     const book = (x, y, w, h, col, band, rot) => `<g transform="rotate(${rot || 0} ${x + w / 2} ${y + h / 2})">
       <rect x="${x}" y="${y}" width="${w}" height="${h}" rx="3" fill="${col}" ${K} stroke-width="1.8"/>
@@ -826,11 +845,13 @@
       <path d="M254,470 C280,480 320,480 346,470" stroke="#8a7a5a" stroke-width="1.4" fill="none"/>
       <path d="M300,346 V566" stroke="#8a7a5a" stroke-width="1" stroke-dasharray="4 4" opacity="0.7"/>
       <ellipse cx="300" cy="328" rx="12" ry="6" fill="url(#gBrass)" ${K} stroke-width="1.4"/>
-      <!-- the sheet -->
-      <path d="M296,332 C330,334 370,350 384,380 C396,420 392,480 402,540 C410,590 416,630 404,660 L392,648 L380,668 L366,650 L352,672 L338,652 C340,600 330,540 318,500 C306,460 300,420 300,380 C288,400 270,420 250,430 C240,410 244,370 262,350 C274,338 284,334 296,332 Z" fill="#e2d9bf" ${K} stroke-width="2.2"/>
-      <path d="M318,360 C340,420 346,500 352,600 M340,370 C366,440 372,520 380,620 M364,390 C380,460 386,540 396,630" stroke="#a89878" stroke-width="1.6" fill="none" opacity="0.7"/>
-      <path d="M322,370 C344,430 350,510 356,610" stroke="#fff" stroke-width="2" fill="none" opacity="0.35"/>
-      <path d="M262,352 C270,380 262,410 252,428" stroke="#a89878" stroke-width="1.4" fill="none" opacity="0.7"/>
+      <!-- the sheet, thrown over the whole form: a headless, shrouded figure -->
+      <path d="M300,318 C318,318 334,330 346,344 C372,354 388,372 391,398 C397,452 399,522 410,592 C414,622 420,650 414,668 L400,656 L388,674 L372,656 L356,678 L340,662 L322,676 L308,656 C302,612 298,570 292,546 L280,530 L266,544 L252,528 L240,538 L226,524 C222,474 214,434 214,400 C216,372 230,356 254,344 C266,330 282,318 300,318 Z" fill="#e2d9bf" ${K} stroke-width="2.2"/>
+      <path d="M300,318 C290,322 286,332 288,340 C296,336 306,336 314,340 C314,330 310,322 300,318 Z" fill="#f2ead4" opacity="0.8"/>
+      <path d="M312,346 C336,420 344,500 352,610 M336,352 C364,430 372,520 380,640 M362,368 C382,450 388,540 398,640 M300,344 C306,420 310,500 318,600" stroke="#a89878" stroke-width="1.6" fill="none" opacity="0.7"/>
+      <path d="M318,352 C342,426 350,506 358,616" stroke="#fff" stroke-width="2.4" fill="none" opacity="0.35"/>
+      <path d="M284,344 C270,400 262,460 262,520 M262,350 C244,396 236,450 238,510" stroke="#a89878" stroke-width="1.4" fill="none" opacity="0.6"/>
+      <path d="M292,546 C300,540 306,544 308,556" stroke="#a89878" stroke-width="1.2" fill="none" opacity="0.6"/>
     </g>`;
     // shelf with specimen jars (right, high)
     const jar = (x, w, h, fillC, inner) => `<g>

@@ -22,8 +22,8 @@
   const HALF = {
     atlas: { // broad; forewing apex is a big "snake-head" lobe curling DOWN
       wings: [
-        [103, 48, ['C', 122, 34, 150, 24, 170, 20], ['C', 183, 17, 193, 11, 200, 3], ['C', 204, 11, 200, 24, 189, 28],
-          ['C', 183, 30, 179, 29, 176, 30], ['C', 175, 44, 172, 58, 166, 70], ['C', 150, 76, 126, 74, 104, 66]],
+        [103, 48, ['C', 122, 34, 148, 24, 166, 20], ['C', 176, 15, 186, 5, 194, 3], ['C', 202, 2, 203, 16, 197, 22],
+          ['C', 191, 28, 182, 27, 176, 30], ['C', 175, 44, 172, 58, 166, 70], ['C', 150, 76, 126, 74, 104, 66]],
         [104, 67, ['C', 132, 70, 164, 72, 177, 84], ['C', 184, 98, 176, 114, 162, 122], ['C', 148, 130, 130, 129, 120, 120],
           ['C', 111, 111, 105, 97, 103, 82]],
         [101, 44, ['C', 106, 34, 112, 26, 121, 19], ['C', 119, 28, 111, 38, 102, 46]],
@@ -288,11 +288,11 @@
       G.svg(`
         <defs>
           <linearGradient id="dkBrassH" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0" stop-color="#4a3210"/><stop offset="0.16" stop-color="#8a6526"/><stop offset="0.3" stop-color="#e7c476"/>
-            <stop offset="0.38" stop-color="#c99a45"/><stop offset="0.62" stop-color="#9a7030"/><stop offset="0.86" stop-color="#6e4d1c"/><stop offset="1" stop-color="#3a2608"/>
+            <stop offset="0" stop-color="#2e1d06"/><stop offset="0.14" stop-color="#7a5620"/><stop offset="0.28" stop-color="#f3d68e"/>
+            <stop offset="0.36" stop-color="#c99a45"/><stop offset="0.6" stop-color="#8a6226"/><stop offset="0.84" stop-color="#553812"/><stop offset="1" stop-color="#241604"/>
           </linearGradient>
           <radialGradient id="dkPatina" cx="50%" cy="50%" r="50%">
-            <stop offset="0" stop-color="#3c3a1e" stop-opacity="0.55"/><stop offset="1" stop-color="#3c3a1e" stop-opacity="0"/>
+            <stop offset="0" stop-color="#2f3418" stop-opacity="0.85"/><stop offset="1" stop-color="#3c3a1e" stop-opacity="0"/>
           </radialGradient>
           <linearGradient id="dkGlass" x1="0" y1="0" x2="1" y2="0">
             <stop offset="0" stop-color="#cfe3ff" stop-opacity="0.22"/><stop offset="0.22" stop-color="#ffffff" stop-opacity="0.5"/>
@@ -338,7 +338,7 @@
           <ellipse cx="930" cy="540" rx="22" ry="8" fill="url(#dkPatina)"/>
           <ellipse cx="866" cy="536" rx="14" ry="7" fill="url(#dkPatina)"/>
           <ellipse cx="930" cy="572" rx="18" ry="5" fill="url(#dkPatina)"/>
-          <path d="M858 522 C860 512 872 508 884 508" fill="none" stroke="#fff4cf" stroke-width="4" stroke-linecap="round" opacity="0.55" filter="url(#dkPaint)"/>
+          <path d="M858 522 C860 512 872 508 884 508" fill="none" stroke="#fffbe8" stroke-width="4.5" stroke-linecap="round" opacity="0.85" filter="url(#dkPaint)"/>
           <path d="M852 530 C856 540 868 545 880 546" fill="none" stroke="#ffe7a6" stroke-width="2" stroke-linecap="round" opacity="0.35" filter="url(#dkPaint)"/>
           <path d="M872 566 C882 563 894 563 902 563" fill="none" stroke="#fff4cf" stroke-width="2.4" stroke-linecap="round" opacity="0.5"/>
           <path d="M880 499 L880 506" stroke="#fff4cf" stroke-width="3" opacity="0.45"/>
@@ -377,8 +377,8 @@
         const a0 = ts[i], a1 = ts[i + 1];
         const xt0 = 852 + 96 * a0, xb0 = 798 + 204 * a0, xt1 = 852 + 96 * a1, xb1 = 798 + 204 * a1;
         const wob = (rnd() - 0.5) * 6;
-        if (i % 2) bands += `<path d="M${xt0.toFixed(1)} 350 Q${((xt0 + xb0) / 2 + wob).toFixed(1)} 400 ${xb0.toFixed(1)} 452 L${xb1.toFixed(1)} 452 Q${((xt1 + xb1) / 2 + wob).toFixed(1)} 400 ${xt1.toFixed(1)} 350 Z" fill="#000" opacity="${(0.05 + rnd() * 0.07).toFixed(3)}"/>`;
-        lines += `<path d="M${xt0.toFixed(1)} 350 Q${((xt0 + xb0) / 2 + wob).toFixed(1)} 400 ${xb0.toFixed(1)} 452" fill="none" stroke="#3a2418" stroke-width="${(0.6 + rnd() * 0.8).toFixed(2)}" opacity="${(0.2 + rnd() * 0.3).toFixed(2)}"/>`;
+        if (i % 2) bands += `<path d="M${xt0.toFixed(1)} 350 Q${((xt0 + xb0) / 2 + wob).toFixed(1)} 400 ${xb0.toFixed(1)} 452 L${xb1.toFixed(1)} 452 Q${((xt1 + xb1) / 2 + wob).toFixed(1)} 400 ${xt1.toFixed(1)} 350 Z" fill="#000" opacity="${(0.06 + rnd() * 0.12).toFixed(3)}"/>`;
+        lines += `<path d="M${xt0.toFixed(1)} 350 Q${((xt0 + xb0) / 2 + wob).toFixed(1)} 400 ${xb0.toFixed(1)} 452" fill="none" stroke="#3a2418" stroke-width="${(0.7 + rnd() * 1.2).toFixed(2)}" opacity="${(0.3 + rnd() * 0.4).toFixed(2)}"/>`;
       }
       G.svg(bands + lines, inner);
       G.svg(`
@@ -876,9 +876,10 @@
           </linearGradient>
           <linearGradient id="dkPearl" x1="0" y1="0" x2="1" y2="0.35">
             <stop offset="0" stop-color="#ffffff" stop-opacity="0"/>
-            <stop offset="0.3" stop-color="#f7e6f2" stop-opacity="0.32"/>
-            <stop offset="0.45" stop-color="#e2f4ee" stop-opacity="0.38"/>
-            <stop offset="0.6" stop-color="#e4ebfc" stop-opacity="0.32"/>
+            <stop offset="0.25" stop-color="#ffd9f0" stop-opacity="0.55"/>
+            <stop offset="0.42" stop-color="#d4fbe8" stop-opacity="0.6"/>
+            <stop offset="0.58" stop-color="#d8e2ff" stop-opacity="0.6"/>
+            <stop offset="0.72" stop-color="#fff0d8" stop-opacity="0.45"/>
             <stop offset="0.8" stop-color="#ffffff" stop-opacity="0"/>
             <animateTransform attributeName="gradientTransform" type="translate" values="-0.6 0;0.6 0;-0.6 0" dur="9s" repeatCount="indefinite"/>
           </linearGradient>
@@ -886,7 +887,7 @@
             <stop offset="0" stop-color="#fff8ff" stop-opacity="0.9"/><stop offset="0.6" stop-color="#e8f0f8" stop-opacity="0.4"/><stop offset="1" stop-color="#e8f0f8" stop-opacity="0"/>
           </radialGradient>
           <radialGradient id="dkMoonAmb" gradientUnits="userSpaceOnUse" cx="1110" cy="430" r="820">
-            <stop offset="0" stop-color="#6f86ac"/><stop offset="0.42" stop-color="#8fa3c3"/><stop offset="1" stop-color="#c6cfdd"/>
+            <stop offset="0" stop-color="#7a90b6"/><stop offset="0.42" stop-color="#a4b5cf"/><stop offset="1" stop-color="#dfe4ec"/>
           </radialGradient>
           <filter id="dkBlur40" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="40"/></filter>
           <linearGradient id="dkGutterShadow" x1="0" y1="0" x2="1" y2="0">
