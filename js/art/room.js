@@ -922,7 +922,7 @@
       soft: rad('ls_s', 900, 420, 760, [[0, '#ffb760', 0.95], [0.45, '#ff9a40', 0.5], [1, '#ff9a40', 0]]),
       glow: `${rad('lg_s', 900, 390, 280, [[0, '#ffe2a0', 0.55], [0.35, '#ffb050', 0.22], [1, '#e0853a', 0]])}
              ${rad('lg2_s', 900, 580, 420, [[0, '#ffcf7a', 0.35], [1, '#ffcf7a', 0]], 'gradientTransform="translate(900 580) scale(1 0.2) translate(-900 -580)"')}`,
-      glowShapes: `<rect width="1600" height="900" fill="url(#lg_s)"/><rect x="300" y="500" width="1200" height="160" fill="url(#lg2_s)"/>`,
+      glowShapes: `<rect x="620" y="110" width="560" height="560" fill="url(#lg_s)"/><rect x="480" y="500" width="840" height="160" fill="url(#lg2_s)"/>`,
       // the moonbeam itself is drawn by window.js; here only a faint cool ambient from the right
       moon: rad('lm2_s', 1700, 250, 900, [[0, '#8fb3d9', 0.16], [1, '#8fb3d9', 0]]),
       moonShapes: `<rect width="1600" height="900" fill="url(#lm2_s)"/>`,
@@ -934,7 +934,8 @@
       warm: rad('lw_n', 800, 1120, 1150, [[0, '#f8dfb8'], [0.35, '#d2b394'], [0.7, '#8a8090'], [1, '#4d5566']]),
       soft: rad('ls_n', 800, 1000, 900, [[0, '#ffa040', 0.9], [0.45, '#ff9a40', 0.4], [1, '#ff9a40', 0]]),
       glow: rad('lg_n', 800, 1040, 760, [[0, '#ffcf7a', 0.28], [1, '#ffcf7a', 0]]),
-      glowShapes: `<rect width="1600" height="900" fill="url(#lg_n)"/>`,
+      noFlick: true,
+      glowShapes: `<rect x="0" y="280" width="1600" height="620" fill="url(#lg_n)"/>`,
       moon: `${rad('lm2_n', -150, 300, 950, [[0, '#8fb3d9', 0.3], [1, '#8fb3d9', 0]])}
              ${lin('lm_n', 0, 150, 420, 900, [[0, '#cfe3ff', 0.24], [0.6, '#a8c6ea', 0.12], [1, '#8fb3d9', 0.08]])}
              ${rad('lp_n', 340, 856, 250, [[0, '#dcebff', 0.3], [0.6, '#cfe3ff', 0.18], [1, '#cfe3ff', 0]], 'gradientTransform="translate(340 856) scale(1 0.17) translate(-340 -856)"')}
@@ -951,7 +952,7 @@
       warm: rad('lw_e', 1800, 560, 1700, [[0, '#f8ddb4'], [0.3, '#d2b090'], [0.65, '#8a8288'], [1, '#4d5566']]),
       soft: rad('ls_e', 1750, 560, 1000, [[0, '#ffa040', 0.9], [0.5, '#ff9a40', 0.35], [1, '#ff9a40', 0]]),
       glow: rad('lg_e', 1750, 560, 600, [[0, '#ffcf7a', 0.3], [1, '#ffcf7a', 0]]),
-      glowShapes: `<rect width="1600" height="900" fill="url(#lg_e)"/>`,
+      glowShapes: `<rect x="1150" y="0" width="450" height="900" fill="url(#lg_e)"/>`,
       // the round window's light falls across this wall & the cabinet
       moonBase: rad('lp_e', 1300, 380, 190, [[0, '#cfe3ff', 0.22], [0.72, '#a8c6ea', 0.16], [1, '#8fb3d9', 0]], 'gradientTransform="translate(1300 380) rotate(-8) scale(0.86 1) translate(-1300 -380)"'),
       moonBaseShapes: `<rect x="1080" y="160" width="440" height="440" fill="url(#lp_e)"/>
@@ -971,7 +972,7 @@
       warm: rad('lw_w', -200, 560, 1700, [[0, '#f8ddb4'], [0.3, '#d2b090'], [0.6, '#a0a2aa'], [1, '#56607a']]),
       soft: rad('ls_w', -150, 560, 1000, [[0, '#ffa040', 0.9], [0.5, '#ff9a40', 0.35], [1, '#ff9a40', 0]]),
       glow: rad('lg_w', -150, 560, 600, [[0, '#ffcf7a', 0.3], [1, '#ffcf7a', 0]]),
-      glowShapes: `<rect width="1600" height="900" fill="url(#lg_w)"/>`,
+      glowShapes: `<rect x="0" y="0" width="450" height="900" fill="url(#lg_w)"/>`,
       moonBase: rad('lp_w', 800, 360, 480, [[0.45, '#8fb3d9', 0.16], [1, '#8fb3d9', 0]]),
       moonBaseShapes: `<rect width="1600" height="900" fill="url(#lp_w)"/>`,
       moon: `${rad('lm2_w', 800, 360, 720, [[0.3, '#cfe3ff', 0.2], [1, '#cfe3ff', 0]])}
@@ -993,8 +994,8 @@
     return `<defs>${c.cold}${c.warm}${c.soft}${c.glow}${c.moonBase || ''}${c.moon}</defs>
       <g class="rl-cold rl-fade" style="mix-blend-mode:multiply"><rect width="1600" height="900" fill="url(#lc_${id})"${m}/></g>
       <g class="rl-warm rl-fade" style="mix-blend-mode:multiply;opacity:0"><rect width="1600" height="900" fill="url(#lw_${id})"${m}/></g>
-      <g class="rl-soft rl-fade" style="mix-blend-mode:soft-light;opacity:0"><g class="rl-flick"${m}><rect width="1600" height="900" fill="url(#ls_${id})"/></g></g>
-      <g class="rl-glow rl-fade" style="mix-blend-mode:screen;opacity:0"><g class="rl-flick2"${m}>${c.glowShapes}</g></g>
+      <g class="rl-soft rl-fade" style="mix-blend-mode:soft-light;opacity:0"><g${m}><rect width="1600" height="900" fill="url(#ls_${id})"/></g></g>
+      <g class="rl-glow rl-fade" style="mix-blend-mode:screen;opacity:0"><g class="${c.noFlick ? '' : 'rl-flick2'}"${m}>${c.glowShapes}</g></g>
       ${c.moonBaseShapes ? `<g class="rl-moonbase rl-fade" style="mix-blend-mode:screen"><g${m}>${c.moonBaseShapes}</g></g>` : ''}
       <g class="rl-moon rl-fade" style="mix-blend-mode:screen;opacity:0"><g${m}>${c.moonShapes}</g></g>
       <g class="rl-motesC rl-fade" style="opacity:0.5">${motes(c.motesC[0], c.motesC[1], c.motesC[2], c.motesC[3])}</g>

@@ -838,7 +838,7 @@
       A.win = win;
       ramp(L.rainTone.frequency, win ? 6500 : RAIN_CLOSED, initial ? 0.1 : 1.5);
       ramp(L.dropLayers[2].g.gain, win ? 1 : 0, initial ? 0.1 : 1.5);
-      ramp(L.rainGain.gain, win ? 1.5 : 0.9, initial ? 0.1 : 1.5);
+      ramp(L.rainGain.gain, win ? 1.2 : 0.9, initial ? 0.1 : 1.5);
       if (!win) ramp(L.windG.gain, 0, 0.5);
       else ramp(L.windG.gain, 0.15, 2);
     }

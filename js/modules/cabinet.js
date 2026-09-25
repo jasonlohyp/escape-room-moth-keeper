@@ -193,6 +193,17 @@
     }).join('');
   }
 
+  // scalloped margin: quadratic bulges between consecutive points, pushed away from centre c
+  function scallop(pts, c, amt) {
+    let d = '';
+    for (let i = 1; i < pts.length; i++) {
+      const a = pts[i - 1], b = pts[i], mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2;
+      const vx = mx - c[0], vy = my - c[1], l = Math.hypot(vx, vy) || 1;
+      d += ` Q${f1(mx + vx / l * amt)},${f1(my + vy / l * amt)} ${b[0]},${b[1]}`;
+    }
+    return d;
+  }
+
   /* Wing geometry: RIGHT side only (x>0), body at x=0, head up (y<0). Left side mirrored.
    * Eyes listed per RIGHT wing; totals are doubled by mirroring. */
   const MOTHS = {
@@ -206,8 +217,8 @@
       edge: '#3a1208', band: '#e7c07a',
       fwDeco: `<path d="M38,-60 C54,-40 68,-18 70,10" stroke="#f3dcb2" stroke-width="4.5" fill="none" opacity="0.85"/>
                <path d="M32,-58 C48,-38 60,-16 62,9" stroke="#3a140a" stroke-width="2.5" fill="none" opacity="0.7"/>
-               <path d="M150,-80 C170,-84 190,-74 186,-60 C178,-56 166,-58 160,-64 C154,-70 150,-74 150,-80 Z" fill="#caa0a4" opacity="0.8"/>
-               <path d="M152,-72 C162,-70 172,-66 182,-66" stroke="#2a0e08" stroke-width="2.2" fill="none"/>
+               <path d="M146,-84 C172,-90 200,-80 196,-60 C192,-50 184,-46 176,-50 C168,-58 156,-66 146,-84 Z" fill="#caa0a4" opacity="0.75"/>
+               <path d="M150,-84 C166,-88 184,-84 194,-72" stroke="#f4e2c8" stroke-width="3" fill="none" opacity="0.6"/>
                <path d="M166,-52 C156,-40 150,-22 148,-4 C146,6 142,12 136,16" stroke="#ecc88a" stroke-width="12" fill="none" opacity="0.55"/>
                <path d="M158,-46 C146,-32 140,-14 138,2 C136,10 132,14 126,16" stroke="#3a140a" stroke-width="1.6" fill="none" opacity="0.8" stroke-dasharray="5 3"/>`,
       hwDeco: `<path d="M18,26 C44,30 84,38 118,54 C128,60 134,70 138,78" stroke="#f3dcb2" stroke-width="4.5" fill="none" opacity="0.85"/>
@@ -274,20 +285,20 @@
     },
     emperor: {
       label: 'Saturnia pavonia', loc: 'Yorkshire moor — 9.iv.1897', no: 'No. 19',
-      say: 'Saturnia pavonia. The emperor, wings round as fans.',
-      fw: 'M8,-22 C36,-62 96,-86 136,-76 C164,-66 168,-30 152,-4 C142,12 122,18 100,18 C62,16 30,8 8,2 Z',
-      hw: 'M8,4 C54,6 112,14 140,40 C160,66 146,106 110,122 C76,134 40,120 22,90 C10,64 6,32 6,10 Z',
+      say: 'Saturnia pavonia. The emperor — broad round fans with scalloped edges.',
+      fw: 'M8,-22 C36,-64 96,-90 148,-86 L154,-80' + scallop([[154, -80], [158, -56], [156, -32], [150, -8], [138, 16]], [60, -30], 7) + ' C110,22 50,14 8,2 Z',
+      hw: 'M8,4 C54,6 110,12 138,34' + scallop([[138, 34], [152, 60], [148, 90], [128, 114], [98, 128], [66, 128], [38, 112]], [60, 60], 7) + ' C16,90 8,50 6,10 Z',
       fwGrad: { r: 170, stops: [[0, '#4a3a3e'], [0.3, '#7a6a70'], [0.65, '#a8969a'], [0.85, '#c8a8a0'], [1, '#d8a07c']] },
       hwGrad: { r: 160, stops: [[0, '#5a3a2a'], [0.3, '#9c6038'], [0.65, '#c8844a'], [0.85, '#dca060'], [1, '#e6c088']] },
       edge: '#2e2224', band: '#efe2d0',
       fwDeco: `<path d="M34,-56 C44,-40 50,-22 48,-2 C46,6 44,10 42,12" stroke="#f2e6d6" stroke-width="5" fill="none" opacity="0.8"/>
                <path d="M40,-60 C52,-42 58,-22 56,-2 C55,6 54,10 52,14" stroke="#2a1e22" stroke-width="2" fill="none" opacity="0.8"/>
-               <path d="M156,-40 L146,-30 L154,-20 L144,-10 L150,0 L138,10" stroke="#f2e6d6" stroke-width="3" fill="none" opacity="0.8" stroke-linejoin="round"/>
-               <path d="M120,-82 C150,-78 166,-58 162,-34 C150,-44 136,-60 120,-82 Z" fill="#b8605a" opacity="0.55"/>`,
+ <path d="M150,-60 L142,-50 L150,-38 L140,-26 L146,-14 L134,-2" stroke="#f2e6d6" stroke-width="3" fill="none" opacity="0.8" stroke-linejoin="round"/>
+               <path d="M118,-88 C140,-90 160,-84 162,-66 C150,-66 134,-74 118,-88 Z" fill="#b8605a" opacity="0.6"/>`,
       hwDeco: `<path d="M22,24 C54,28 96,38 132,62" stroke="#f2e6d6" stroke-width="4" fill="none" opacity="0.7"/>
                <path d="M22,18 C56,22 98,32 134,54" stroke="#3a2418" stroke-width="2" fill="none" opacity="0.7"/>
-               <path d="M148,58 C152,86 136,108 108,118 C80,128 50,118 32,96" stroke="#f0dcc0" stroke-width="10" fill="none" opacity="0.5"/>
-               <path d="M140,60 L130,74 L140,86 L126,98 L130,110 L112,112 L108,122" stroke="#3a2418" stroke-width="1.8" fill="none" opacity="0.7" stroke-linejoin="round"/>`,
+               <path d="M156,58 C158,90 138,120 106,132 C74,140 44,124 32,104" stroke="#f0dcc0" stroke-width="14" fill="none" opacity="0.5"/>
+               <path d="M140,58 L132,72 L140,86 L126,98 L128,110 L110,112 L104,122" stroke="#3a2418" stroke-width="1.8" fill="none" opacity="0.7" stroke-linejoin="round"/>`,
       fwVeins: [[70, -70], [120, -80], [158, -40], [148, 2], [110, 18], [60, 14]],
       hwVeins: [[60, 10], [120, 22], [148, 62], [130, 110], [84, 130], [40, 110]],
       fwBase: [8, -18], hwBase: [8, 6],
@@ -295,42 +306,44 @@
       pal: { halo: '#f4e8d8', outer: INK, ring: '#e2b868', inner: '#6a4e8a', pupil: '#100a0c' },
       body: { th: [11, 15], abd: [62, 10], thc: '#6a4a3a', abc: '#8a6a52', hair: '#e2d0bc', seg: '#e0cdb4' },
       ant: ['feather', 40, 26, '#4a3226', 6],
-      top: -100, bottom: 132, span: 168,
+      top: -104, bottom: 136, span: 166,
     },
     io: {
       label: 'Automeris io', loc: 'Ohio — 30.vi.1893', no: 'No. 5',
-      say: 'Automeris io. It flashes two great eyes to frighten birds.',
-      fw: 'M8,-22 C40,-56 96,-74 128,-68 C146,-62 148,-40 138,-18 C130,0 116,12 100,14 C62,12 30,8 8,2 Z',
-      hw: 'M8,4 C52,6 102,16 122,38 C138,64 120,98 88,110 C58,120 28,104 16,78 C8,56 6,30 6,10 Z',
-      fwGrad: { r: 150, stops: [[0, '#8a5a1a'], [0.3, '#c89a30'], [0.7, '#e0bc48'], [1, '#e8c85c']] },
-      hwGrad: { r: 140, stops: [[0, '#c07a2a'], [0.3, '#e0b040'], [0.7, '#eccb56'], [1, '#e6be4c']] },
+      say: 'Automeris io. Small, with swept-back wings — and two great eyes to frighten birds.',
+      scale: 0.8,
+      fw: 'M8,-20 C48,-42 108,-60 156,-64 C150,-52 128,-30 108,-10 C98,0 88,4 76,6 C52,8 28,6 8,2 Z',
+      hw: 'M8,4 C30,4 62,14 80,36 C96,60 92,96 68,110 C46,122 22,106 16,82 C10,60 6,30 6,10 Z',
+      fwGrad: { r: 160, stops: [[0, '#8a5a1a'], [0.3, '#c89a30'], [0.7, '#e0bc48'], [1, '#e8c85c']] },
+      hwGrad: { r: 120, stops: [[0, '#c07a2a'], [0.3, '#e0b040'], [0.7, '#eccb56'], [1, '#e6be4c']] },
       edge: '#6a4410', band: '#f4de8a',
-      fwDeco: `<path d="M28,-40 C46,-22 56,-6 58,10" stroke="#8a5a1a" stroke-width="2.4" fill="none" opacity="0.6"/>
-               <path d="M100,-66 C112,-40 118,-16 116,10" stroke="#8a5a1a" stroke-width="2.4" fill="none" opacity="0.6"/>
-               <path d="M72,-62 C80,-44 84,-24 80,-4" stroke="#b07a2a" stroke-width="6" fill="none" opacity="0.35"/>`,
-      hwDeco: `<path d="M130,48 C136,72 120,96 90,106 C60,114 34,102 20,80" stroke="#b8302c" stroke-width="7" fill="none" opacity="0.9"/>
-               <path d="M122,46 C128,68 114,90 88,98 C62,106 38,96 26,78" stroke="#1c140f" stroke-width="2" fill="none" opacity="0.8"/>`,
-      fwVeins: [[60, -60], [110, -68], [140, -30], [110, 12], [60, 12]],
-      hwVeins: [[60, 10], [116, 30], [124, 76], [80, 110], [30, 94]],
+      fwDeco: `<path d="M34,-30 C46,-18 52,-6 52,6" stroke="#8a5a1a" stroke-width="2.4" fill="none" opacity="0.6"/>
+               <path d="M96,-54 C98,-36 94,-16 86,2" stroke="#8a5a1a" stroke-width="2.4" fill="none" opacity="0.6"/>
+               <path d="M40,-24 C80,-40 120,-54 150,-60" stroke="#a8742a" stroke-width="5" fill="none" opacity="0.35"/>`,
+      hwDeco: `<path d="M88,46 C96,76 86,100 64,110 C44,118 26,106 18,86" stroke="#b8302c" stroke-width="7" fill="none" opacity="0.9"/>
+               <path d="M82,48 C88,74 80,94 62,102 C44,108 30,100 24,84" stroke="#1c140f" stroke-width="2" fill="none" opacity="0.8"/>`,
+      fwVeins: [[70, -44], [120, -58], [150, -62], [104, -12], [60, 6]],
+      hwVeins: [[50, 10], [78, 36], [88, 80], [58, 114], [20, 88]],
       fwBase: [8, -18], hwBase: [8, 6],
-      eyes: { fw: [], hw: [[64, 56, 24]] },
+      eyes: { fw: [], hw: [[50, 64, 20]] },
       pal: { halo: '#f8e89a', outer: INK, ring: '#6f92cc', inner: '#243866', pupil: '#0e0a08' },
       body: { th: [11, 15], abd: [58, 10], thc: '#b8862e', abc: '#d8a840', hair: '#f4dc8a', seg: '#8a5a1a' },
       ant: ['feather', 36, 22, '#6a4410', 5],
-      top: -86, bottom: 118, span: 150,
+      top: -80, bottom: 118, span: 158,
     },
     plume: {
       label: 'Pterophorus pentadactyla', loc: 'The garden — 14.viii.1898', no: 'No. 23',
       say: 'A plume moth. Hardly more than feathers.',
       plume: true,
-      body: { th: [5, 9], abd: [96, 4.5], thc: '#d8ccb0', abc: '#e4dac0', hair: '#fffaf0', seg: '#b4a684' },
+      body: { th: [5, 9], abd: [96, 4.5], eyeCol: '#9a8a68', thc: '#d8ccb0', abc: '#e4dac0', hair: '#fffaf0', seg: '#b4a684' },
       ant: ['thin', 58, 22, '#b8aa8a', 0],
       top: -70, bottom: 110, span: 160,
     },
   };
   const ORDER = ['atlas', 'luna', 'hawk', 'emperor', 'io', 'plume'];
 
-  function plumeSide() {
+  function plumeSide(opts) {
+    const mini = opts && opts.mini;
     // one narrow forewing straight out (T), split into 2 plumes at the tip; hindwing = 3 feathers behind
     let s = '';
     const feather = (x0, y0, x1, y1, w, seed, col) => {
@@ -340,8 +353,8 @@
         const t = i / n, x = x0 + dx * t, y = y0 + dy * t, bl = w * (0.5 + 0.5 * Math.sin(Math.PI * Math.min(1, t * 1.05))) * (0.8 + r() * 0.4);
         barbs += `M${f1(x)},${f1(y)}l${f1(-uy * bl + ux * bl * 0.5)},${f1(ux * bl + uy * bl * 0.5)}M${f1(x)},${f1(y)}l${f1(uy * bl + ux * bl * 0.5)},${f1(-ux * bl + uy * bl * 0.5)}`;
       }
-      return `<path d="${barbs}" stroke="${col}" stroke-width="1.1" opacity="0.9" fill="none"/>` +
-        `<path d="M${x0},${y0} L${x1},${y1}" stroke="#8c7c5c" stroke-width="1.6" stroke-linecap="round"/>`;
+      return `<path d="${barbs}" stroke="${mini ? '#8a7650' : col}" stroke-width="${mini ? 2.6 : 1.1}" opacity="0.9" fill="none"/>` +
+        `<path d="M${x0},${y0} L${x1},${y1}" stroke="${mini ? '#5a4a30' : '#8c7c5c'}" stroke-width="${mini ? 4 : 1.6}" stroke-linecap="round"/>`;
     };
     // hindwing plumes (behind)
     s += feather(6, -2, 112, 16, 9, 3, '#b8a47c');
@@ -407,7 +420,7 @@
       </g><ellipse cx="0" cy="-10" rx="${tx}" ry="${ty}" fill="none" stroke="${INK}" stroke-width="1.2" opacity="0.55"/>`;
     // head
     s += `<ellipse cx="0" cy="${headY}" rx="${f1(tx * 0.62)}" ry="${f1(tx * 0.5)}" fill="${b.thc}" stroke="${INK}" stroke-width="1.2"/>
-      <ellipse cx="${f1(-tx * 0.45)}" cy="${headY}" rx="2" ry="3" fill="#1c140f"/><ellipse cx="${f1(tx * 0.45)}" cy="${headY}" rx="2" ry="3" fill="#1c140f"/>`;
+      <ellipse cx="${f1(-tx * 0.42)}" cy="${headY}" rx="${f1(Math.max(1, tx * 0.17))}" ry="${f1(Math.max(1.4, tx * 0.26))}" fill="${b.eyeCol || '#2a1c12'}"/><ellipse cx="${f1(tx * 0.42)}" cy="${headY}" rx="${f1(Math.max(1, tx * 0.17))}" ry="${f1(Math.max(1.4, tx * 0.26))}" fill="${b.eyeCol || '#2a1c12'}"/>`;
     // antennae
     const a = M.ant;
     const ant = a[0] === 'feather' ? antFeather(a[1], a[2], a[3], a[4]) : antThin(a[1], a[2], a[3], a[4]);
@@ -425,7 +438,7 @@
   function mothArt(k, opts) {
     opts = opts || {};
     const M = MOTHS[k];
-    const side = M.plume ? plumeSide() : wing(k, 'hw', M, opts) + wing(k, 'fw', M, opts);
+    const side = M.plume ? plumeSide(opts) : wing(k, 'hw', M, opts) + wing(k, 'fw', M, opts);
     const sil = silhouette(k, M);
     const b = M.body;
     const bodySil = `<ellipse cx="0" cy="${b.abd[0] / 2}" rx="${b.abd[1]}" ry="${b.abd[0] / 2 + 8}"/><ellipse cx="0" cy="-10" rx="${b.th[0]}" ry="${b.th[1]}"/>`;
@@ -437,9 +450,8 @@
       <g transform="scale(-1,1)">${side}</g>
       <g>${side}</g>
       ${body(M, opts)}
-      ${opts.mini ? '' : `<path d="M1,-12 L26,22" stroke="#1a100a" stroke-width="2.4" opacity="0.28" filter="url(#cabBlur1)"/>`}
-      <ellipse cx="0" cy="-12" rx="${opts.mini ? 3.2 : 3.4}" ry="${opts.mini ? 3.2 : 3}" fill="#6a6660" stroke="${INK}" stroke-width="1"/>
-      <path d="M-1.8,-13.2 L0.8,-14" stroke="#e8e6e0" stroke-width="1.2" stroke-linecap="round"/>
+      ${opts.mini ? '' : `<path d="M${f1(b.th[0] * 0.45 + 1)},-4 L${f1(b.th[0] * 0.45 + 22)},26" stroke="#1a100a" stroke-width="2.4" opacity="0.28" filter="url(#cabBlur1)"/>`}
+      <circle cx="${f1(b.th[0] * 0.45)}" cy="-4" r="${opts.mini ? 2.6 : 2.2}" fill="#8e8a84"/>
     </g>`;
   }
 
@@ -628,7 +640,7 @@
       const col = i % 3, row = Math.floor(i / 3), M = MOTHS[k];
       const avail = rh - labelH - (mini ? 10 : 24);
       const mh = M.bottom - M.top;
-      let s = scaleBase;
+      let s = scaleBase * (M.scale || 1);
       if (mh * s > avail) s = avail / mh;
       if (M.span * 2 * s > cw * 0.92) s = cw * 0.92 / (M.span * 2);
       const cx = x + cw * (col + 0.5);
