@@ -953,17 +953,17 @@
       glow: rad('lg_e', 1750, 560, 600, [[0, '#ffcf7a', 0.3], [1, '#ffcf7a', 0]]),
       glowShapes: `<rect width="1600" height="900" fill="url(#lg_e)"/>`,
       // the round window's light falls across this wall & the cabinet
-      moonBase: rad('lp_e', 720, 330, 215, [[0, '#cfe3ff', 0.2], [0.72, '#a8c6ea', 0.15], [1, '#8fb3d9', 0]], 'gradientTransform="translate(720 330) rotate(-8) scale(0.88 1) translate(-720 -330)"'),
-      moonBaseShapes: `<rect x="480" y="100" width="480" height="480" fill="url(#lp_e)"/>
-             <g opacity="0.85">${wheel(720, 330, 1.9, 2.1, -8, 6)}</g>
-             <clipPath id="lpc_e"><ellipse cx="720" cy="330" rx="186" ry="210" transform="rotate(-8 720 330)"/></clipPath>
-             <g clip-path="url(#lpc_e)">${rainStreaks(23, 520, 110, 400, 440, 26, 0.45, 30)}${drips(24, 540, 150, 360, 6)}</g>`,
-      moon: `${rad('lm2_e', 800, 900, 1200, [[0, '#8fb3d9', 0.14], [1, '#8fb3d9', 0]])}${rad('lm3_e', 720, 330, 330, [[0, '#cfe3ff', 0.16], [1, '#cfe3ff', 0]])}`,
+      moonBase: rad('lp_e', 1300, 380, 190, [[0, '#cfe3ff', 0.22], [0.72, '#a8c6ea', 0.16], [1, '#8fb3d9', 0]], 'gradientTransform="translate(1300 380) rotate(-8) scale(0.86 1) translate(-1300 -380)"'),
+      moonBaseShapes: `<rect x="1080" y="160" width="440" height="440" fill="url(#lp_e)"/>
+             <g opacity="0.6">${wheel(1300, 380, 1.62, 1.88, -8, 4)}</g>
+             <clipPath id="lpc_e"><ellipse cx="1300" cy="380" rx="164" ry="190" transform="rotate(-8 1300 380)"/></clipPath>
+             <g clip-path="url(#lpc_e)">${rainStreaks(23, 1130, 170, 340, 420, 22, 0.45, 30)}${drips(24, 1150, 200, 300, 5)}</g>`,
+      moon: `${rad('lm2_e', 800, 900, 1200, [[0, '#8fb3d9', 0.14], [1, '#8fb3d9', 0]])}${rad('lm3_e', 1300, 380, 330, [[0, '#cfe3ff', 0.14], [1, '#cfe3ff', 0]])}`,
       moonShapes: `<rect width="1600" height="900" fill="url(#lm2_e)"/><rect width="1600" height="900" fill="url(#lm3_e)"/>
-             <rect x="480" y="100" width="480" height="480" fill="url(#lp_e)" opacity="1.6"/><rect x="480" y="100" width="480" height="480" fill="url(#lp_e)"/>
-             <g clip-path="url(#lpc_e)">${rainStreaks(26, 520, 110, 400, 440, 26, 0.4, 40)}</g>`,
+             <rect x="1080" y="160" width="440" height="440" fill="url(#lp_e)"/><rect x="1080" y="160" width="440" height="440" fill="url(#lp_e)"/>
+             <g clip-path="url(#lpc_e)">${rainStreaks(26, 1130, 170, 340, 420, 22, 0.4, 40)}</g>`,
       motesW: [35, 14, [1150, 250, 400, 450], 'gMoteW'],
-      motesC: [36, 24, [540, 140, 360, 400], 'gMoteC'],
+      motesC: [36, 24, [1120, 180, 340, 420], 'gMoteC'],
     },
     west: {
       mask: 'winMask_w',

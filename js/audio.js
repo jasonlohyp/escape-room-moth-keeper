@@ -446,9 +446,9 @@
     cocoonCrack(K, t, o) {
       const v = voice(K, boost(o, 2), 0.3);
       const bump = (x, c, w) => Math.exp(-Math.pow((x - c) / w, 2));
-      noise(K, v, { t, buf: crackleBuf(K.c, 1.3, x => 260 * (bump(x, 0.1, 0.07) + bump(x, 0.5, 0.1) + bump(x, 0.9, 0.08)) + 10, 0.7, 2), flat: true, g: 1.1, filters: [{ type: 'bandpass', f: 4000, q: 0.8 }] });
+      noise(K, v, { t, buf: crackleBuf(K.c, 1.3, x => 260 * (bump(x, 0.1, 0.07) + bump(x, 0.5, 0.1) + bump(x, 0.9, 0.08)) + 10, 0.7, 2), flat: true, g: 0.9, filters: [{ type: 'bandpass', f: 4000, q: 0.8 }] });
       [0.12, 0.55, rr(0.85, 0.95)].forEach(dt => {
-        noise(K, v, { t: t + dt, a: 0.0005, d: 0.006, g: 0.3, filters: [{ type: 'bandpass', f: rr(2200, 3000), q: 1.5 }] });
+        noise(K, v, { t: t + dt, a: 0.0005, d: 0.006, g: 0.18, filters: [{ type: 'bandpass', f: rr(2200, 3000), q: 1.5 }] });
         tone(K, v, { f: rr(1600, 2000), t: t + dt, d: 0.03, g: 0.05 });
       });
       noise(K, v, { t: t + 0.4, a: 0.2, hold: 0.3, d: 0.4, g: 0.04, filters: [{ type: 'bandpass', f: 1400, q: 3 }] });
@@ -800,7 +800,7 @@
     if (A.win) {
       ramp(L.windBP.frequency, rr(300, 1000), rr(0.6, 1.5));
       ramp(L.whisBP.frequency, rr(650, 1300), rr(0.8, 2));
-      ramp(L.windG.gain, A.finished ? 0.05 : rr(0.03, 0.3), rr(0.8, 2));
+      ramp(L.windG.gain, A.finished ? 0 : rr(0.03, 0.3), rr(0.8, 2));
       ramp(L.whisG.gain, rr(0.05, 0.4), 1.5);
     }
     later(windWander, rr(1.5, 4));
@@ -1096,6 +1096,26 @@
         setTimeout(() => { clearInterval(iv); res({ peak: +pk.toFixed(3), rms: +Math.sqrt(s / Math.max(1, n)).toFixed(4), dBFS: +(20 * Math.log10(Math.sqrt(s / Math.max(1, n)) + 1e-9)).toFixed(1) }); }, ms || 2000); });
     },
     _mix(o) { if (o.amb != null) ambBus.gain.value = o.amb; if (o.mus != null) musBus.gain.value = o.mus; if (o.sfx != null) sfxBus.gain.value = o.sfx; },
+    _analyze(stage) { // debug: voicings, melody notes that clash at chord onsets, parallel 5ths/8ves
+      const mode = stage >= 2 ? 'major' : 'minor', out = {};
+      PNAMES.forEach(nm => {
+        const ph = PHR[nm], st = {}, res = { chords: [], clashes: [], parallels: 0 };
+        let prev = null;
+        ph.ch.forEach(c => {
+          const pcs = chordPcs(c[1], c[2], mode), vc = voiceChord(pcs, st), all = [vc.bs].concat(vc.v);
+          res.chords.push(all.join('/'));
+          if (prev) for (let i = 0; i < 4; i++) for (let j = i + 1; j < 4; j++) {
+            const pi = ((prev[j] - prev[i]) % 12 + 12) % 12, ni = ((all[j] - all[i]) % 12 + 12) % 12, mi = all[i] - prev[i], mj = all[j] - prev[j];
+            if ((pi === 0 || pi === 7) && pi === ni && mi && Math.sign(mi) === Math.sign(mj)) res.parallels++;
+          }
+          prev = all;
+          let pos = 0;
+          ph.n.forEach(([d, len, acc]) => { if (d != null && pos === c[0]) { const pc = ((degMidi(d, mode, acc) % 12) + 12) % 12; if (!pcs.includes(pc)) res.clashes.push('beat ' + pos + ' pc ' + pc + ' vs ' + pcs); } pos += len; });
+        });
+        out[nm] = res;
+      });
+      return out;
+    },
     _state: () => ({ ctx: ctx ? ctx.state : 'none', amb: A.on, stage: M.stage, lamp: A.lamp, win: A.win, finished: A.finished, last: M.last }),
   };
 })();
