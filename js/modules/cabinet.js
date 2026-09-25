@@ -116,6 +116,9 @@
       <stop offset="0.8" stop-color="#000" stop-opacity="0.3"/><stop offset="1" stop-color="#000" stop-opacity="0.88"/>
     </linearGradient>
     <linearGradient id="cabImprint" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#12040a"/><stop offset="1" stop-color="#2a0a10"/></linearGradient>
+    <linearGradient id="cabWarmGlass" x1="1" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#ffc070" stop-opacity="0.28"/><stop offset="0.5" stop-color="#ffb060" stop-opacity="0.08"/><stop offset="1" stop-color="#ffb060" stop-opacity="0"/>
+    </linearGradient>
     <linearGradient id="cabVelvetG" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" stop-color="#1e0a0b"/><stop offset="0.45" stop-color="#4a1618"/><stop offset="1" stop-color="#6e2224"/>
     </linearGradient>`;
@@ -286,8 +289,8 @@
     emperor: {
       label: 'Saturnia pavonia', loc: 'Yorkshire moor — 9.iv.1897', no: 'No. 19',
       say: 'Saturnia pavonia. The emperor — broad round fans with scalloped edges.',
-      fw: 'M8,-22 C36,-64 96,-90 148,-86 L154,-80' + scallop([[154, -80], [158, -56], [156, -32], [150, -8], [138, 16]], [60, -30], 7) + ' C110,22 50,14 8,2 Z',
-      hw: 'M8,4 C54,6 110,12 138,34' + scallop([[138, 34], [152, 60], [148, 90], [128, 114], [98, 128], [66, 128], [38, 112]], [60, 60], 7) + ' C16,90 8,50 6,10 Z',
+      fw: 'M8,-22 C36,-64 96,-90 148,-86 L154,-80' + scallop([[154, -80], [160, -62], [160, -44], [156, -26], [150, -8], [138, 14]], [60, -30], 9) + ' C110,22 50,14 8,2 Z',
+      hw: 'M8,4 C54,6 110,12 138,34' + scallop([[138, 34], [152, 56], [154, 80], [144, 102], [124, 120], [100, 130], [74, 132], [50, 122], [34, 106]], [60, 60], 9) + ' C16,90 8,50 6,10 Z',
       fwGrad: { r: 170, stops: [[0, '#4a3a3e'], [0.3, '#7a6a70'], [0.65, '#a8969a'], [0.85, '#c8a8a0'], [1, '#d8a07c']] },
       hwGrad: { r: 160, stops: [[0, '#5a3a2a'], [0.3, '#9c6038'], [0.65, '#c8844a'], [0.85, '#dca060'], [1, '#e6c088']] },
       edge: '#2e2224', band: '#efe2d0',
@@ -552,6 +555,8 @@
             <path d="M538,222 L1062,222 L1062,236 L538,236 Z" fill="#1c0e06" opacity="0.35" filter="url(#cabBlur1)"/>`;
       // glass: reflections
       m += `<g pointer-events="none"><rect x="538" y="222" width="524" height="284" fill="url(#cabGlass)"/>
+            <g id="cab-wall-warm"><rect x="538" y="222" width="524" height="284" fill="url(#cabWarmGlass)"/>
+              <path d="M1020,222 L1062,222 L1062,300 L990,506 L948,506 Z" fill="#ffd48a" opacity="0.1"/></g>
             <path d="M600,222 L680,222 L560,506 L538,506 L538,370 Z" fill="#fff" opacity="0.06"/>
             <path d="M700,222 L722,222 L602,506 L580,506 Z" fill="#fff" opacity="0.07"/>
             <path d="M960,222 L1010,222 L900,506 L850,506 Z" fill="#cfe3ff" opacity="0.045"/></g>`;
@@ -617,11 +622,16 @@
       wall.els.glint = g.querySelector('#cab-wall-keyglint');
       wall.els.digits = [0, 1, 2, 3].map(i => g.querySelector('#cab-wall-d' + i));
       wall.els.dim = g.querySelector('#cab-wall-dim');
+      wall.els.warm = g.querySelector('#cab-wall-warm');
     },
     update() {
       if (!wall.g) return;
       const open = !!G.get('drawerOpen');
-      wall.els.dim.setAttribute('opacity', G.get('lampLit') ? '0.08' : '0.32');
+      const lit = !!G.get('lampLit');
+      wall.els.dim.setAttribute('fill', lit ? '#ffb45a' : '#12222e');
+      wall.els.dim.setAttribute('opacity', lit ? '0.22' : '0.32');
+      wall.els.dim.style.mixBlendMode = lit ? 'soft-light' : 'multiply';
+      wall.els.warm.style.display = lit ? '' : 'none';
       wall.els.cavity.style.display = open ? '' : 'none';
       wall.els.glint.style.display = open && !G.get('gotKey') ? '' : 'none';
       wall.els.drawer.setAttribute('transform', open ? 'translate(800,636) scale(1.075) translate(-800,-584)' : '');
@@ -745,7 +755,7 @@
   function setTint(el) {
     const lit = !!G.get('lampLit');
     el.setAttribute('fill', lit ? '#ffb85a' : '#12222e');
-    el.setAttribute('opacity', lit ? '0.07' : '0.22');
+    el.setAttribute('opacity', lit ? '0.14' : '0.22');
     el.style.mixBlendMode = lit ? 'soft-light' : 'multiply';
   }
 
@@ -815,6 +825,7 @@
           <path d="M-50,-22 C-54,40 54,40 50,-22" fill="none" stroke="url(#cabBrass)" stroke-width="8" stroke-linecap="round"/>
           <path d="M-46,-12 C-46,26 -10,32 10,30" fill="none" stroke="#fff0c0" stroke-width="2" opacity="0.6" stroke-linecap="round"/>
           <path d="M-54,-18 C-58,52 58,52 54,-18" fill="none" stroke="#000" stroke-width="10" opacity="0.2" filter="url(#blur6)" transform="translate(6,14)"/>
+          <rect x="-80" y="-50" width="160" height="104" fill="transparent"/>
         </g>`;
       });
       // lock plate
@@ -846,9 +857,9 @@
         <g transform="translate(801,263.5) scale(0.9)" fill="none" stroke="#fff0c0" stroke-width="1" opacity="0.35">
           <path d="M0,-6 C-20,-26 -54,-30 -62,-14"/><path d="M0,-6 C20,-26 54,-30 62,-14"/></g>`;
       // engraved motto
-      pl += `<text x="801.5" y="349.5" text-anchor="middle" font-family="'IM Fell English', Georgia, serif" font-style="italic" font-size="34" fill="#fff0c0" opacity="0.4">What the light remembers</text>
+      pl += `<g id="cab-motto"><text x="801.5" y="349.5" text-anchor="middle" font-family="'IM Fell English', Georgia, serif" font-style="italic" font-size="34" fill="#fff0c0" opacity="0.4">What the light remembers</text>
         <text x="800" y="348" text-anchor="middle" font-family="'IM Fell English', Georgia, serif" font-style="italic" font-size="34" fill="#3a2406">What the light remembers</text>
-        <path d="M640,366 C700,372 760,364 800,372 C840,364 900,372 960,366" stroke="#4a3010" stroke-width="1.6" fill="none" opacity="0.7"/>`;
+        <path d="M640,366 C700,372 760,364 800,372 C840,364 900,372 960,366" stroke="#4a3010" stroke-width="1.6" fill="none" opacity="0.7"/></g>`;
       // wheel bezel recess
       pl += `<rect x="584" y="386" width="432" height="164" rx="14" fill="#3a2608" opacity="0.55"/>
         <rect x="584" y="386" width="432" height="164" rx="14" fill="none" stroke="#fff0c0" stroke-width="1.4" opacity="0.35" transform="translate(1,1.5)"/>
@@ -871,6 +882,7 @@
       dr.inner = g.querySelector('#cab-inner');
       dr.key = g.querySelector('#cab-key');
       dr.bolt = g.querySelector('#cab-bolt');
+      dr.motto = g.querySelector('#cab-motto');
       dr.tint = g.querySelector('#cab-dtint');
       dr.frontHit = g.querySelector('#cab-front-hit');
       g.querySelectorAll('.cab-handle').forEach(h => G.hotspot(h, {
@@ -878,7 +890,7 @@
         click: () => {
           if (G.get('drawerOpen')) return;
           G.sfx('lockFail'); G.say('Locked fast. The drawer won\'t budge.');
-          G.tween(260, t => dr.front.setAttribute('transform', `translate(0,${f1(Math.sin(t * Math.PI * 3) * 3 * (1 - t))})`), 'linear');
+          rattle(3);
         },
       }));
       G.hotspot(dr.key, {
@@ -955,11 +967,32 @@
     },
   });
 
+  function rattle(amp) {
+    if (!dr.front || G.get('drawerOpen') || solving) return;
+    G.tween(300, t => dr.front.setAttribute('transform', `translate(${f1(Math.sin(t * Math.PI * 4) * amp * 0.5 * (1 - t))},${f1(Math.sin(t * Math.PI * 3) * amp * (1 - t))})`), 'linear')
+      .then(() => { if (!G.get('drawerOpen') && !solving) dr.front.setAttribute('transform', ''); });
+  }
+  // soft feedback for a wrong *complete* code: once every wheel has been moved, after the player pauses
+  const touched = [false, false, false, false];
+  let wrongTimer = 0, lastWrong = '';
+  function scheduleWrong() {
+    clearTimeout(wrongTimer);
+    wrongTimer = setTimeout(() => {
+      if (G.view() !== 'drawer' || solving || G.get('drawerOpen') || !touched.every(Boolean)) return;
+      const code = values().join('');
+      if (code === CODE.join('') || code === lastWrong) return;
+      lastWrong = code;
+      G.sfx('lockFail');
+      rattle(2);
+    }, 1100);
+  }
+
   function setOpenPose(t) {
     const s = 1 + 0.07 * t, dy = SLIDE * t;
     dr.front.setAttribute('transform', t ? `translate(800,${f1(FRONT.y + dy)}) scale(${s}) translate(-800,${-FRONT.y})` : '');
     dr.inner.setAttribute('transform', `translate(0,${f1(-SLIDE + dy)})`);
     dr.bolt.setAttribute('transform', t ? 'translate(-130,0)' : '');
+    dr.motto.setAttribute('opacity', t ? 0 : 1);
   }
 
   function renderWheel(i) {
@@ -985,12 +1018,14 @@
       if (w.token !== tok) return;
       w.target = mod10(w.target); w.pos = w.target; renderWheel(i);
       if (wall.g) wall.els.digits[i].textContent = w.target;
-      check();
+      check(i);
     });
   }
 
-  function check() {
+  function check(i) {
+    if (i != null) touched[i] = true;
     const v = values();
+    if (!v.every((d, j) => d === CODE[j])) scheduleWrong();
     if (v.every((d, i) => d === CODE[i]) && !solving && !G.get('drawerOpen')) solve();
   }
 
@@ -1008,6 +1043,7 @@
         const s = 1 + 0.07 * t, dy = SLIDE * t;
         dr.front.setAttribute('transform', `translate(800,${f1(FRONT.y + dy)}) scale(${f1(s * 1000) / 1000}) translate(-800,${-FRONT.y})`);
         dr.inner.setAttribute('transform', `translate(0,${f1(-SLIDE + dy)})`);
+        dr.motto.setAttribute('opacity', f1(Math.max(0, 1 - t * 2.5) * 100) / 100);
       }, 'inOut');
       solving = false;
       G.set('drawerOpen');
@@ -1032,7 +1068,7 @@
       G.sfx('dial');
       G.tween(260, t => { if (w.token !== tok) return; w.pos = from + (to - from) * t; renderWheel(i); }, 'out').then(() => {
         if (w.token !== tok) return;
-        w.target = mod10(w.target); w.pos = w.target; renderWheel(i); check();
+        w.target = mod10(w.target); w.pos = w.target; renderWheel(i); check(i);
       });
     }
     kbIdx++;

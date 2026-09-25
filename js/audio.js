@@ -626,8 +626,8 @@
     L.rainGain = G_(0.9);
     const lift = BQ('peaking', 2200, 0.7); lift.gain.value = 4.5;   // presence for small speakers
     chain(L.rainTone, lift, L.rainGain, L.amb); send(L.rainGain);
-    [-0.75, 0.75].forEach(p => chain(loopSrc(nb.white, rr(0.97, 1.03)), BQ('bandpass', rr(1200, 1500), 0.45), G_(0.16), PAN(p), L.rainTone));
-    chain(loopSrc(nb.brown), BQ('lowpass', 380), G_(0.35), L.rainTone);            // roof body
+    [-0.75, 0.75].forEach(p => chain(loopSrc(nb.white, rr(0.97, 1.03)), BQ('bandpass', rr(1300, 1700), 0.45), G_(0.24), PAN(p), L.rainTone));
+    chain(loopSrc(nb.brown), BQ('lowpass', 380), G_(0.26), L.rainTone);            // roof body
     L.patter = G_(0.18);
     chain(loopSrc(nb.pink, 1.1), BQ('highpass', 700), L.patter, PAN(0.2), L.rainTone);
     // window-side droplets + gutter (directional, follow view)
@@ -643,7 +643,7 @@
     });
 
     // ---- room tone ----
-    chain(loopSrc(nb.brown, 0.8), BQ('lowpass', 110), G_(0.22), L.amb);
+    chain(loopSrc(nb.brown, 0.8), BQ('lowpass', 110), G_(0.15), L.amb);
     chain(loopSrc(nb.pink, 0.9), BQ('bandpass', 260, 0.4), G_(0.012), L.amb);
 
     // ---- wind (off until windowOpen) ----
