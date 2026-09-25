@@ -667,12 +667,14 @@
     G.on('hint', () => { S.hintEvents++; });
     G.on('finish', () => { document.body.classList.add('finale'); showEnding(); });
     // the finale cutscene: fade the whole HUD out and keep it gone through the ending
-    const finaleHud = () => {
-      const on = !!G.get('hatched');
+    const finaleHud = force => {
+      const on = !!force || !!G.get('hatched');
       document.body.classList.toggle('finale', on);
       if (on) { closeHint(); hideLabel(0); if (G.selected()) G.select(null); }
     };
     G.on('flag', k => { if (k === 'hatched') finaleHud(); });
+    // the finale starts by taking the cocoon (before 'hatched' is set) — hide the HUD from that moment
+    G.on('take', id => { if (id === 'cocoon') finaleHud(true); });
     G.on('start', finaleHud);
     renderInv(true);
     updateHUD();

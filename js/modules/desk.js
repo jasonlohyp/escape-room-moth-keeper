@@ -727,7 +727,7 @@
       const refs = {};
       // pearlescent sheen: the page is deliberately, conspicuously blank
       refs.sheen = G.el('g', { 'pointer-events': 'none' }, g);
-      G.el('path', { d: RIGHT_PAGE_D, fill: 'url(#dkPearl)', style: 'mix-blend-mode:screen' }, refs.sheen);
+      G.el('path', { d: RIGHT_PAGE_D, fill: 'url(#dkPearl)' }, refs.sheen);
       G.el('path', { d: RIGHT_PAGE_D, fill: 'url(#dkPearl2)', opacity: 0.8, style: 'mix-blend-mode:soft-light' }, refs.sheen);
       G.svg(`<g fill="#ffffff">
         <circle cx="990" cy="300" r="1.6"><animate attributeName="opacity" values="0;0.9;0;0" dur="3.8s" repeatCount="indefinite"/></circle>
@@ -876,10 +876,10 @@
           </linearGradient>
           <linearGradient id="dkPearl" x1="0" y1="0" x2="1" y2="0.35">
             <stop offset="0" stop-color="#ffffff" stop-opacity="0"/>
-            <stop offset="0.25" stop-color="#ffd9f0" stop-opacity="0.55"/>
-            <stop offset="0.42" stop-color="#d4fbe8" stop-opacity="0.6"/>
-            <stop offset="0.58" stop-color="#d8e2ff" stop-opacity="0.6"/>
-            <stop offset="0.72" stop-color="#fff0d8" stop-opacity="0.45"/>
+            <stop offset="0.22" stop-color="#f2c4e2" stop-opacity="0.26"/>
+            <stop offset="0.38" stop-color="#bfeedd" stop-opacity="0.3"/>
+            <stop offset="0.52" stop-color="#c6d2fa" stop-opacity="0.3"/>
+            <stop offset="0.66" stop-color="#f6e0c0" stop-opacity="0.22"/>
             <stop offset="0.8" stop-color="#ffffff" stop-opacity="0"/>
             <animateTransform attributeName="gradientTransform" type="translate" values="-0.6 0;0.6 0;-0.6 0" dur="9s" repeatCount="indefinite"/>
           </linearGradient>

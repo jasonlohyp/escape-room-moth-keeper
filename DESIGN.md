@@ -70,7 +70,8 @@ Each press escalates: nudge → stronger nudge → explicit answer (the answer o
 - Motion: slow, weighted, eased (no bouncy UI). Dust motes, flame flicker, rain streaks, candle-glow breathing.
 
 ## Stage & layout contract (SVG viewBox `0 0 1600 900`)
-Floor line ≈ y 790. Reserved object zones per wall (room art must leave these clear / provide a suitable backdrop):
+Floor line ≈ y 790. **HUD zones (every wall, no props or decor):** turn arrows at x 0–110 and x 1380–1480, y 340–560; inventory strip x 1480–1600 full height; back arrow / captions x 560–1040, y 800–900 in close-ups.
+Reserved object zones per wall (room art must leave these clear / provide a suitable backdrop):
 - **north** — door frame x 640–960, y 150–800 (owned by finale module). Tall clock x 300–500, y 110–800 (clock module). Rest: room art decor.
 - **east** — cabinet x 480–1120, y 140–790 (cabinet module).
 - **south** — desk x 380–1220, top at y 575 (room art draws the desk). Lamp centred x 900, base y 575, top ≈ y 360 (desk module). Journal on desk x 520–720 (desk module). Writing box x 1010–1170 (finale module). Projection area on wall x 440–1160, y 110–340 (desk module). Portrait of Edith on wall x 1260–1470, y 150–430 (room art).

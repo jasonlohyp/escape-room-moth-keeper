@@ -6,6 +6,11 @@
  *   #glow        warm bloom for flames / lit things
  *   #moonglow    cold bloom for moonlit things
  *   #blur2 #blur6 #blur20  gaussian blurs
+ *   #gCandle #gBrass #gWalnut  shared gradients
+ * Room-art additions (free to reuse): #pWall (sage damask wallpaper pattern), #gBeam, #gCeil, #gPanel,
+ *   #gShadow (radial contact shadow — use on an <ellipse>), #gRailShadow, #gGilt, #gLegWood, #gGlass,
+ *   #gMoteW / #gMoteC (warm / cool dust mote), #gRipple, #gPaperAge (aged-paper edge darkening).
+ * room.js also adds #pGrain and #gVignette at boot (used by the global grade in #fx).
  */
 (function () {
   'use strict';

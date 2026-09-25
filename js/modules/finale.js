@@ -52,7 +52,7 @@
         <stop offset="0" stop-color="#fffdf2"/><stop offset=".55" stop-color="#efe9d4"/><stop offset="1" stop-color="#bdb59c"/>
       </radialGradient>
       <radialGradient id="fnMoonDark" cx="40%" cy="38%" r="70%">
-        <stop offset="0" stop-color="#1f2c44"/><stop offset="1" stop-color="#0a1120"/>
+        <stop offset="0" stop-color="#2c3d5c"/><stop offset=".7" stop-color="#16213a"/><stop offset="1" stop-color="#0c1424"/>
       </radialGradient>
       <radialGradient id="fnSilk" cx="50%" cy="45%" r="75%">
         <stop offset="0" stop-color="#d9bfae"/><stop offset=".55" stop-color="#b58f80"/><stop offset="1" stop-color="#6a4540"/>
@@ -108,6 +108,14 @@
         <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="b"/>
         <feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
       </filter>
+      <filter id="fnFuzz" x="-10%" y="-20%" width="120%" height="140%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.55" numOctaves="2" seed="4" result="n"/>
+        <feDisplacementMap in="SourceGraphic" in2="n" scale="7" xChannelSelector="R" yChannelSelector="G" result="d"/>
+        <feGaussianBlur in="d" stdDeviation=".6"/>
+      </filter>
+      <radialGradient id="fnTear" cx="50%" cy="65%" r="70%">
+        <stop offset="0" stop-color="#fffbe6"/><stop offset=".45" stop-color="#ffd98a"/><stop offset=".85" stop-color="#b9763a"/><stop offset="1" stop-color="#5a3418"/>
+      </radialGradient>
       <filter id="fnBlur3" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="3"/></filter>
       <filter id="fnBlur40" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="40"/></filter>
     `);
@@ -263,56 +271,94 @@
     return m;
   }
 
-  // ================================================================== cocoon
-  const COC = 'M-100,2 C-93,-28 -44,-42 16,-40 C60,-38 94,-24 102,-5 C106,6 98,16 84,24 C44,43 -36,44 -78,29 C-94,22 -104,13 -100,2 Z';
-  const SEAM = [[-106, 1], [-78, -5], [-54, 2], [-28, -8], [-2, -1], [24, -10], [50, -3], [76, -9], [108, -4]];
-  function cocoonBody(id) {
-    // helical silk wraps (diagonal, uneven), a faint pupa shadow inside, lit from within
-    let strands = '';
-    for (let i = 0; i < 34; i++) {
-      const x = -118 + i * 7.2 + ((i * 37) % 5);
-      const tilt = 26 + ((i * 13) % 9);
-      const bow = (i % 2 ? -1 : 1) * (4 + (i % 5));
-      const w = i % 5 === 0 ? 1.6 : (i % 3 ? .6 : 1);
-      const op = i % 5 === 0 ? .55 : (i % 3 ? .28 : .4);
-      strands += `<path d="M${x - tilt},-46 Q${x + bow},0 ${x + tilt},46" stroke="#ffffff" stroke-width="${w}" fill="none" opacity="${op}"/>`;
+  // ================================================================== cocoon (lumpy silk spindle)
+  function srand(seed) { let s = seed >>> 0; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
+  function smoothClosed(pts) {
+    const n = pts.length, f = v => v.toFixed(2);
+    let d = `M${f(pts[0][0])},${f(pts[0][1])}`;
+    for (let i = 0; i < n; i++) {
+      const p0 = pts[(i - 1 + n) % n], p1 = pts[i], p2 = pts[(i + 1) % n], p3 = pts[(i + 2) % n];
+      d += ` C${f(p1[0] + (p2[0] - p0[0]) / 6)},${f(p1[1] + (p2[1] - p0[1]) / 6)} ${f(p2[0] - (p3[0] - p1[0]) / 6)},${f(p2[1] - (p3[1] - p1[1]) / 6)} ${f(p2[0])},${f(p2[1])}`;
     }
-    for (let i = 0; i < 14; i++) {
-      const x = -104 + i * 15.5;
-      strands += `<path d="M${x + 30},-46 Q${x + 6},${(i % 2 ? 6 : -6)} ${x - 24},46" stroke="#fdf6e4" stroke-width=".5" fill="none" opacity=".3"/>`;
+    return d + ' Z';
+  }
+  function cocoonEnvelope(x) {
+    const c = clamp(x / 104, -1, 1), s = Math.sqrt(1 - c * c);
+    return 40 * Math.pow(s, 0.85) * (1 - 0.12 * c);
+  }
+  const COC = (function () {
+    const pts = [];
+    for (let i = 0; i < 64; i++) {
+      const t = i / 64 * Math.PI * 2, c = Math.cos(t), s = Math.sin(t);
+      const bump = 1 + 0.06 * Math.sin(t * 7 + 1.3) + 0.04 * Math.sin(t * 13 + 0.4) + 0.025 * Math.sin(t * 23);
+      pts.push([104 * c * (1 + 0.015 * Math.sin(t * 9)), 40 * Math.sign(s) * Math.pow(Math.abs(s), 0.85) * (1 - 0.12 * c) * bump]);
+    }
+    return smoothClosed(pts);
+  })();
+  function cocoonBody(id) {
+    const R = srand(7);
+    let fib = '';
+    for (let i = 0; i < 130; i++) {
+      const x = -100 + R() * 200, env = cocoonEnvelope(x);
+      const y = (R() * 2 - 1) * env * 0.95;
+      const a = (55 + R() * 70) * Math.PI / 180 * (R() < 0.5 ? 1 : -1), L = 8 + R() * 22;
+      const dx = Math.cos(a) * L, dy = Math.sin(a) * L, bend = (R() - 0.5) * 8;
+      const light = R() < 0.72;
+      fib += `<path d="M${(x - dx / 2).toFixed(1)},${(y - dy / 2).toFixed(1)} q${(dx / 2 + bend).toFixed(1)},${(dy / 2 - bend).toFixed(1)} ${dx.toFixed(1)},${dy.toFixed(1)}" stroke="${light ? '#fffdf4' : '#b5a27c'}" stroke-width="${(0.4 + R() * 0.9).toFixed(2)}" opacity="${(0.18 + R() * 0.4).toFixed(2)}" fill="none"/>`;
     }
     return `
       <path d="${COC}" fill="url(#fnCocoon)"/>
       <g clip-path="url(#${id}-cc)">
-        <path d="M-70,2 C-66,-16 -20,-22 30,-18 C60,-15 76,-6 76,2 C76,12 56,20 20,21 C-30,22 -70,18 -70,2 Z" fill="#7d6a48" opacity=".3" filter="url(#fnBlur3)"/>
-        <path d="M-40,-14 C-38,4 -38,12 -40,20 M-14,-17 C-12,4 -12,14 -14,21 M12,-17 C14,4 14,14 12,21 M36,-15 C38,2 38,12 36,18" stroke="#6d5a3c" stroke-width="3" fill="none" opacity=".12" filter="url(#fnBlur3)"/>
-        <ellipse class="coc-core" cx="-4" cy="0" rx="74" ry="26" fill="url(#fnCore)" opacity=".7" style="mix-blend-mode:screen"/>
-        ${strands}
+        <path d="M-66,2 C-62,-14 -20,-20 30,-17 C58,-14 72,-6 72,2 C72,12 54,19 20,20 C-28,21 -66,17 -66,2 Z" fill="#8a6f44" opacity=".28" filter="url(#fnBlur3)"/>
+        <ellipse class="coc-core" cx="-6" cy="-2" rx="78" ry="28" fill="url(#fnCore)" opacity=".75" style="mix-blend-mode:screen"/>
+        ${fib}
         <path class="coc-warm" d="${COC}" fill="#ffae4a" opacity="0" style="mix-blend-mode:multiply"/>
-        <path d="M-98,12 C-60,36 40,40 94,14 L110,60 L-110,60 Z" fill="#8f7c5c" opacity=".35" filter="url(#fnBlur3)"/>
-        <path d="M-78,-20 C-40,-35 30,-35 72,-22" stroke="#ffffff" stroke-width="7" fill="none" opacity=".5" filter="url(#fnBlur3)"/>
+        <path d="M-104,14 C-60,40 50,42 104,10 L110,60 L-110,60 Z" fill="#8f7c5c" opacity=".38" filter="url(#fnBlur3)"/>
+        <path d="M-74,-22 C-40,-36 30,-36 70,-22" stroke="#ffffff" stroke-width="6" fill="none" opacity=".4" filter="url(#fnBlur3)"/>
       </g>
-      <path d="${COC}" fill="none" stroke="#fffaf0" stroke-width="6" opacity=".35" filter="url(#fnBlur3)"/>
-      <path d="${COC}" fill="none" stroke="#6d5f47" stroke-width="1.4" opacity=".75"/>`;
+      <path d="${COC}" fill="none" stroke="#fffaf0" stroke-width="7" opacity=".55" filter="url(#fnFuzz)"/>
+      <path d="${COC}" fill="none" stroke="#7d6d50" stroke-width="1.2" opacity=".55"/>`;
+  }
+  function tearPath(p) { // jagged lens opening along the dorsal ridge, p 0..1
+    const W = 104 * p, H = 22 * p, cx = -6, cy = -33, up = [], lo = [];
+    const R = srand(21);
+    for (let k = 0; k <= 12; k++) {
+      const u = k / 12, x = cx - W / 2 + W * u, sn = Math.sin(Math.PI * u);
+      up.push([x, cy - H * sn + (k % 2 ? -2.4 : 1.2) * p * (0.4 + R())]);
+      lo.push([x, cy + H * 0.5 * sn + (k % 2 ? 1.6 : -1) * p * (0.4 + R())]);
+    }
+    const f = v => v.toFixed(1);
+    const d = 'M' + up.map(q => f(q[0]) + ',' + f(q[1])).join(' L') + ' L' + lo.slice().reverse().map(q => f(q[0]) + ',' + f(q[1])).join(' L') + ' Z';
+    return { d, up, lo };
+  }
+  function tearFibres(p) {
+    const t = tearPath(p), R = srand(5);
+    let d = '';
+    t.up.forEach(([x, y], k) => {
+      if (k === 0 || k === 12) return;
+      const L = (6 + R() * 16) * p, sx = (R() - 0.5) * 10 * p;
+      d += `M${x.toFixed(1)},${y.toFixed(1)} q${(sx * 0.3).toFixed(1)},${(-L * 0.6).toFixed(1)} ${sx.toFixed(1)},${(-L).toFixed(1)} `;
+    });
+    t.lo.forEach(([x, y], k) => {
+      if (k % 2 || k === 0 || k === 12) return;
+      const L = (4 + R() * 9) * p;
+      d += `M${x.toFixed(1)},${y.toFixed(1)} q${((R() - 0.5) * 4).toFixed(1)},${(-L * 0.5).toFixed(1)} ${((R() - 0.5) * 8).toFixed(1)},${(-L).toFixed(1)} `;
+    });
+    return d || 'M0,0';
   }
   function cocoonMarkup(id) {
-    const seam = SEAM.map(p => p.join(',')).join(' L');
-    const up = SEAM.map(p => p.join(',')).join(' ') + ' 110,-70 -110,-70';
-    const lo = SEAM.map(p => p.join(',')).join(' ') + ' 110,70 -110,70';
     return `
-      <defs>
-        <clipPath id="${id}-cc"><path d="${COC}"/></clipPath>
-        <clipPath id="${id}-up"><polygon points="${up}"/></clipPath>
-        <clipPath id="${id}-lo"><polygon points="${lo}"/></clipPath>
-      </defs>
-      <ellipse class="coc-halo" cx="0" cy="0" rx="150" ry="90" fill="#fff4cf" opacity=".3" filter="url(#blur20)"/>
-      <g class="coc-threads" stroke="#f4eee0" stroke-width=".8" fill="none" opacity=".6">
-        <path d="M-100,2 C-116,-4 -126,-14 -140,-16"/><path d="M-98,8 C-114,14 -128,12 -142,20"/><path d="M100,-6 C116,-14 128,-22 140,-30"/><path d="M98,4 C116,6 128,4 142,10"/>
+      <defs><clipPath id="${id}-cc"><path d="${COC}"/></clipPath></defs>
+      <ellipse class="coc-halo" cx="0" cy="0" rx="150" ry="90" fill="#fff4cf" opacity=".34" filter="url(#blur20)"/>
+      <g class="coc-threads" stroke="#f6f0e2" stroke-width=".8" fill="none" opacity=".7">
+        <path d="M-100,4 C-114,10 -124,22 -128,40"/><path d="M-96,10 C-104,22 -108,32 -106,40"/><path d="M-60,30 C-62,34 -66,38 -72,40"/><path d="M-20,36 C-18,38 -16,39 -12,40"/>
+        <path d="M40,32 C44,36 48,38 56,40"/><path d="M96,6 C110,14 118,26 124,40"/><path d="M102,-2 C116,-4 126,4 136,40"/>
+        <path d="M-118,40 L136,40" stroke-width=".5" opacity=".35"/>
       </g>
-      <g class="coc-in" opacity="0"><ellipse cx="0" cy="2" rx="86" ry="20" fill="#2a2016"/><ellipse cx="0" cy="2" rx="80" ry="15" fill="url(#fnCore)"/></g>
-      <g class="coc-lo" clip-path="url(#${id}-lo)">${cocoonBody(id)}</g>
-      <g class="coc-up" clip-path="url(#${id}-up)">${cocoonBody(id)}</g>
-      <path class="coc-seam" d="M${seam}" stroke="#fffbe8" stroke-width="3" fill="none" opacity="0" filter="url(#fnBloom)" stroke-linejoin="round"/>`;
+      <g class="coc-body">${cocoonBody(id)}</g>
+      <path class="coc-tearglow" d="M0,0" fill="#fff4cf" opacity="0" filter="url(#blur6)"/>
+      <path class="coc-tear" d="M0,0" fill="url(#fnTear)" opacity="0"/>
+      <path class="coc-fib" d="M0,0" stroke="#fffaf0" stroke-width="1" fill="none" opacity="0" stroke-linecap="round"/>`;
   }
   function makeCocoon(parent, x, y, s, rot) {
     const id = 'fnc' + (uid++);
@@ -320,7 +366,17 @@
     const breathe = G.el('g', {}, outer);
     breathe.innerHTML = cocoonMarkup(id) + `<animateTransform attributeName="transform" type="scale" values="1 1;1.018 1.05;1 1" dur="3.4s" repeatCount="indefinite"/>`;
     const q = s2 => breathe.querySelector(s2), qa = s2 => breathe.querySelectorAll(s2);
-    return { outer, breathe, id, up: q('.coc-up'), lo: q('.coc-lo'), seam: q('.coc-seam'), halo: q('.coc-halo'), inside: q('.coc-in'), cores: qa('.coc-core'), warms: qa('.coc-warm'), x, y, s, rot: rot || 0 };
+    const c = { outer, breathe, id, halo: q('.coc-halo'), tear: q('.coc-tear'), tearGlow: q('.coc-tearglow'), fib: q('.coc-fib'), cores: qa('.coc-core'), warms: qa('.coc-warm'), x, y, s, rot: rot || 0 };
+    c.setTear = p => {
+      const t = tearPath(Math.max(0.001, p));
+      c.tear.setAttribute('d', t.d); c.tearGlow.setAttribute('d', t.d); c.fib.setAttribute('d', tearFibres(p));
+      c.tear.setAttribute('opacity', p > 0 ? 1 : 0); c.tearGlow.setAttribute('opacity', (0.8 * p).toFixed(3)); c.fib.setAttribute('opacity', (0.9 * Math.min(1, p * 2)).toFixed(3));
+    };
+    c.toStage = (lx, ly) => {
+      const r = c.rot * Math.PI / 180, cs = Math.cos(r), sn = Math.sin(r);
+      return [c.x + (lx * cs - ly * sn) * c.s, c.y + (lx * sn + ly * cs) * c.s];
+    };
+    return c;
   }
 
   // ================================================================== small helpers
