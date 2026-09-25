@@ -183,10 +183,11 @@
     near += `L${f(x)} ${yb}Z`;
     // trees at the ends
     let trees = '';
-    for (let t = 0; t < 7; t++) {
-      const tx = t < 4 ? x0 + r() * (x1 - x0) * 0.22 : x1 - r() * (x1 - x0) * 0.2;
-      const ty = base - (14 + r() * 26) * k, tr = (12 + r() * 16) * k;
-      trees += `<ellipse cx="${f(tx)}" cy="${f(ty)}" rx="${f(tr * .8)}" ry="${f(tr * 1.25)}"/><ellipse cx="${f(tx + tr * .5)}" cy="${f(ty + tr * .5)}" rx="${f(tr * .7)}" ry="${f(tr)}"/>`;
+    for (let t = 0; t < 8; t++) {
+      const tx = t < 4 ? x0 + r() * (x1 - x0) * 0.25 : x1 - r() * (x1 - x0) * 0.25;
+      const tr = (7 + r() * 8) * k, ty = base - tr * 1.2;
+      trees += `<rect x="${f(tx - tr * .08)}" y="${f(ty)}" width="${f(tr * .16)}" height="${f(tr * 2)}"/>`;
+      for (let j = 0; j < 5; j++) trees += `<ellipse cx="${f(tx + (r() - .5) * tr * 1.3)}" cy="${f(ty - j * tr * .35 + (r() - .5) * tr * .4)}" rx="${f(tr * (0.75 - j * .1))}" ry="${f(tr * (0.6 - j * .06))}"/>`;
     }
     return { far, near, lights, trees };
   }
@@ -418,6 +419,11 @@
     // moulded surround (walnut)
     s += `<path d="${ring(R_REVEAL, R_MOULD)}" fill-rule="evenodd" fill="url(#win-mould)" stroke="${INK}" stroke-width="${ink}"/>`;
     s += `<path d="${ring(R_REVEAL + 5, R_REVEAL + 11)}" fill-rule="evenodd" fill="url(#win-mould2)" opacity=".8"/>`;
+    // bead moulding
+    let beads = '';
+    for (let i = 0; i < 128; i++) { const a = i / 128 * 6.2832, x = (R_REVEAL + 8.2) * Math.cos(a), y = (R_REVEAL + 8.2) * Math.sin(a);
+      beads += `M${f(x + 1.9)} ${f(y)}a1.9 1.9 0 1 0 -3.8 0a1.9 1.9 0 1 0 3.8 0Z`; }
+    s += `<path d="${beads}" fill="#8a5d3a" stroke="#1a0f08" stroke-opacity=".7" stroke-width="${lw(.6)}"/>`;
     s += `<g fill="none" stroke-width="${lw(1.1)}">
       <circle r="${R_REVEAL + 5}" stroke="#1a0f08" stroke-opacity=".8"/>
       <circle r="${R_REVEAL + 11.5}" stroke="#1a0f08" stroke-opacity=".7"/>
@@ -524,11 +530,11 @@
     const latch = G.el('g', { class: 'win-latch' }, latchWrap);
     G.svg(latchLocal(c), latch).setAttribute('transform', tr);
     // things once open: blowing rain, moonlight spill
+    if (c.sill) G.svg(c.sill, root);
     const openFx = G.el('g', { class: 'win-openfx', opacity: 0, 'pointer-events': 'none' }, root);
     const inR = rng(c.seed + 99);
     G.svg(`<g clip-path="url(#win-open-${id})">${rainStreaks(c, B, inR, 0.32, Math.round(c.streaks * 0.35), 0.42, 2.2)}</g>`, openFx);
     if (c.openExtra) G.svg(c.openExtra, openFx);
-    if (c.sill) G.svg(c.sill, root);
     const curt = c.curtains ? G.svg(c.curtains, root) : null;
     // cold air wash (animated during opening)
     const wash = G.el('rect', { x: 0, y: 0, width: 1600, height: 900, fill: '#cfe3ff', opacity: 0, 'pointer-events': 'none' }, root);
@@ -815,7 +821,7 @@
   beamObject('west', `
     <ellipse cx="800" cy="860" rx="420" ry="52" fill="url(#win-pool)" opacity=".32"/>
     <ellipse cx="800" cy="856" rx="250" ry="28" fill="url(#win-pool)" opacity=".3"/>`,
-    [560, 640, 1040, 860], [0.3, 1], 303);
+    null, null, 303);
 
   // ---------- hint + debug step ----------
   G.registerHint({

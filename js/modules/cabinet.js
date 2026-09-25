@@ -222,7 +222,7 @@
       say: 'Sphinx ligustri. The privet hawk-moth — built for speed.',
       fw: 'M8,-26 C62,-34 132,-18 186,16 C197,23 195,31 182,30 C150,26 118,24 88,27 C56,27 30,16 9,0 Z',
       hw: 'M8,4 C44,8 88,24 110,42 C118,60 100,78 72,82 C46,86 22,68 8,34 Z',
-      fwGrad: { r: 200, stops: [[0, '#3a2a1e'], [0.3, '#6a5440'], [0.7, '#8e7658'], [1, '#a89070']] },
+      fwGrad: { r: 200, stops: [[0, '#4a3424'], [0.3, '#7a6048'], [0.7, '#9a8062'], [1, '#b09878']] },
       hwGrad: { r: 110, stops: [[0, '#6a3a3a'], [0.3, '#c98088'], [0.7, '#e3a4a6'], [1, '#d99aa0']] },
       edge: '#221a14', band: '#c8b89c',
       fwDeco: `<path d="M20,-10 C70,-8 120,4 178,18" stroke="#1a120c" stroke-width="6" fill="none" opacity="0.75"/>
@@ -319,7 +319,7 @@
     s += feather(6, 2, 100, 38, 9, 4, '#b09c74');
     s += feather(6, 6, 82, 58, 8, 5, '#a8946c');
     // forewing: solid narrow blade then two plumes
-    s += `<path d="M4,-24 C40,-28 70,-30 98,-33 L103,-22 C70,-18 40,-14 5,-10 Z" fill="#d8c8a0" stroke="${INK}" stroke-width="1.1" opacity="0.95"/>`;
+    s += `<path d="M4,-24 C40,-28 70,-30 98,-33 L103,-22 C70,-18 40,-14 5,-10 Z" fill="#d8c8a0" stroke="#7a6a4c" stroke-width="1" opacity="0.95"/>`;
     s += `<path d="M20,-20 C50,-23 74,-25 94,-27" stroke="#b4a482" stroke-width="1.2" fill="none" opacity="0.7"/>`;
     s += feather(98, -31, 156, -42, 9, 6, '#c4b088');
     s += feather(101, -24, 152, -16, 9, 7, '#c4b088');
