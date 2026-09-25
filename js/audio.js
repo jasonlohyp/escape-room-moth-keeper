@@ -292,7 +292,7 @@
         noise(K, v, { t: tt, a: 0.004, d: 0.07, g: 0.35 * g, filters: [{ type: 'lowpass', f: rr(500, 800), q: 0.8 }] });
         noise(K, v, { t: tt + 0.01, a: 0.01, d: 0.05, g: 0.05 * g, filters: [{ type: 'bandpass', f: 2500, q: 0.7 }] }); // grit
       });
-      if (R() < 0.65) creak(K, v, t + rr(0.03, 0.12), { dur: rr(0.18, 0.4), r0: rr(60, 90), rm: rr(100, 150), r1: rr(70, 110), res: [[rr(420, 520), 6, 1], [rr(950, 1150), 8, 0.6], [rr(2000, 2300), 9, 0.25]], g: 0.35 });
+      if (R() < 0.65) creak(K, v, t + rr(0.03, 0.12), { dur: rr(0.18, 0.4), r0: rr(60, 90), rm: rr(100, 150), r1: rr(70, 110), res: [[rr(420, 520), 6, 1], [rr(950, 1150), 8, 0.6], [rr(2000, 2300), 9, 0.25]], g: 0.8 });
     },
     pickup(K, t, o) {
       const v = voice(K, o, 0.3);
@@ -320,7 +320,7 @@
       const v = voice(K, o, 0.3);
       metalTick(K, v, t, 0.3, 0.9);
       metalTick(K, v, t + 0.05, 0.15, 1.1);
-      creak(K, v, t + 0.12, { dur: rr(0.6, 0.8), r0: 110, rm: rr(200, 240), r1: 150, res: [[900, 8, 1], [2000, 10, 0.6], [3400, 12, 0.3]], g: 0.4 });
+      creak(K, v, t + 0.12, { dur: rr(0.6, 0.8), r0: 110, rm: rr(200, 240), r1: 150, res: [[900, 8, 1], [2000, 10, 0.6], [3400, 12, 0.3]], g: 1.0 });
       woodKnock(K, v, t + 0.88, 260, 0.12);
     },
     match(K, t, o) {
@@ -333,8 +333,8 @@
       noise(K, v, { t: ti, a: 0.012, d: 0.5, g: 0.35, filters: [{ type: 'bandpass', f: 1400, q: 0.5, pts: [[0.4, 500]] }] });
       noise(K, v, { t: ti, buf: 'brown', a: 0.02, d: 0.7, g: 0.35, filters: [{ type: 'lowpass', f: 700 }] });
       // fizz
-      noise(K, v, { t: ti, buf: crackleBuf(K.c, 1.3, x => 280 * Math.pow(1 - x, 2) + 15, 1.2), flat: true, g: 0.45, filters: [{ type: 'highpass', f: 1800 }] });
-      noise(K, v, { t: ti + 0.05, a: 0.1, d: 1, g: 0.03, filters: [{ type: 'highpass', f: 5000 }] });
+      noise(K, v, { t: ti, buf: crackleBuf(K.c, 1.3, x => 280 * Math.pow(1 - x, 2) + 15, 1.2), flat: true, g: 0.5, filters: [{ type: 'bandpass', f: 3200, q: 0.7 }] });
+      noise(K, v, { t: ti + 0.05, a: 0.1, d: 0.8, g: 0.015, filters: [{ type: 'bandpass', f: 4500, q: 0.8 }] });
     },
     lampWhoosh(K, t, o) {
       const v = voice(K, o, 0.3);
@@ -380,14 +380,14 @@
     windowCreak(K, t, o) {
       const v = voice(K, Object.assign({ pan: -0.1 }, o), 0.35);
       metalTick(K, v, t, 0.25, 0.8);
-      creak(K, v, t + 0.1, { dur: rr(1.7, 2.1), r0: 40, rm: rr(120, 150), r1: 65, res: [[650, 7, 1], [1400, 9, 0.7], [2700, 10, 0.35], [300, 4, 0.5]], g: 0.4 });
+      creak(K, v, t + 0.1, { dur: rr(1.7, 2.1), r0: 40, rm: rr(120, 150), r1: 65, res: [[650, 7, 1], [1400, 9, 0.7], [2700, 10, 0.35], [300, 4, 0.5]], g: 1.1 });
       noise(K, v, { t: t + 0.9, buf: 'pink', a: 0.8, d: 1.3, g: 0.2, filters: [{ type: 'bandpass', f: 600, q: 0.7, pts: [[1.5, 1500], [2.1, 900]] }] });
     },
     wind(K, t, o) {
       const v = voice(K, o, 0.3), p0 = rr(300, 400);
-      noise(K, v, { t, buf: 'pink', a: 1.1, hold: 0.3, d: 1.8, g: 0.55, filters: [{ type: 'bandpass', f: p0, q: 0.9, pts: [[1.2, p0 * 2.4], [3.1, p0 * 1.3]] }] });
+      noise(K, v, { t, buf: 'pink', a: 1.1, hold: 0.3, d: 1.8, g: 1.0, filters: [{ type: 'bandpass', f: p0, q: 0.9, pts: [[1.2, p0 * 2.4], [3.1, p0 * 1.3]] }] });
       const w0 = rr(760, 900);
-      noise(K, v, { t, a: 1.2, hold: 0.2, d: 1.7, g: 0.1, filters: [{ type: 'bandpass', f: w0, q: 18, pts: [[1.0, w0 * 1.35], [1.8, w0 * 1.15], [3.1, w0 * 1.25]] }] });
+      noise(K, v, { t, a: 1.2, hold: 0.2, d: 1.7, g: 0.2, filters: [{ type: 'bandpass', f: w0, q: 18, pts: [[1.0, w0 * 1.35], [1.8, w0 * 1.15], [3.1, w0 * 1.25]] }] });
     },
     paper(K, t, o) {
       const v = voice(K, o, 0.2), d = rr(0.25, 0.38);
@@ -404,14 +404,14 @@
     boxOpen(K, t, o) {
       const v = voice(K, o, 0.28);
       metalTick(K, v, t, 0.22, 1);
-      creak(K, v, t + 0.06, { dur: rr(0.4, 0.5), r0: 160, rm: rr(240, 290), r1: 190, res: [[1200, 8, 1], [2600, 10, 0.6], [600, 5, 0.4]], g: 0.35 });
+      creak(K, v, t + 0.06, { dur: rr(0.4, 0.5), r0: 160, rm: rr(240, 290), r1: 190, res: [[1200, 8, 1], [2600, 10, 0.6], [600, 5, 0.4]], g: 0.8 });
       woodKnock(K, v, t + 0.55, rr(200, 220), 0.4, 0.1);
       woodKnock(K, v, t + 0.65, rr(210, 230), 0.1, 0.06);
     },
     cocoonCrack(K, t, o) {
       const v = voice(K, o, 0.3);
       const bump = (x, c, w) => Math.exp(-Math.pow((x - c) / w, 2));
-      noise(K, v, { t, buf: crackleBuf(K.c, 1.3, x => 260 * (bump(x, 0.1, 0.07) + bump(x, 0.5, 0.1) + bump(x, 0.9, 0.08)) + 10, 0.7, 2), flat: true, g: 0.7, filters: [{ type: 'bandpass', f: 4000, q: 0.8 }] });
+      noise(K, v, { t, buf: crackleBuf(K.c, 1.3, x => 260 * (bump(x, 0.1, 0.07) + bump(x, 0.5, 0.1) + bump(x, 0.9, 0.08)) + 10, 0.7, 2), flat: true, g: 1.1, filters: [{ type: 'bandpass', f: 4000, q: 0.8 }] });
       [0.12, 0.55, rr(0.85, 0.95)].forEach(dt => {
         noise(K, v, { t: t + dt, a: 0.0005, d: 0.006, g: 0.3, filters: [{ type: 'bandpass', f: rr(2200, 3000), q: 1.5 }] });
         tone(K, v, { f: rr(1600, 2000), t: t + dt, d: 0.03, g: 0.05 });
@@ -424,7 +424,7 @@
       for (let i = 0; i < n; i++) {
         const d = rr(0.22, 0.5);
         const v = voice(K, Object.assign({}, o, { pan: clamp((o.pan || 0) + rr(-0.6, 0.6), -1, 1) }), 0.3);
-        noise(K, v, { t: tt, buf: flutterBuf(K.c, d, rr(15, 23)), flat: true, g: rr(0.35, 0.55), filters: [{ type: 'bandpass', f: rr(900, 1500), q: 0.6 }, { type: 'highpass', f: 250 }] });
+        noise(K, v, { t: tt, buf: flutterBuf(K.c, d, rr(15, 23)), flat: true, g: rr(0.35, 0.55), filters: [{ type: 'bandpass', f: rr(900, 1500), q: 0.6 }, { type: 'highpass', f: 250 }, { type: 'lowpass', f: 3200 }] });
         tt += d + rr(0.12, 0.4);
       }
     },
@@ -453,7 +453,7 @@
     },
     doorOpen(K, t, o) {
       const v = voice(K, o, 0.4);
-      creak(K, v, t, { dur: 3.8, r0: 18, rm: 58, r1: 30, jit: 0.35, res: [[220, 6, 1], [480, 8, 0.8], [1100, 10, 0.5], [2300, 12, 0.2]], g: 0.45 });
+      creak(K, v, t, { dur: 3.8, r0: 18, rm: 58, r1: 30, jit: 0.35, res: [[220, 6, 1], [480, 8, 0.8], [1100, 10, 0.5], [2300, 12, 0.2]], g: 1.1 });
       noise(K, v, { t: t + 0.3, buf: 'pink', a: 1.6, hold: 0.6, d: 2.2, g: 0.3, filters: [{ type: 'lowpass', f: 250, q: 0.7, pts: [[1.8, 900], [4.2, 300]] }] });
       tone(K, v, { f: 42, t, a: 1, hold: 1.5, d: 2, g: 0.18 });
       woodKnock(K, v, t + 4.1, 75, 0.25, 0.25);
@@ -688,7 +688,7 @@
       const v = voice(K, { pan: rr(-1, 1), vol: rr(0.5, 1) }, 0.7), lo = rr(200, 450);
       for (let i = 0; i < n; i++) {
         const d = rr(0.35, 1.3);
-        creak(K, v, t, { dur: d, r0: rr(18, 50), rm: rr(40, 110), r1: rr(20, 60), res: [[lo, 5, 1], [lo * rr(2.2, 2.8), 7, 0.5], [lo * 0.5, 3, 0.6]], g: 0.18 });
+        creak(K, v, t, { dur: d, r0: rr(18, 50), rm: rr(40, 110), r1: rr(20, 60), res: [[lo, 5, 1], [lo * rr(2.2, 2.8), 7, 0.5], [lo * 0.5, 3, 0.6]], g: 0.45 });
         t += d + rr(0.2, 0.9);
       }
     }
@@ -854,8 +854,8 @@
     }
   }
   function finalChord(K, dest, t) {
-    [38, 45, 50, 54, 57, 64, 66, 69].forEach(m => padNote(K, dest, t, mtof(m), 5, m < 45 ? 0.04 : 0.028, true, 2.5, 9));
-    [74, 78, 81, 86, 90].forEach((m, i) => mbNote(K, dest, t + 0.4 + i * 0.32, mtof(m), 0.3 - i * 0.03, { decay: 4.5 }));
+    [38, 45, 50, 54, 57, 64, 66, 69].forEach(m => padNote(K, dest, t, mtof(m), 5, m < 45 ? 0.06 : 0.04, true, 2.5, 9));
+    [74, 78, 81, 86, 90].forEach((m, i) => mbNote(K, dest, t + 0.4 + i * 0.32, mtof(m), 0.42 - i * 0.04, { decay: 4.5 }));
     mbNote(K, dest, t + 2.6, mtof(98), 0.12, { decay: 5 });
     bell(K, dest, t, mtof(62), 0.08, 9);
   }
@@ -917,7 +917,8 @@
     const active = Math.max(1, last - first);
     let asum = 0;
     for (let ch = 0; ch < 2; ch++) { const d = buf.getChannelData(ch); for (let i = first; i < last; i++) asum += d[i] * d[i]; }
-    return { name, peak: +peak.toFixed(3), rmsActive: +Math.sqrt(asum / (2 * active)).toFixed(4), audibleSec: +(active / sr).toFixed(2), nan: !isFinite(sum) };
+    let zc = 0; { const d = buf.getChannelData(0); for (let i = first + 1; i < last; i++) if ((d[i] >= 0) !== (d[i - 1] >= 0)) zc++; }
+    return { name, zcrHz: Math.round(zc / 2 / (active / sr)), peak: +peak.toFixed(3), rmsActive: +Math.sqrt(asum / (2 * active)).toFixed(4), audibleSec: +(active / sr).toFixed(2), nan: !isFinite(sum) };
   }
 
   window.Audio2 = {

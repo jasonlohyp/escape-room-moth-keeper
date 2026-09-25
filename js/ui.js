@@ -76,12 +76,12 @@
       <path d="M110 97 C 128 94, 148 88, 164 80" fill="none" stroke="#5f8f6c" stroke-width=".9" opacity=".4"/>
       <ellipse cx="142" cy="80" rx="6" ry="7.5" fill="#e9e0c4" stroke="#8a5a64" stroke-width="1.6"/>
       <ellipse cx="142" cy="80" rx="2.2" ry="3.2" fill="#6b4a3c"/>
-      <path d="M103 102 C 124 104, 150 112, 152 132 C 153 148, 138 156, 128 166 C 121 175, 120 188, 121 199 C 114 194, 110 180, 108 164 C 106 146, 103 124, 103 102 Z" fill="url(#lunaHind)" stroke="#2c3a2e" stroke-width="1.3" stroke-linejoin="round"/>
-      <path d="M121 199 C 118 192, 116 184, 115 176" fill="none" stroke="#c9a060" stroke-width="2" stroke-linecap="round" opacity=".6"/>
+      <path d="M103 102 C 124 104, 149 110, 151 128 C 152 142, 139 150, 129 158 C 121 166, 118 182, 123 198 C 126 206, 121 212, 115 207 C 110 197, 109 178, 107 160 C 105 140, 103 122, 103 102 Z" fill="url(#lunaHind)" stroke="#2c3a2e" stroke-width="1.3" stroke-linejoin="round"/>
+      <path d="M121 204 C 117 196, 115 186, 115 176" fill="none" stroke="#c9a060" stroke-width="2" stroke-linecap="round" opacity=".55"/>
       <ellipse cx="130" cy="131" rx="5.5" ry="6.5" fill="#e9e0c4" stroke="#8a5a64" stroke-width="1.5"/>
       <ellipse cx="130" cy="131" rx="2" ry="2.8" fill="#6b4a3c"/>`;
   }
-  const EMBLEM = `<svg viewBox="0 0 200 210" aria-hidden="true">
+  const EMBLEM = `<svg viewBox="0 0 200 215" aria-hidden="true">
     <defs>
       <linearGradient id="lunaFore" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e3f3dc"/><stop offset=".6" stop-color="#b9e0bf"/><stop offset="1" stop-color="#8fc6a0"/></linearGradient>
       <linearGradient id="lunaHind" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d4ecd0"/><stop offset=".5" stop-color="#a8d8b0"/><stop offset="1" stop-color="#6fae8a"/></linearGradient>
@@ -505,7 +505,7 @@
   function fmtTime(ms) {
     const m = Math.floor(ms / 60000), s = Math.floor(ms / 1000) % 60;
     if (m >= 60) return `${Math.floor(m / 60)} h ${m % 60} min`;
-    if (m === 0) return `${s} seconds`;
+    if (m === 0) return s === 1 ? '1 second' : `${s} seconds`;
     return `${m} min ${String(s).padStart(2, '0')} s`;
   }
 
@@ -594,7 +594,6 @@
     requestAnimationFrame(() => requestAnimationFrame(() => { e.classList.add('show'); E.endAmb.start(); }));
     const r = reduced() ? .3 : 1;
     [[l1, 2300], [l2, 4100], [m1, 5600], [m2, 5900], [again, 6300]].forEach(([el, t]) => setTimeout(() => el.classList.add('in'), t * r));
-    setTimeout(() => { try { again.focus({ preventScroll: true }); } catch (err) { } }, 6400 * r);
   }
 
   // ---------------------------------------------------------------- input
