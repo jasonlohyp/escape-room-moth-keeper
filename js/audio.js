@@ -540,6 +540,7 @@
   /* =====================================================================================
    *  Ambience
    * ===================================================================================== */
+  const AMB_LEVEL = 0.32;
   const A = { on: false, started: false, nodes: [], timers: [], L: {}, cracked: false, win: false, lamp: false, finished: false };
   function later(fn, sec) {
     const id = setTimeout(() => { const i = A.timers.indexOf(id); if (i >= 0) A.timers.splice(i, 1); if (A.on) { try { fn(); } catch (e) { } } }, sec * 1000);
@@ -568,7 +569,7 @@
     const c = ctx, nb = noiseBuffers(c), now = c.currentTime, L = A.L = {};
 
     // ---- ambience master (fades in) ----
-    L.amb = G_(0); L.amb.connect(ambBus); L.amb.gain.setTargetAtTime(1, now, 1.5);
+    L.amb = G_(0); L.amb.connect(ambBus); L.amb.gain.setTargetAtTime(AMB_LEVEL, now, 1.5);
     const send = n => { const s = G_(0.25); n.connect(s); s.connect(roomRev); };
 
     // ---- rain ----
@@ -934,6 +935,7 @@
       return new Promise(res => { const iv = setInterval(() => { an.getFloatTimeDomainData(d); for (const x of d) { pk = Math.max(pk, Math.abs(x)); s += x * x; n++; } }, 40);
         setTimeout(() => { clearInterval(iv); res({ peak: +pk.toFixed(3), rms: +Math.sqrt(s / Math.max(1, n)).toFixed(4), dBFS: +(20 * Math.log10(Math.sqrt(s / Math.max(1, n)) + 1e-9)).toFixed(1) }); }, ms || 2000); });
     },
+    _mix(o) { if (o.amb != null) ambBus.gain.value = o.amb; if (o.mus != null) musBus.gain.value = o.mus; if (o.sfx != null) sfxBus.gain.value = o.sfx; },
     _state: () => ({ ctx: ctx ? ctx.state : 'none', amb: A.on, stage: M.stage, lamp: A.lamp, win: A.win, finished: A.finished, last: M.last }),
   };
 })();
