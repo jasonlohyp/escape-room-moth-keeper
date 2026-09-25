@@ -206,42 +206,50 @@
             <stop offset="0.5" stop-color="#eef6ff" stop-opacity="0.85"/>
             <stop offset="1" stop-color="#cfe3ff" stop-opacity="0"/>
           </linearGradient>
-          <clipPath id="dkBookTop"><path d="M534 548 L706 544 L724 566 L516 571 Z"/></clipPath>
+          <clipPath id="dkBookTop"><path d="M540 530 L702 526 L727 555 L515 561 Z"/></clipPath>
+          <linearGradient id="dkFore" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#b8a67e"/><stop offset="1" stop-color="#7a6a48"/></linearGradient>
         </defs>
         <!-- contact shadow -->
-        <ellipse cx="620" cy="576" rx="118" ry="9" fill="#000" opacity="0.45" filter="url(#blur6)"/>
-        <!-- back cover edge -->
-        <path d="M516 571 L724 566 L724 574 L516 580 Z" fill="#3a1414" stroke="${INK}" stroke-width="2" stroke-linejoin="round"/>
-        <!-- page block -->
-        <path d="M520 568 L721 563 L721 570 L520 575 Z" fill="url(#dkEdges)"/>
-        <path d="M522 570.5 L719 565.6 M522 572.5 L719 567.6" stroke="#8a7a58" stroke-width="0.6" opacity="0.8"/>
-        <!-- top cover -->
-        <path d="M534 548 L706 544 L724 566 L516 571 Z" fill="url(#dkCover)" stroke="${INK}" stroke-width="2.4" stroke-linejoin="round" filter="url(#ink)"/>
-        <!-- spine band -->
-        <path d="M534 548 L516 571 L530 570.6 L546 547.7 Z" fill="#3a1414" opacity="0.7"/>
+        <ellipse cx="624" cy="577" rx="126" ry="10" fill="#000" opacity="0.5" filter="url(#blur6)"/>
+        <!-- bottom board -->
+        <path d="M515 572 L727 567 L727 573 L515 579 Z" fill="#3a1414" stroke="${INK}" stroke-width="2" stroke-linejoin="round"/>
+        <!-- page block: front + fore-edge side -->
+        <path d="M517 562 L725 557 L725 569 L517 574 Z" fill="url(#dkEdges)" stroke="${INK}" stroke-width="1.2"/>
+        <path d="M519 565 L723 560 M519 567.5 L723 562.5 M519 570 L723 565" stroke="#8a7a58" stroke-width="0.6" opacity="0.8"/>
+        <path d="M702 528 L725 557 L725 569 L704 541 Z" fill="url(#dkFore)" stroke="${INK}" stroke-width="1.2" stroke-linejoin="round"/>
+        <path d="M727 555 L727 571 L704 542" fill="none" stroke="#3a1414" stroke-width="3"/>
+        <!-- top board -->
+        <path d="M540 530 L702 526 L727 555 L515 561 Z" fill="url(#dkCover)" stroke="${INK}" stroke-width="2.4" stroke-linejoin="round" filter="url(#ink)"/>
+        <path d="M515 561 L727 555 L727 559 L515 565 Z" fill="#4a1a18" stroke="${INK}" stroke-width="1.4" stroke-linejoin="round"/>
+        <!-- spine band + raised bands -->
+        <path d="M540 530 L515 561 L532 560.6 L555 529.6 Z" fill="#2c0f0e" opacity="0.75"/>
+        <path d="M534 537 L550 536.6 M527 546 L543 545.6 M520 555 L537 554.6" stroke="#b8893a" stroke-width="1.1" opacity="0.6"/>
         <!-- tooled border -->
-        <path d="M552 550.5 L700 547.2 L713 563.6 L540 567.6 Z" fill="none" stroke="#b8893a" stroke-width="1" opacity="0.7"/>
-        <!-- embossed moth on cover -->
-        <g transform="translate(626 557) scale(0.16 0.085)" opacity="0.8">
-          <path d="${SIL.luna}" transform="translate(-100 -70)" fill="#b8893a"/>
+        <path d="M562 533.5 L696 530.4 L714 552 L545 556 Z" fill="none" stroke="#b8893a" stroke-width="1.1" opacity="0.75"/>
+        <path d="M566 536 L693 533.1 L708 550 L551 553.6 Z" fill="none" stroke="#b8893a" stroke-width="0.6" opacity="0.5"/>
+        <!-- gilt moth on cover -->
+        <g transform="translate(630 542) scale(0.3 0.15)" opacity="0.9">
+          <path d="${SIL.luna}" transform="translate(-100 -70)" fill="#d9ad58" stroke="#6e4d1c" stroke-width="3"/>
         </g>
-        <!-- ribbon bookmark -->
-        <path d="M640 575 C641 582 636 588 640 594 L636 600 L642 597 L646 602 L646 594 C642 588 646 582 645 574 Z" fill="#2f5f5a" stroke="${INK}" stroke-width="1.4" stroke-linejoin="round"/>
+        <!-- cover highlight -->
+        <path d="M548 532 L640 530" stroke="#e8b0a0" stroke-width="1.5" opacity="0.25" stroke-linecap="round"/>
+        <!-- ribbon bookmark draping from the pages onto the desk -->
+        <path d="M646 569 C648 578 642 586 650 594 L644 602 L652 599 L657 605 L658 595 C650 587 655 578 652 568 Z" fill="#6e2a26" stroke="${INK}" stroke-width="1.4" stroke-linejoin="round"/>
       `, jg);
       // moonlight shimmer
       R.shimmer = G.el('g', { opacity: 0, 'pointer-events': 'none' }, jg);
       const sh = G.el('g', { 'clip-path': 'url(#dkBookTop)' }, R.shimmer);
-      G.el('path', { d: 'M534 548 L706 544 L724 566 L516 571 Z', fill: '#cfe3ff', opacity: 0.25 }, sh);
-      G.svg(`<rect x="440" y="530" width="70" height="60" fill="url(#dkSheen)" transform="skewX(-30)">
+      G.el('path', { d: 'M540 530 L702 526 L727 555 L515 561 Z', fill: '#cfe3ff', opacity: 0.25 }, sh);
+      G.svg(`<rect x="440" y="520" width="60" height="50" fill="url(#dkSheen)" transform="skewX(-30)">
         <animate attributeName="x" values="700;1260;1260" keyTimes="0;0.55;1" dur="3.2s" repeatCount="indefinite"/></rect>`, sh);
       const spark = G.svg(`
         <g fill="#f2f8ff" filter="url(#moonglow)">
-          <path d="M600 556 l2 -7 l2 7 l7 2 l-7 2 l-2 7 l-2 -7 l-7 -2 Z"><animate attributeName="opacity" values="0;1;0;0" dur="2.4s" repeatCount="indefinite"/></path>
-          <path d="M676 552 l1.5 -5 l1.5 5 l5 1.5 l-5 1.5 l-1.5 5 l-1.5 -5 l-5 -1.5 Z"><animate attributeName="opacity" values="0;0;1;0" dur="2.4s" repeatCount="indefinite"/></path>
-          <path d="M560 564 l1.2 -4 l1.2 4 l4 1.2 l-4 1.2 l-1.2 4 l-1.2 -4 l-4 -1.2 Z"><animate attributeName="opacity" values="1;0;0;1" dur="3.1s" repeatCount="indefinite"/></path>
+          <path d="M600 543 l2 -7 l2 7 l7 2 l-7 2 l-2 7 l-2 -7 l-7 -2 Z"><animate attributeName="opacity" values="0;1;0;0" dur="2.4s" repeatCount="indefinite"/></path>
+          <path d="M676 537 l1.5 -5 l1.5 5 l5 1.5 l-5 1.5 l-1.5 5 l-1.5 -5 l-5 -1.5 Z"><animate attributeName="opacity" values="0;0;1;0" dur="2.4s" repeatCount="indefinite"/></path>
+          <path d="M562 552 l1.2 -4 l1.2 4 l4 1.2 l-4 1.2 l-1.2 4 l-1.2 -4 l-4 -1.2 Z"><animate attributeName="opacity" values="1;0;0;1" dur="3.1s" repeatCount="indefinite"/></path>
         </g>`, R.shimmer);
       void spark;
-      const hot = G.el('path', { d: 'M512 538 L730 534 L732 606 L510 610 Z', fill: 'transparent' }, jg);
+      const hot = G.el('path', { d: 'M508 520 L732 516 L734 608 L508 610 Z', fill: 'transparent' }, jg);
       G.hotspot(hot, { cursor: 'look', click() { G.sfx('paper'); G.go('journal'); } });
     },
     update() {
@@ -528,10 +536,17 @@
     G.el('path', { d, fill: '#e8dcc0', filter: 'url(#paper)' }, g);
     G.el('path', { d, fill: side === 'L' ? 'url(#dkGutterL)' : 'url(#dkGutterR)' }, g);
     G.el('path', { d, fill: 'url(#dkFox)', opacity: 0.8 }, g);
+    // age spots (deterministic per page)
+    const seed = (pageBase.n = (pageBase.n || 0) + 1);
+    for (let i = 0; i < 4; i++) {
+      const rx = Math.abs(Math.sin(seed * 12.9 + i * 78.2)), ry = Math.abs(Math.sin(seed * 4.1 + i * 37.7));
+      const x = (side === 'L' ? 230 : 830) + rx * 540, y = 130 + ry * 620;
+      G.el('circle', { cx: x.toFixed(0), cy: y.toFixed(0), r: (6 + rx * 16).toFixed(1), fill: '#9a7a44', opacity: (0.06 + ry * 0.07).toFixed(3), filter: 'url(#blur6)', 'pointer-events': 'none' }, g);
+    }
   }
   function pageNum(g, side, n) {
     const t = G.el('text', {
-      x: side === 'L' ? 250 : 1350, y: 752, 'font-family': FELL, 'font-size': 18, fill: '#5a4430', opacity: 0.7,
+      x: side === 'L' ? 500 : 1100, y: 762, 'font-family': FELL, 'font-size': 18, fill: '#5a4430', opacity: 0.7,
       'text-anchor': 'middle',
     }, g);
     t.textContent = '— ' + n + ' —';
@@ -597,10 +612,14 @@
     return `<g filter="url(#ink)">
       <path d="${rays}" stroke="#3a2a1e" stroke-width="1" stroke-dasharray="2 6" opacity="0.55"/>
       <path d="M${cx - 40} ${cy - 50} L${cx + 40} ${cy - 50} L${cx + 85} ${cy + 30} C${cx + 40} ${cy + 42} ${cx - 40} ${cy + 42} ${cx - 85} ${cy + 30} Z" fill="#8a6a44" fill-opacity="0.14" stroke="#3a2a1e" stroke-width="1.8" stroke-linejoin="round"/>
-      ${[[-48, 4], [-14, -14], [18, -2], [52, 14]].map(p => `<path d="M${cx + p[0]} ${cy + p[1]} c-6 -8 -14 -6 -12 2 c2 6 8 6 12 2 c4 4 10 4 12 -2 c2 -8 -6 -10 -12 -2 Z" fill="#3a2a1e" fill-opacity="0.6" stroke="#3a2a1e" stroke-width="1"/>`).join('')}
-      <path d="M${cx - 16} ${cy + 38} L${cx - 20} ${cy + 64} C${cx - 40} ${cy + 70} ${cx - 40} ${cy + 104} ${cx} ${cy + 106} C${cx + 40} ${cy + 104} ${cx + 40} ${cy + 70} ${cx + 20} ${cy + 64} L${cx + 16} ${cy + 38}" fill="none" stroke="#3a2a1e" stroke-width="1.6"/>
-      <path d="M${cx - 34} ${cy + 118} H${cx + 34}" stroke="#3a2a1e" stroke-width="1.8"/>
-      <path d="M${cx - 24} ${cy + 106} L${cx - 30} ${cy + 118} M${cx + 24} ${cy + 106} L${cx + 30} ${cy + 118}" stroke="#3a2a1e" stroke-width="1.6"/>
+      ${[[-50, 6], [-16, -18], [20, -4], [54, 12]].map(p => `<g transform="translate(${cx + p[0]} ${cy + p[1]}) scale(0.95)"><path d="M0 0 C-4 -9 -16 -12 -18 -4 C-19 1 -10 3 0 0 C10 3 19 1 18 -4 C16 -12 4 -9 0 0 Z M0 0 C-3 5 -10 9 -12 5 C-13 2 -6 1 0 0 C6 1 13 2 12 5 C10 9 3 5 0 0 Z" fill="#3a2a1e" fill-opacity="0.65" stroke="#3a2a1e" stroke-width="0.8"/></g>`).join('')}
+      <path d="M${cx - 12} ${cy + 36} C${cx - 14} ${cy + 44} ${cx - 24} ${cy + 50} ${cx - 22} ${cy + 62} C${cx - 20} ${cy + 72} ${cx - 12} ${cy + 76} ${cx - 12} ${cy + 80} L${cx + 12} ${cy + 80} C${cx + 12} ${cy + 76} ${cx + 20} ${cy + 72} ${cx + 22} ${cy + 62} C${cx + 24} ${cy + 50} ${cx + 14} ${cy + 44} ${cx + 12} ${cy + 36}" fill="#8a6a44" fill-opacity="0.08" stroke="#3a2a1e" stroke-width="1.5"/>
+      <path d="M${cx - 6} ${cy + 72} C${cx - 4} ${cy + 64} ${cx + 4} ${cy + 64} ${cx + 6} ${cy + 72}" fill="none" stroke="#3a2a1e" stroke-width="1.2"/>
+      <path d="M${cx - 18} ${cy + 80} H${cx + 18} V${cy + 88} H${cx - 18} Z" fill="#8a6a44" fill-opacity="0.2" stroke="#3a2a1e" stroke-width="1.5"/>
+      <path d="M${cx - 10} ${cy + 88} C${cx - 52} ${cy + 90} ${cx - 54} ${cy + 118} ${cx - 12} ${cy + 124} L${cx + 12} ${cy + 124} C${cx + 54} ${cy + 118} ${cx + 52} ${cy + 90} ${cx + 10} ${cy + 88} Z" fill="#8a6a44" fill-opacity="0.18" stroke="#3a2a1e" stroke-width="1.7"/>
+      <path d="M${cx - 10} ${cy + 124} L${cx - 8} ${cy + 136} M${cx + 10} ${cy + 124} L${cx + 8} ${cy + 136}" stroke="#3a2a1e" stroke-width="1.5"/>
+      <path d="M${cx - 38} ${cy + 146} C${cx - 36} ${cy + 136} ${cx + 36} ${cy + 136} ${cx + 38} ${cy + 146} Z" fill="#8a6a44" fill-opacity="0.18" stroke="#3a2a1e" stroke-width="1.7"/>
+      <path d="M${cx + 22} ${cy + 84} h10" stroke="#3a2a1e" stroke-width="2"/>
     </g>`;
   }
   function windowSketch(cx, cy, r) {
@@ -631,21 +650,22 @@
     }, g => {
       pageBase(g, 'R');
       G.svg(clockSketch(1100, 340, 150), g);
-      G.svg(crescentDoodle(900, 600, 1.4) + candleDoodle(1300, 596, 1.3), g);
-      handText(g, 880, 580, '', { lines: ['Father’s tall clock.', 'Pictures, not numbers —', '“hours one can hold.”'], size: 18, lh: 38, maxw: 440, opacity: 0.8 });
+      G.svg(crescentDoodle(905, 640, 1.5) + candleDoodle(1300, 650, 1.3), g);
+      const cap = handText(g, 1100, 598, '', { lines: ['Father’s tall clock.', 'Pictures, not numbers —', '“hours one can hold.”'], size: 18, lh: 38, maxw: 330, opacity: 0.8 });
+      cap.setAttribute('text-anchor', 'middle'); cap.querySelectorAll('tspan').forEach(t => t.setAttribute('x', 1100));
       pageNum(g, 'R', 2);
     }],
     // spread 2
     [g => {
       pageBase(g, 'L');
       handText(g, 262, 180, 'Father cut my lampshade by hand, so the lamp throws my four dearest onto the wall. When I count them, I count their eyes — every eye, on every wing.', { chars: 33, maxw: 480 });
-      G.svg(eyeSketch(360, 580, 1.3), g);
-      handText(g, 420, 588, '', { lines: ['an eye — ring', 'within ring'], size: 16, lh: 34, maxw: 260, opacity: 0.75 });
+      G.svg(eyeSketch(380, 500, 1.3), g);
+      handText(g, 440, 500, '', { lines: ['an eye — ring', 'within ring'], size: 16, lh: 34, maxw: 260, opacity: 0.75 });
       pageNum(g, 'L', 3);
     }, g => {
       pageBase(g, 'R');
       G.svg(shadeSketch(1100, 360), g);
-      handText(g, 900, 640, '', { lines: ['Lit, it is a summer night', 'on the attic wall.'], size: 18, lh: 38, maxw: 440, opacity: 0.8 });
+      handText(g, 900, 660, '', { lines: ['Lit, it is a summer night', 'on the attic wall.'], size: 18, lh: 38, maxw: 440, opacity: 0.8 });
       pageNum(g, 'R', 4);
     }],
     // spread 3
@@ -653,7 +673,7 @@
       pageBase(g, 'L');
       G.svg(mothSketch('luna', 500, 300, 1.35, -6), g);
       G.svg(`<path d="M430 424 C470 470 520 480 560 470" fill="none" stroke="#3a2a1e" stroke-width="1" stroke-dasharray="3 4" opacity="0.5"/>`, g);
-      handText(g, 262, 540, 'Actias luna, the moon moth. She does not eat; she lives but a week, and spends it looking for the light.', { chars: 33, maxw: 480, size: 20 });
+      handText(g, 262, 540, 'Actias luna, the moon moth. She does not eat; she lives but a week, and spends it looking for the light.', { chars: 30, maxw: 480, size: 20 });
       pageNum(g, 'L', 5);
     }, g => {
       pageBase(g, 'R');
@@ -662,8 +682,9 @@
       refs.sheen = G.el('path', { d: RIGHT_PAGE_D, fill: 'url(#dkPageSheen)', opacity: 0.6, 'pointer-events': 'none' }, g);
       // moonlight bath
       refs.moon = G.el('g', { opacity: 0, 'pointer-events': 'none' }, g);
-      G.el('path', { d: RIGHT_PAGE_D, fill: '#5d7596', style: 'mix-blend-mode:multiply' }, refs.moon);
-      G.el('path', { d: 'M1000 90 L1300 90 L1180 790 L820 790 Z', fill: '#cfe3ff', opacity: 0.22, filter: 'url(#blur20)', style: 'mix-blend-mode:screen' }, refs.moon);
+      G.el('path', { d: RIGHT_PAGE_D, fill: 'url(#dkMoonBath)', style: 'mix-blend-mode:multiply' }, refs.moon);
+      G.el('path', { d: 'M960 96 L1260 96 L1150 786 L830 786 Z', fill: '#cfe3ff', opacity: 0.3, filter: 'url(#blur20)', style: 'mix-blend-mode:screen' }, refs.moon);
+      G.el('path', { d: 'M1250 96 L1330 96 L1260 786 L1190 786 Z', fill: '#cfe3ff', opacity: 0.14, filter: 'url(#blur20)', style: 'mix-blend-mode:screen' }, refs.moon);
       // silver ink
       refs.ink = G.el('g', { 'pointer-events': 'none' }, g);
       const MY = 360, RR = 50, XS = [912, 1040, 1168, 1296];
@@ -697,7 +718,14 @@
     [g => {
       pageBase(g, 'L');
       handText(g, 262, 200, 'They are calling me now, every night, at the glass. I think I am ready to go.', { chars: 30, maxw: 480, size: 23 });
-      handText(g, 560, 470, '', { lines: ['— E.'], size: 26 });
+      handText(g, 560, 420, '', { lines: ['— E.'], size: 26 });
+      G.svg(`<g filter="url(#ink)" stroke="#3a2a1e" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M330 500 C400 492 470 496 540 490" fill="none" stroke-width="1.8"/>
+        <path d="M430 494 L432 516" fill="none" stroke-width="1.2"/>
+        <path d="M432 516 C414 522 408 556 414 590 C420 626 444 628 450 590 C456 556 450 522 432 516 Z" fill="#8a6a44" fill-opacity="0.18" stroke-width="1.7"/>
+        <path d="M418 540 C428 546 442 544 450 538 M414 562 C426 570 444 568 452 560 M416 586 C428 592 442 590 450 584" fill="none" stroke-width="1" opacity="0.7"/>
+      </g>`, g);
+      handText(g, 480, 590, '', { lines: ['soon.'], size: 18, opacity: 0.7 });
       pageNum(g, 'L', 7);
     }, g => {
       pageBase(g, 'R');
@@ -752,6 +780,9 @@
           <radialGradient id="dkSilver" cx="45%" cy="40%" r="70%">
             <stop offset="0" stop-color="#ffffff"/><stop offset="0.6" stop-color="#e2eaf6"/><stop offset="1" stop-color="#a9bbd4"/>
           </radialGradient>
+          <linearGradient id="dkMoonBath" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#8aa3c8"/><stop offset="0.5" stop-color="#6d86ab"/><stop offset="1" stop-color="#4a5f80"/>
+          </linearGradient>
           <linearGradient id="dkLeafShade" x1="0" y1="0" x2="1" y2="0">
             <stop offset="0" stop-color="#000" stop-opacity="0.35"/><stop offset="0.3" stop-color="#000" stop-opacity="0.05"/><stop offset="1" stop-color="#000" stop-opacity="0"/>
           </linearGradient>
@@ -788,7 +819,8 @@
       G.svg(`<path d="M796 104 C799 300 799 600 796 790 L804 790 C801 600 801 300 804 104 Z" fill="#2a1a0e" opacity="0.55"/>
              <path d="M800 100 V792" stroke="${INK}" stroke-width="1.4" opacity="0.6"/>`, g);
       // ribbon bookmark
-      G.svg(`<path d="M794 96 C792 300 806 560 800 820 L808 846 L814 822 L822 840 C818 560 808 300 806 96 Z" fill="#2f5f5a" stroke="${INK}" stroke-width="1.6" opacity="0.92"/>`, g);
+      G.svg(`<path d="M805 97 C808 300 812 560 818 800 L814 826 L822 816 L830 828 L830 800 C824 560 818 300 815 97 Z" fill="#6e2a26" stroke="${INK}" stroke-width="1.3" opacity="0.95"/>
+             <path d="M809 110 C812 300 816 560 821 796" fill="none" stroke="#a35a5a" stroke-width="1" opacity="0.5"/>`, g);
       // light overlays
       J.warm = G.el('rect', { width: 1600, height: 900, fill: 'url(#dkWarm)', 'pointer-events': 'none', style: 'mix-blend-mode:screen' }, g);
       J.cold = G.el('rect', { width: 1600, height: 900, fill: '#16262b', opacity: 0.18, 'pointer-events': 'none', style: 'mix-blend-mode:multiply' }, g);
@@ -815,7 +847,7 @@
     update() {
       const lit = !!G.get('lampLit');
       J.warm.setAttribute('opacity', lit ? 1 : 0);
-      J.cold.setAttribute('opacity', lit ? 0.12 : 0.34);
+      J.cold.setAttribute('opacity', lit ? 0.06 : 0.2);
       if (!J.revealing) {
         const rr = J.static[2].rr;
         applyMoon(rr, !!G.get('windowOpen'), !!G.get('inkSeen'));
