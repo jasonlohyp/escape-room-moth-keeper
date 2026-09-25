@@ -940,9 +940,14 @@
       if (G.get('clockSolved')) G.say(d.lockedHand ? 'The hands will not budge now. The clock keeps its own time again.' : 'Pictures instead of numbers. Father’s work, surely.');
       return;
     }
+    clickChain = clickChain.then(() => resolveClick(d, p)).catch(err => console.error(err));
+  }
+  let clickChain = Promise.resolve();
+  async function resolveClick(d, p) {
     // click resolution: a hand -> step it clockwise; a picture -> send the active hand there; else caption
-    if (d.queued) { let n = 0; while (animating && n++ < 80) await G.wait(25); if (hardLocked()) return; }
-    const r = Math.hypot(p.x - CX, p.y - CY), icon = iconAt(p), hand = d.which;
+    let n = 0; while (animating && n++ < 120) await G.wait(25);
+    if (hardLocked() || animating) return;
+    const r = Math.hypot(p.x - CX, p.y - CY), icon = iconAt(p), hand = d.queued ? pickHand(p) : d.which;
     let handClick = false;
     if (hand) {
       if (icon == null) handClick = true;
