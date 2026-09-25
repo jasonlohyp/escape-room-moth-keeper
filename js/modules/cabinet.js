@@ -422,7 +422,7 @@
       <path d="M${-tx + 2},${-10 - ty * 0.6} Q0,${-10 - ty * 0.95} ${tx - 2},${-10 - ty * 0.6}" stroke="${b.hair}" stroke-width="3" fill="none" opacity="0.8"/>
       </g><ellipse cx="0" cy="-10" rx="${tx}" ry="${ty}" fill="none" stroke="${INK}" stroke-width="1.2" opacity="0.55"/>`;
     // head
-    s += `<ellipse cx="0" cy="${headY}" rx="${f1(tx * 0.62)}" ry="${f1(tx * 0.5)}" fill="${b.thc}" stroke="${INK}" stroke-width="1.2"/>
+    s += `<ellipse cx="0" cy="${headY}" rx="${f1(tx * 0.62)}" ry="${f1(tx * 0.5)}" fill="${b.thc}" stroke="${b.eyeCol || INK}" stroke-width="${b.eyeCol ? 0.6 : 1.2}"/>
       <ellipse cx="${f1(-tx * 0.42)}" cy="${headY}" rx="${f1(Math.max(1, tx * 0.17))}" ry="${f1(Math.max(1.4, tx * 0.26))}" fill="${b.eyeCol || '#2a1c12'}"/><ellipse cx="${f1(tx * 0.42)}" cy="${headY}" rx="${f1(Math.max(1, tx * 0.17))}" ry="${f1(Math.max(1.4, tx * 0.26))}" fill="${b.eyeCol || '#2a1c12'}"/>`;
     // antennae
     const a = M.ant;
