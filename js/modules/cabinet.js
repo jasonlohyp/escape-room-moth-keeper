@@ -32,7 +32,7 @@
     </filter>
     <filter id="cabFuzz" x="-30%" y="-30%" width="160%" height="160%">
       <feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="2" seed="2" result="n"/>
-      <feDisplacementMap in="SourceGraphic" in2="n" scale="5" xChannelSelector="R" yChannelSelector="G"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="3.2" xChannelSelector="R" yChannelSelector="G"/>
     </filter>
     <filter id="cabShadow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="5"/></filter>
     <filter id="cabShadowS" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="2.2"/></filter>
@@ -219,9 +219,9 @@
     hawk: {
       label: 'Sphinx ligustri', loc: 'Kent — 22.vii.1896', no: 'No. 11',
       say: 'Sphinx ligustri. The privet hawk-moth — built for speed.',
-      fw: 'M8,-26 C62,-36 132,-22 186,12 C198,20 196,30 184,31 C152,30 118,32 88,36 C58,34 30,20 9,0 Z',
+      fw: 'M8,-26 C62,-34 132,-18 186,16 C197,23 195,31 182,30 C150,26 118,24 88,27 C56,27 30,16 9,0 Z',
       hw: 'M8,4 C44,8 88,24 110,42 C118,60 100,78 72,82 C46,86 22,68 8,34 Z',
-      fwGrad: { r: 200, stops: [[0, '#3a2e26'], [0.3, '#5e4c3e'], [0.7, '#7c6a58'], [1, '#9c8a72']] },
+      fwGrad: { r: 200, stops: [[0, '#3a2a1e'], [0.3, '#6a5440'], [0.7, '#8e7658'], [1, '#a89070']] },
       hwGrad: { r: 110, stops: [[0, '#6a3a3a'], [0.3, '#c98088'], [0.7, '#e3a4a6'], [1, '#d99aa0']] },
       edge: '#221a14', band: '#c8b89c',
       fwDeco: `<path d="M20,-10 C70,-8 120,4 178,18" stroke="#1a120c" stroke-width="6" fill="none" opacity="0.75"/>
@@ -238,8 +238,8 @@
       fwBase: [8, -18], hwBase: [8, 8],
       eyes: { fw: [], hw: [[64, 60, 11]] },
       pal: { halo: '#f2d6c8', outer: INK, ring: '#e7c476', inner: '#3d5f92', pupil: '#0e0a08' },
-      body: { th: [12, 19], abd: [100, 12], thc: '#3a2c22', abc: '#c9767e', hair: '#d8c8b0', seg: '#1c1210', stripes: true },
-      ant: ['thin', 36, 18, '#d8cbb4', 1],
+      body: { th: [12, 19], abd: [100, 12], thc: '#5a4636', abc: '#c9767e', hair: '#d8c8b0', seg: '#1c1210', stripes: true },
+      ant: ['thin', 40, 20, '#7a6a54', 1],
       top: -70, bottom: 120, span: 200,
     },
     emperor: {
@@ -343,7 +343,7 @@
         ${opts.mini ? '' : dusting(k.length * 31 + (w === 'fw' ? 1 : 2), bx, 260, M.edge, 0.22, 3)}
         ${opts.mini ? '' : dusting(k.length * 17 + (w === 'fw' ? 3 : 4), bx, 160, '#fff6e0', 0.18, 2.5)}
         <path d="${d}" fill="none" stroke="${M.edge}" stroke-width="10" opacity="0.35"/>
-        <path d="${d}" fill="none" stroke="${M.band}" stroke-width="3" stroke-dasharray="2 2.5" opacity="0.7"/>
+        <path d="${d}" fill="none" stroke="${M.band}" stroke-width="2.4" stroke-dasharray="1.5 3" opacity="0.4"/>
       </g>
       <path d="${d}" fill="none" stroke="${INK}" stroke-width="${opts.mini ? 2.6 : 1.8}" stroke-linejoin="round"/>
       ${eyes}
@@ -358,8 +358,8 @@
     const abd = `M${-ax},6 C${-ax - 1},${f1(al * 0.55)} ${f1(-ax * 0.45)},${al} 0,${al + 6} C${f1(ax * 0.45)},${al} ${ax + 1},${f1(al * 0.55)} ${ax},6 C${f1(ax * 0.6)},0 ${f1(-ax * 0.6)},0 ${-ax},6 Z`;
     s += `<g ${opts.mini ? '' : 'filter="url(#cabFuzz)"'}><path d="${abd}" fill="${b.abc}"/>`;
     if (b.stripes) {
-      for (let i = 0; i < 7; i++) {
-        const y = 14 + i * (al - 14) / 7;
+      for (let i = 0; i < 6; i++) {
+        const y = 16 + i * (al - 16) / 6;
         s += `<path d="M${-ax - 2},${f1(y)} Q0,${f1(y + 6)} ${ax + 2},${f1(y)} L${ax + 2},${f1(y + 5)} Q0,${f1(y + 11)} ${-ax - 2},${f1(y + 5)} Z" fill="${b.seg}" clip-path="none" opacity="0.92"/>`;
       }
       s += `<path d="M0,8 L0,${al}" stroke="${b.seg}" stroke-width="3" opacity="0.7"/>`;
@@ -369,12 +369,12 @@
         s += `<path d="M${f1(-ax * 0.9)},${f1(y)} Q0,${f1(y + 4)} ${f1(ax * 0.9)},${f1(y)}" stroke="${b.seg}" stroke-width="1.2" fill="none" opacity="0.6"/>`;
       }
     }
-    s += `<path d="${abd}" fill="url(#cabCyl)"/><path d="${abd}" fill="none" stroke="${INK}" stroke-width="1.4"/></g>`;
+    s += `<path d="${abd}" fill="url(#cabCyl)"/></g><path d="${abd}" fill="none" stroke="${INK}" stroke-width="1.2" opacity="0.55"/>`;
     // thorax
     s += `<g ${opts.mini ? '' : 'filter="url(#cabFuzz)"'}><ellipse cx="0" cy="-10" rx="${tx}" ry="${ty}" fill="${b.thc}"/>
       <ellipse cx="0" cy="-10" rx="${tx}" ry="${ty}" fill="url(#cabCyl)"/>
       <path d="M${-tx + 2},${-10 - ty * 0.6} Q0,${-10 - ty * 0.95} ${tx - 2},${-10 - ty * 0.6}" stroke="${b.hair}" stroke-width="3" fill="none" opacity="0.8"/>
-      <ellipse cx="0" cy="-10" rx="${tx}" ry="${ty}" fill="none" stroke="${INK}" stroke-width="1.4"/></g>`;
+      </g><ellipse cx="0" cy="-10" rx="${tx}" ry="${ty}" fill="none" stroke="${INK}" stroke-width="1.2" opacity="0.55"/>`;
     // head
     s += `<ellipse cx="0" cy="${headY}" rx="${f1(tx * 0.62)}" ry="${f1(tx * 0.5)}" fill="${b.thc}" stroke="${INK}" stroke-width="1.2"/>
       <ellipse cx="${f1(-tx * 0.45)}" cy="${headY}" rx="2" ry="3" fill="#1c140f"/><ellipse cx="${f1(tx * 0.45)}" cy="${headY}" rx="2" ry="3" fill="#1c140f"/>`;
@@ -633,10 +633,10 @@
             <path d="M120,62 L150,62 L150,776 L120,776 Z" fill="#1c0e06" opacity="0.25" filter="url(#blur6)" pointer-events="none"/>`;
       // brass title plate on frame
       m += `<g transform="translate(770,34)">
-              <path d="M-150,-22 L150,-22 C158,-22 162,-16 162,-10 L162,10 C162,16 158,22 150,22 L-150,22 C-158,22 -162,16 -162,10 L-162,-10 C-162,-16 -158,-22 -150,-22 Z" fill="url(#cabBrass)" stroke="${INK}" stroke-width="2"/>
-              <text x="0" y="7" text-anchor="middle" font-family="'IM Fell English SC', 'IM Fell English', Georgia, serif" font-size="21" fill="#3a2608" letter-spacing="2">HETEROCERA · E. VANE</text>
-              <text x="0" y="8" text-anchor="middle" font-family="'IM Fell English SC', 'IM Fell English', Georgia, serif" font-size="21" fill="#fff0c0" opacity="0.35" letter-spacing="2" transform="translate(0.8,0.8)">HETEROCERA · E. VANE</text>
-              ${screw(-150, 0, 5, 20)}${screw(150, 0, 5, 60)}
+              <path d="M-170,-22 L170,-22 C178,-22 182,-16 182,-10 L182,10 C182,16 178,22 170,22 L-170,22 C-178,22 -182,16 -182,10 L-182,-10 C-182,-16 -178,-22 -170,-22 Z" fill="url(#cabBrass)" stroke="${INK}" stroke-width="2"/>
+              <text x="0" y="7" text-anchor="middle" font-family="'IM Fell English SC', 'IM Fell English', Georgia, serif" font-size="19" fill="#3a2608" letter-spacing="1.5">HETEROCERA · E. VANE</text>
+              <text x="0" y="8" text-anchor="middle" font-family="'IM Fell English SC', 'IM Fell English', Georgia, serif" font-size="19" fill="#fff0c0" opacity="0.35" letter-spacing="1.5" transform="translate(0.8,0.8)">HETEROCERA · E. VANE</text>
+              ${screw(-168, 0, 5, 20)}${screw(168, 0, 5, 60)}
             </g>`;
       // brass corner brackets
       [[92, 34, 0], [1448, 34, 90], [1448, 804, 180], [92, 804, 270]].forEach(([x, y, r]) => {
@@ -856,7 +856,7 @@
         const btn = (dir) => {
           const y = dir < 0 ? y0 - 38 : y0 + WH + 38;
           const tri = dir < 0 ? `M${cx - 11},${y + 5} L${cx},${y - 7} L${cx + 11},${y + 5} Z` : `M${cx - 11},${y - 5} L${cx},${y + 7} L${cx + 11},${y - 5} Z`;
-          return `<g class="cab-btn" data-w="${i}" data-d="${dir}">
+          return `<g class="cab-btn" data-w="${i}" data-d="${-dir}">
             <ellipse cx="${cx + 2}" cy="${y + 4}" rx="30" ry="17" fill="#000" opacity="0.35" filter="url(#cabBlur1)"/>
             <ellipse cx="${cx}" cy="${y}" rx="30" ry="17" fill="url(#cabDome)" stroke="${INK}" stroke-width="2"/>
             <path d="${tri}" fill="#4a3010" stroke="#2a1a06" stroke-width="1" stroke-linejoin="round"/>
@@ -870,14 +870,11 @@
         const ticks = [...wEl.querySelectorAll('.ticks path')];
         const hit = G.el('rect', { x: x0, y: y0, width: WW, height: WH, fill: 'transparent' }, wEl);
         dr.wheelEls[i] = { digits, ticks, glow: wEl.querySelector('.wglow'), cx, x0 };
-        G.hotspot(hit, { cursor: 'use', click: (ev) => {
-          // click on upper half rolls back, lower half rolls forward
-          const p = G.toStage(ev);
-          spin(i, p.y < WY - 18 ? -1 : 1);
+        G.hotspot(hit, { cursor: 'use', click: () => {
+          spin(i, 1);
         } });
         wEl.querySelectorAll('.cab-btn').forEach(b => G.hotspot(b, { cursor: 'use', click: () => {
           spin(i, +b.dataset.d);
-          const dome = b.querySelector('ellipse:nth-of-type(2)');
           G.tween(140, t => b.setAttribute('transform', `translate(0,${f1(Math.sin(t * Math.PI) * 2.5)})`), 'linear');
         } }));
         renderWheel(i);

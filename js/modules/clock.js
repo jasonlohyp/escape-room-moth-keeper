@@ -401,7 +401,7 @@
         <circle cx="400" cy="440" r="18.5" fill="none" stroke="${INK}" stroke-width="1.2"/>
         <path d="M391,432 a12,12 0 0 1 9,-5" stroke="#fff" stroke-width="1.2" fill="none" opacity="0.5"/>
         <path d="M436,540 m-3,0 a3,3 0 1 0 6,0 a3,3 0 1 0 -6,0 M436,543 l0,6" stroke="${INK}" stroke-width="1.2" fill="#6e4d1c"/>
-        <path d="M400,552 c-6,-8 -22,-10 -26,-2 c6,4 16,6 26,6 c10,0 20,-2 26,-6 c-4,-8 -20,-6 -26,2Z" fill="#3e2618" stroke="#24160d" stroke-width="1"/>
+        <g transform="translate(400,560) scale(0.42)" fill="#4a2e1e" stroke="#20140c" stroke-width="2.4"><path d="M-2,0 C-12,-16 -38,-22 -48,-12 C-50,-4 -36,6 -18,4 C-30,8 -34,20 -24,22 C-12,22 -6,12 -2,6Z"/><path d="M2,0 C12,-16 38,-22 48,-12 C50,-4 36,6 18,4 C30,8 34,20 24,22 C12,22 6,12 2,6Z"/><ellipse cx="0" cy="3" rx="3.5" ry="12" fill="#6a4229"/></g>
       </g>
       <!-- hood base moulding -->
       <path d="M312,322 h176 l-6,10 h-164Z" fill="url(#ck-walnutH)" stroke="${INK}" stroke-width="2"/>
@@ -443,7 +443,7 @@
       ${icons}
       <path d="${pol(54, 137, cx, dy).map(f1).join(',').replace(/^/, 'M')} L${pol(40, 133, cx, dy).map(f1).join(',')} L${pol(30, 139, cx, dy).map(f1).join(',')}" stroke="#4a3b2a" stroke-width="0.7" fill="none"/>
       <g class="ck-wh" stroke="${INK}" stroke-width="1">
-        <path d="M-2.4,5 L-1.8,-22 L0,-30 L1.8,-22 L2.4,5Z M0,-26 m-6,6 a6,6 0 1 0 12,0 a6,6 0 1 0 -12,0" fill="#1a2330"/>
+        <path d="M-2.4,5 L-1.6,-15 C-8,-15 -8,-24 -2,-23.5 L0,-31 L2,-23.5 C8,-24 8,-15 1.6,-15 L2.4,5Z" fill="#1a2330"/>
       </g>
       <g class="ck-wm" stroke="${INK}" stroke-width="0.8">
         <path d="M-1.6,8 L-0.8,-44 L0,-50 L0.8,-44 L1.6,8Z" fill="#1a2330"/>
@@ -527,8 +527,8 @@
         <g class="ck-weightL"><path d="M716,604 v14" stroke="#8a6a3a" stroke-width="1.5"/><rect x="704" y="618" width="24" height="88" rx="4" fill="url(#ck-colBrass)" stroke="${INK}" stroke-width="1.6"/><path d="M704,630 h24 M704,694 h24" stroke="#5e4015" stroke-width="1.5"/></g>
         <g class="ck-weightR"><path d="M884,604 v6" stroke="#8a6a3a" stroke-width="1.5"/><rect x="872" y="610" width="24" height="88" rx="4" fill="url(#ck-colBrass)" stroke="${INK}" stroke-width="1.6"/><path d="M872,622 h24 M872,686 h24" stroke="#5e4015" stroke-width="1.5"/></g>
         <g class="ck-pend">
-          <path d="M800,560 L800,${LEN.y - 20}" stroke="#6e4d1c" stroke-width="5"/>
-          <path d="M800,560 L800,${LEN.y - 20}" stroke="#c8963e" stroke-width="2"/>
+          <path d="M800,${DOOR.y - 2} L800,${LEN.y - 20}" stroke="#6e4d1c" stroke-width="5"/>
+          <path d="M800,${DOOR.y - 2} L800,${LEN.y - 20}" stroke="#c8963e" stroke-width="2"/>
           <circle cx="${LEN.x}" cy="${LEN.y}" r="29" fill="url(#ck-bobG)" stroke="${INK}" stroke-width="2"/>
           <circle cx="${LEN.x}" cy="${LEN.y}" r="21" fill="none" stroke="#7a5520" stroke-width="1.2" opacity="0.7"/>
           <path d="M${LEN.x - 16},${LEN.y - 12} a20,20 0 0 1 14,-10" stroke="#fff6d6" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.8"/>
@@ -626,10 +626,10 @@
         <circle cx="${CX}" cy="${CY}" r="118" fill="none" stroke="#8a6a3a" stroke-width="1"/>
         <circle cx="${CX}" cy="${CY}" r="114" fill="none" stroke="#8a6a3a" stroke-width="0.5"/>
         ${medallions}${florets}
-        ${lunaMoth(CX, CY - 62, 1.05)}
-        <path id="ck-signArc" d="M${CX - 70},${CY + 40} A70,70 0 0 0 ${CX + 70},${CY + 40}" fill="none"/>
-        <text font-family="IM Fell English, Georgia, serif" font-style="italic" font-size="23" fill="#3a2a1c" text-anchor="middle"><textPath href="#ck-signArc" startOffset="50%">Jos. Vane</textPath></text>
-        <text x="${CX}" y="${CY + 98}" font-family="IM Fell English SC, IM Fell English, Georgia, serif" font-size="13" letter-spacing="5" fill="#5a4630" text-anchor="middle">LONDON</text>
+        <g opacity="0.72">${lunaMoth(CX, CY - 60, 0.95)}</g>
+        <text x="${CX}" y="${CY + 70}" font-family="IM Fell English, Georgia, serif" font-style="italic" font-size="24" fill="#3a2a1c" text-anchor="middle">Jos. Vane</text>
+        <path d="M${CX - 34},${CY + 79} q34,7 68,0" stroke="#6e5438" stroke-width="0.9" fill="none"/>
+        <text x="${CX}" y="${CY + 97}" font-family="IM Fell English SC, IM Fell English, Georgia, serif" font-size="12" letter-spacing="5" fill="#5a4630" text-anchor="middle">LONDON</text>
         ${icons}
         <path d="${crack}" stroke="#fffaf0" stroke-width="1.2" fill="none" opacity="0.5" transform="translate(0.8,0.8)"/>
         <path d="${crack}" stroke="#3a2c1e" stroke-width="1.1" fill="none" stroke-linejoin="round"/>
@@ -871,6 +871,7 @@
       ensureLoop();
       await G.wait(1500);
       G.sfx('clockOpen');
+      V.matchbox.style.display = '';
       // latch pops: door jumps ajar
       await G.tween(220, t => setDoor(9 * t), 'outBack');
       await G.wait(380);
@@ -889,7 +890,6 @@
     V.doorBack.style.display = c < 0 ? '' : 'none';
     // affine stand-in for perspective: foreshorten + slight vertical skew as the free edge swings toward us
     const k = s * 0.045 * (c >= 0 ? 1 : -1);
-    V.door.firstElementChild.setAttribute('transform', '');
     const m = `translate(${hx},${cy}) matrix(${c.toFixed(4)},${(-k).toFixed(4)},0,${(1 + s * 0.05).toFixed(4)},0,0) translate(${-hx},${-cy})`;
     V.doorFront.setAttribute('transform', m);
     V.doorBack.setAttribute('transform', m);

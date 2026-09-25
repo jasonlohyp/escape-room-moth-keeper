@@ -160,7 +160,7 @@
       // broad fan of light thrown up the wall by the shade's open top
       G.el('path', { d: 'M852 362 L380 60 Q900 -30 1420 60 L948 362 Z', fill: 'url(#dkWash)', filter: 'url(#dkBleed)' }, R.proj);
       // the bright rim of the shade's top opening
-      G.el('ellipse', { cx: 900, cy: 336, rx: 150, ry: 26, fill: '#ffcf7a', opacity: 0.18, filter: 'url(#dkBleed)' }, R.proj);
+      G.el('ellipse', { cx: 900, cy: 346, rx: 190, ry: 34, fill: '#ffcf7a', opacity: 0.1, filter: 'url(#blur20)' }, R.proj);
       R.moths = [];
       SLOTS.forEach((s, i) => {
         const outer = G.el('g', { transform: `translate(${s.x} ${s.y}) rotate(${s.r}) scale(${s.s})` }, R.proj);
@@ -453,7 +453,7 @@
     wash.forEach(w => w.setAttribute('opacity', 0));
     await G.tween(2200, t => {
       wash[0].setAttribute('opacity', Math.min(1, t * 1.6));
-      wash[1].setAttribute('opacity', 0.18 * Math.min(1, t * 1.6));
+      wash[1].setAttribute('opacity', 0.1 * Math.min(1, t * 1.6));
       R.moths.forEach((mm, i) => {
         const u = Math.max(0, Math.min(1, (t - 0.12 - i * 0.14) / 0.42));
         const e = G.ease.inOut(u);
