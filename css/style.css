@@ -77,16 +77,17 @@ body.busy .ui-arrow, body.busy .ui-back { opacity: 0 !important; pointer-events:
 .ui-slots { position: absolute; left: calc(var(--u) * 20); top: calc(var(--u) * 128); width: calc(var(--u) * 92); display: flex; flex-direction: column; gap: calc(var(--u) * 20); }
 .ui-slot {
   position: relative; width: calc(var(--u) * 92); height: calc(var(--u) * 92); box-sizing: border-box;
-  border: 1px solid rgba(231, 196, 118, .2);
-  background: radial-gradient(ellipse at 50% 40%, rgba(60, 48, 34, .32), rgba(12, 10, 8, .5) 75%);
-  box-shadow: inset 0 0 0 calc(var(--u) * 4) rgba(0, 0, 0, .28), inset 0 0 0 calc(var(--u) * 5) rgba(231, 196, 118, .07);
+  border: 1px solid rgba(231, 196, 118, .13);
+  background: radial-gradient(ellipse at 50% 40%, rgba(60, 48, 34, .16), rgba(12, 10, 8, .3) 75%);
+  box-shadow: inset 0 0 0 calc(var(--u) * 4) rgba(0, 0, 0, .16), inset 0 0 0 calc(var(--u) * 5) rgba(231, 196, 118, .05);
   transition: border-color .4s ease, box-shadow .6s ease, background .6s ease, transform .5s var(--slow);
 }
 .ui-slot::before, .ui-slot::after { /* tiny corner ticks, like a mounted specimen box */
-  content: ""; position: absolute; width: calc(var(--u) * 9); height: calc(var(--u) * 9); border-color: rgba(231, 196, 118, .38); border-style: solid; pointer-events: none;
+  content: ""; position: absolute; width: calc(var(--u) * 9); height: calc(var(--u) * 9); border-color: rgba(231, 196, 118, .22); border-style: solid; pointer-events: none;
 }
 .ui-slot::before { left: calc(var(--u) * -4); top: calc(var(--u) * -4); border-width: 1px 0 0 1px; }
 .ui-slot::after { right: calc(var(--u) * -4); bottom: calc(var(--u) * -4); border-width: 0 1px 1px 0; }
+.ui-slot.filled::before, .ui-slot.filled::after { border-color: rgba(231, 196, 118, .45); }
 .ui-slot.filled { border-color: rgba(231, 196, 118, .34); background: radial-gradient(ellipse at 50% 42%, rgba(96, 76, 50, .42), rgba(16, 12, 9, .62) 78%); }
 .ui-slot.filled:hover { border-color: rgba(231, 196, 118, .62); }
 .ui-slot.sel {
@@ -106,7 +107,7 @@ body.busy .ui-arrow, body.busy .ui-back { opacity: 0 !important; pointer-events:
   100% { box-shadow: inset 0 0 0 calc(var(--u) * 4) rgba(0, 0, 0, .28), inset 0 0 0 calc(var(--u) * 5) rgba(231, 196, 118, .07); }
 }
 .ui-mag {
-  position: absolute; right: calc(var(--u) * -9); bottom: calc(var(--u) * -9); width: calc(var(--u) * 30); height: calc(var(--u) * 30);
+  position: absolute; right: calc(var(--u) * 3); bottom: calc(var(--u) * 3); width: calc(var(--u) * 26); height: calc(var(--u) * 26);
   border-radius: 50%; background: rgba(14, 11, 8, .92); border: 1px solid rgba(231, 196, 118, .5) !important;
   display: none; align-items: center; justify-content: center; opacity: .75; transition: opacity .3s ease, transform .3s ease;
 }
@@ -120,7 +121,7 @@ body.busy .ui-slots { opacity: .6; transition: opacity .6s ease; }
 #ui-label {
   position: absolute; right: calc(var(--u) * 134); top: 0; max-width: calc(var(--u) * 380); text-align: right;
   padding: calc(var(--u) * 10) calc(var(--u) * 18) calc(var(--u) * 12) calc(var(--u) * 70);
-  background: radial-gradient(ellipse at 85% 50%, rgba(6, 8, 9, .72), rgba(6, 8, 9, 0) 72%);
+  background: radial-gradient(ellipse closest-side at 62% 50%, rgba(6, 8, 9, .66), rgba(6, 8, 9, .4) 60%, rgba(6, 8, 9, 0));
   opacity: 0; transform: translate(calc(var(--u) * 8), -50%); transition: opacity .4s ease, transform .5s var(--slow);
   pointer-events: none !important;
 }
@@ -184,7 +185,7 @@ body.busy .ui-hintbtn { pointer-events: none !important; opacity: .4; }
   opacity: 0; visibility: hidden; transition: opacity .45s ease, transform .6s var(--slow), visibility 0s linear .45s;
 }
 #ui-hint.open { opacity: 1; visibility: visible; transform: rotate(-.8deg); transition: opacity .45s ease, transform .6s var(--slow); }
-#ui-hint .hp-head { display: flex; align-items: center; justify-content: space-between; font-family: var(--serif-sc); font-size: max(calc(var(--u) * 19), 10px); letter-spacing: .1em; color: rgba(60, 40, 22, .62); margin-bottom: calc(var(--u) * 12); }
+#ui-hint .hp-head { display: flex; align-items: center; justify-content: space-between; font-family: var(--serif-sc); font-size: max(calc(var(--u) * 19), 10px); letter-spacing: .1em; color: rgba(60, 40, 22, .62); margin: 0 calc(var(--u) * 26) calc(var(--u) * 12) 0; }
 #ui-hint .hp-pips { display: flex; gap: calc(var(--u) * 7); }
 #ui-hint .hp-pips i { width: calc(var(--u) * 8); height: calc(var(--u) * 8); transform: rotate(45deg); border: 1px solid rgba(110, 77, 28, .6); display: block; }
 #ui-hint .hp-pips i.on { background: #8a6326; border-color: #8a6326; }
