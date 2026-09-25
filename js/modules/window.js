@@ -845,7 +845,7 @@
     build(g) {
       RC = buildWindow(g, CLOSE);
       // a moth that flies in through the open window and settles on the sill
-      RC.land = G.svg(`<g style="display:none"><g class="win-lm">${mothMarkup(1, '#e9dfc3')}</g></g>`, RC.root);
+      RC.land = G.svg(`<g style="display:none"><g class="win-lm">${mothMarkup(1, '#e9dfc3')}</g></g>`, RC.root).firstChild;
       RC.landState = 'none';
       // vignette on top
       G.el('rect', { width: 1600, height: 900, fill: 'url(#win-vign)', 'pointer-events': 'none' }, RC.root);
@@ -890,7 +890,7 @@
     setLever(RC, 0);
   }
 
-  const LAND = { x: 1040, y: 698, s: 2.5 };
+  const LAND = { x: 1040, y: 708, s: 2.4 };
   function placeMoth(x, y, s, rot) { RC.land.firstChild.setAttribute('transform', `translate(${f(x)} ${f(y)}) rotate(${f(rot)}) scale(${f(s)})`); }
   function showLanded() {
     RC.land.style.display = ''; RC.land.classList.add('win-resting');

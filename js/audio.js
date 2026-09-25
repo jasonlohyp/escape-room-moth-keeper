@@ -582,7 +582,7 @@
       fn(KS, now + 0.01 + (o.delay || 0), o);
       if (DUCK[name]) duck(now + (o.delay || 0), DUCK[name]);
       if (name === 'cocoonCrack') A.cracked = true;
-      if (name === 'mothFlutter' && A.cracked) setMusicStage(Math.max(M.stage, 2));
+      if (name === 'mothFlutter' && A.cracked && !A.hatchHeard) { A.hatchHeard = true; if (M.stage < 2) setMusicStage(2); }
     } catch (e) { /* silent */ }
   }
 
@@ -842,7 +842,7 @@
       if (!win) ramp(L.windG.gain, 0, 0.5);
       else ramp(L.windG.gain, 0.15, 2);
     }
-    const stage = door ? 3 : hatched ? 2 : lamp ? 1 : 0;
+    const stage = door ? 3 : (hatched || A.hatchHeard) ? 2 : lamp ? 1 : 0;
     if (stage !== M.stage) setMusicStage(stage, initial);
     onView(G.view());
   }
@@ -1042,7 +1042,7 @@
     try { if (!ctx) return; if (document.hidden) ctx.suspend(); else ctx.resume(); } catch (e) { }
   });
   if (window.G && G.on) {
-    G.on('start', () => { try { if (A.on) stopAmbience(0.3); A.started = true; A.cracked = false; M.last = null; M.recent = []; M.voices = null; M.bass = null; A.win = false; A.lamp = false; setTimeout(maybeStartAmb, A.on ? 600 : 0); } catch (e) { } });
+    G.on('start', () => { try { if (A.on) stopAmbience(0.3); A.started = true; A.cracked = false; A.hatchHeard = false; M.last = null; M.recent = []; M.voices = null; M.bass = null; A.win = false; A.lamp = false; setTimeout(maybeStartAmb, A.on ? 600 : 0); } catch (e) { } });
     G.on('flag', (k) => { try { if (k !== 'finished') sync(false); } catch (e) { } });
     G.on('view', (id) => { try { onView(id); } catch (e) { } });
     G.on('finish', () => { try { onFinish(); } catch (e) { } });

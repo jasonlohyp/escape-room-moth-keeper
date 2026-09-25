@@ -870,9 +870,9 @@
       pl += `<rect x="700" y="586" width="200" height="30" rx="6" fill="#140a02" stroke="${INK}" stroke-width="2"/>
         <rect x="700" y="586" width="200" height="30" rx="6" fill="none" stroke="#fff0c0" stroke-width="1" opacity="0.3" transform="translate(0,1.5)"/>
         <rect x="866" y="590" width="30" height="22" rx="3" fill="#6e4d1c" stroke="${INK}" stroke-width="1.4"/>
-        <g id="cab-bolt"><rect x="706" y="592" width="176" height="18" rx="4" fill="url(#cabBrass)" stroke="${INK}" stroke-width="1.6"/>
+        <defs><clipPath id="cab-boltclip"><rect x="702" y="588" width="196" height="26" rx="5"/></clipPath></defs><g clip-path="url(#cab-boltclip)"><g id="cab-bolt"><rect x="706" y="592" width="176" height="18" rx="4" fill="url(#cabBrass)" stroke="${INK}" stroke-width="1.6"/>
           <path d="M712,596 L876,596" stroke="#fff0c0" stroke-width="1.4" opacity="0.6"/>
-          ${[730, 760, 790, 820, 850].map(x => `<path d="M${x},594 L${x},608" stroke="#5a3a10" stroke-width="1.2" opacity="0.6"/>`).join('')}</g>`;
+          ${[730, 760, 790, 820, 850].map(x => `<path d="M${x},594 L${x},608" stroke="#5a3a10" stroke-width="1.2" opacity="0.6"/>`).join('')}</g></g>`;
       fr += `<g id="cab-plate">${pl}<g id="cab-wheels"></g></g>`;
       m += `<g id="cab-front">${fr}<rect id="cab-front-hit" x="${F.x}" y="${F.y}" width="${F.w}" height="${F.h}" fill="transparent" style="display:none"/></g>`;
       m += `<rect id="cab-dtint" width="1600" height="900" pointer-events="none" fill="#12222e" opacity="0.22" style="mix-blend-mode:multiply"/>`;

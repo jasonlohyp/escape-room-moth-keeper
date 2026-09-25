@@ -982,7 +982,7 @@
              <g clip-path="url(#lpc_e)">${rainStreaks(23, 1130, 170, 340, 420, 22, 0.45, 30)}${drips(24, 1150, 200, 300, 5)}</g>`,
       moon: `${rad('lm2_e', 800, 900, 1200, [[0, '#8fb3d9', 0.14], [1, '#8fb3d9', 0]])}${rad('lm3_e', 1300, 380, 330, [[0, '#cfe3ff', 0.14], [1, '#cfe3ff', 0]])}`,
       moonShapes: `<rect width="1600" height="900" fill="url(#lm2_e)"/><rect width="1600" height="900" fill="url(#lm3_e)"/>
-             <rect x="1080" y="160" width="440" height="440" fill="url(#lp_e)"/><rect x="1080" y="160" width="440" height="440" fill="url(#lp_e)"/>
+             <rect x="1080" y="160" width="440" height="440" fill="url(#lp_e)"/>
              <g clip-path="url(#lpc_e)">${rainStreaks(26, 1130, 170, 340, 420, 22, 0.4, 40)}</g>`,
       motesW: [35, 14, [1150, 250, 400, 450], 'gMoteW'],
       motesC: [36, 24, [1120, 180, 340, 420], 'gMoteC'],

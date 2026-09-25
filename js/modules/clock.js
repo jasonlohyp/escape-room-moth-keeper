@@ -880,15 +880,17 @@
     }
     return null;
   }
-  function locked() { return !!G.get('clockSolved') || animating || swinging || G.isBusy(); }
+  function hardLocked() { return !!G.get('clockSolved') || swinging || G.isBusy(); }
+  function locked() { return hardLocked() || animating; }
 
   function onDown(e) {
     if (e.button != null && e.button !== 0) return;
     const p = G.toStage(e);
     e.preventDefault();
     try { V.hit.setPointerCapture(e.pointerId); } catch (err) { }
-    if (locked()) { drag = { which: null, start: p, lockedHand: !!pickHand(p) }; return; }
+    if (hardLocked()) { drag = { which: null, start: p, lockedHand: !!pickHand(p) }; return; }
     const which = pickHand(p);
+    if (animating) { drag = { which, start: p, moved: false, queued: true }; return; }   // mid-animation: treat as a queued click
     drag = { which, start: p, moved: false, raw: which ? ang[which] : 0, detent: which ? Math.round(ang[which] / 30) : 0 };
     if (which) V.hit.style.cursor = 'grabbing';
   }
@@ -902,7 +904,7 @@
       V.hit.style.cursor = w ? 'grab' : 'pointer';
       return;
     }
-    if (!drag.which) return;
+    if (!drag.which || drag.queued) return;
     if (!drag.moved && Math.hypot(p.x - drag.start.x, p.y - drag.start.y) > 6) {
       drag.moved = true;
       active = drag.which;
@@ -939,6 +941,7 @@
       return;
     }
     // click resolution: a hand -> step it clockwise; a picture -> send the active hand there; else caption
+    if (d.queued) { let n = 0; while (animating && n++ < 80) await G.wait(25); if (hardLocked()) return; }
     const r = Math.hypot(p.x - CX, p.y - CY), icon = iconAt(p), hand = d.which;
     let handClick = false;
     if (hand) {
