@@ -21,6 +21,34 @@
     const d = document.getElementById('defs');
     if (!d) return;
     let m = `
+    <filter id="cabTexScale" x="0" y="0" width="100%" height="100%" filterUnits="userSpaceOnUse">
+      <feTurbulence type="fractalNoise" baseFrequency="0.55 1.3" numOctaves="2" seed="11" stitchTiles="stitch" result="n"/>
+      <feColorMatrix in="n" type="matrix" values="0 0 0 0 0.08  0 0 0 0 0.05  0 0 0 0 0.03  0 0 0 1.5 -0.55" result="d"/>
+      <feTurbulence type="fractalNoise" baseFrequency="1.6" numOctaves="1" seed="5" stitchTiles="stitch" result="n2"/>
+      <feColorMatrix in="n2" type="matrix" values="0 0 0 0 1  0 0 0 0 0.97  0 0 0 0 0.9  0 0 0 0.9 -0.5" result="l"/>
+      <feMerge><feMergeNode in="d"/><feMergeNode in="l"/></feMerge>
+    </filter>
+    <pattern id="cabPScale" patternUnits="userSpaceOnUse" width="120" height="120"><rect width="120" height="120" filter="url(#cabTexScale)"/></pattern>
+    <filter id="cabTexPaper" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" seed="8" stitchTiles="stitch" result="t"/>
+      <feColorMatrix in="t" type="matrix" values="0 0 0 0 0.35  0 0 0 0 0.28  0 0 0 0 0.18  0 0 0 0.5 -0.05"/>
+    </filter>
+    <filter id="cabTexPaper2" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="3" seed="4" stitchTiles="stitch" result="t"/>
+      <feColorMatrix in="t" type="matrix" values="0 0 0 0 0.45  0 0 0 0 0.33  0 0 0 0 0.18  0 0 0 0.7 -0.25"/>
+    </filter>
+    <pattern id="cabPPaper" patternUnits="userSpaceOnUse" width="200" height="200"><rect width="200" height="200" filter="url(#cabTexPaper)"/></pattern>
+    <pattern id="cabPStain" patternUnits="userSpaceOnUse" width="500" height="400"><rect width="500" height="400" filter="url(#cabTexPaper2)"/></pattern>
+    <filter id="cabTexGrain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.01 0.3" numOctaves="3" seed="7" stitchTiles="stitch" result="n"/>
+      <feColorMatrix in="n" type="matrix" values="0 0 0 0 0.1  0 0 0 0 0.05  0 0 0 0 0.02  0 0 0 1.1 -0.3"/>
+    </filter>
+    <pattern id="cabPGrain" patternUnits="userSpaceOnUse" width="600" height="200"><rect width="600" height="200" filter="url(#cabTexGrain)"/></pattern>
+    <filter id="cabTexVelvet" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="9" stitchTiles="stitch" result="n"/>
+      <feColorMatrix in="n" type="matrix" values="0 0 0 0 0.9  0 0 0 0 0.5  0 0 0 0 0.5  0 0 0 0.35 -0.08"/>
+    </filter>
+    <pattern id="cabPVelvet" patternUnits="userSpaceOnUse" width="160" height="160"><rect width="160" height="160" filter="url(#cabTexVelvet)"/></pattern>
     <filter id="cabScale" x="-2%" y="-2%" width="104%" height="104%">
       <feTurbulence type="fractalNoise" baseFrequency="0.55 1.3" numOctaves="2" seed="11" result="n"/>
       <feColorMatrix in="n" type="matrix" values="0 0 0 0 0.08  0 0 0 0 0.05  0 0 0 0 0.03  0 0 0 1.5 -0.55" result="d"/>
@@ -100,6 +128,7 @@
         m += `<radialGradient id="cab-g-${k}-${w}" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="${g.r}">` +
           g.stops.map(s => `<stop offset="${s[0]}" stop-color="${s[1]}"/>`).join('') + `</radialGradient>`;
         m += `<clipPath id="cab-c-${k}-${w}"><path d="${M[w]}"/></clipPath>`;
+        if (w === 'fw') m += `<radialGradient id="cab-b-${k}"><stop offset="0" stop-color="${M.edge}" stop-opacity="0.55"/><stop offset="1" stop-color="${M.edge}" stop-opacity="0"/></radialGradient>`;
       });
     });
     d.insertAdjacentHTML('beforeend', m);
@@ -334,9 +363,9 @@
     const eyes = (M.eyes[w] || []).map(e => eye(e[0], e[1], e[2], M.pal)).join('');
     const bx = w === 'fw' ? [0, -90, 200, 30] : [0, 0, 160, 230];
     return `<g class="wing ${w}">
-      <path d="${d}" fill="url(#cab-g-${k}-${w})" ${opts.mini ? '' : 'filter="url(#cabScale)"'}/>
+      <path d="${d}" fill="url(#cab-g-${k}-${w})"/>${opts.mini ? '' : `<path d="${d}" fill="url(#cabPScale)"/>`}
       <g clip-path="url(#cab-c-${k}-${w})">
-        <ellipse cx="${base[0] + 10}" cy="${base[1] + (w === 'fw' ? -2 : 8)}" rx="${w === 'fw' ? 46 : 36}" ry="${w === 'fw' ? 22 : 30}" fill="${M.edge}" opacity="0.45" ${opts.mini ? '' : 'filter="url(#blur6)"'}/>
+        <ellipse cx="${base[0] + 10}" cy="${base[1] + (w === 'fw' ? -2 : 8)}" rx="${w === 'fw' ? 60 : 48}" ry="${w === 'fw' ? 32 : 40}" fill="url(#cab-b-${k})"/>
         ${deco}
         ${vs}
         ${w === 'hw' && !opts.mini ? `<path d="${M.fw}" fill="#140a04" opacity="0.35" filter="url(#blur6)" transform="translate(2,7)"/>` : ''}
@@ -487,7 +516,7 @@
       const X0 = 500, X1 = 1100;
       let m = '';
       // cast shadow on wall + floor contact
-      m += `<rect x="${X0 + 14}" y="160" width="${X1 - X0 + 10}" height="620" fill="#0b0806" opacity="0.45" filter="url(#blur20)"/>
+      m += `${[40, 28, 16, 6].map((e, i) => `<rect x="${X0 + 16 - e}" y="${150 - e}" width="${X1 - X0 + 8 + e * 2}" height="${632 + e}" rx="${e + 6}" fill="#0b0806" opacity="0.1"/>`).join('')}
             <ellipse cx="800" cy="790" rx="330" ry="14" fill="#000" opacity="0.55" filter="url(#blur6)"/>`;
       // cornice
       m += `<path d="M478,140 L1122,140 L1122,152 L1112,158 L1112,168 L1100,176 L1100,192 L500,192 L500,176 L488,168 L488,158 L478,152 Z" fill="url(#cabWal)" stroke="${INK}" stroke-width="2.4" stroke-linejoin="round"/>
@@ -497,16 +526,17 @@
       for (let i = 0; i < 30; i++) m += `<rect x="${506 + i * 20}" y="${168}" width="10" height="8" fill="#2a180e" opacity="0.55"/>`;
       // upper case
       m += `<rect x="${X0}" y="192" width="${X1 - X0}" height="338" fill="url(#cabWalH)" stroke="${INK}" stroke-width="2.4"/>
-            <g filter="url(#cabGrain)"><rect x="${X0 + 2}" y="194" width="${X1 - X0 - 4}" height="334" fill="#5a3824" opacity="0.35"/></g>`;
+            <rect x="${X0 + 2}" y="194" width="${X1 - X0 - 4}" height="334" fill="url(#cabPGrain)"/>`;
       m += grain(X0, 196, X1 - X0, 330, 24, 21, '#2a170c', 0.5);
       // glass door frame
       m += `<rect x="522" y="208" width="556" height="312" rx="3" fill="#4a2e1c" stroke="${INK}" stroke-width="2.2"/>
             <rect x="526" y="212" width="548" height="304" fill="none" stroke="#9a6e48" stroke-width="1.4" opacity="0.6"/>`;
       // backing + moths
       m += `<rect x="538" y="222" width="524" height="284" fill="url(#cabBacking)"/>
-            <rect x="538" y="222" width="524" height="284" fill="url(#cabBacking)" filter="url(#paper)" opacity="0.6"/>`;
+            <rect x="538" y="222" width="524" height="284" fill="url(#cabPPaper)"/><rect x="538" y="222" width="524" height="284" fill="url(#cabPStain)" opacity="0.5"/>`;
       m += `<g id="cab-wall-moths"></g>`;
-      m += `<rect x="538" y="222" width="524" height="284" fill="url(#cabBackVig)"/>
+      m += `<rect id="cab-wall-dim" x="538" y="222" width="524" height="284" fill="#12222e" opacity="0.3" style="mix-blend-mode:multiply"/>
+            <rect x="538" y="222" width="524" height="284" fill="url(#cabBackVig)"/>
             <path d="M538,222 L1062,222 L1062,236 L538,236 Z" fill="#1c0e06" opacity="0.35" filter="url(#cabBlur1)"/>`;
       // glass: reflections
       m += `<g pointer-events="none"><rect x="538" y="222" width="524" height="284" fill="url(#cabGlass)"/>
@@ -574,10 +604,12 @@
       wall.els.cavity = g.querySelector('#cab-wall-cavity');
       wall.els.glint = g.querySelector('#cab-wall-keyglint');
       wall.els.digits = [0, 1, 2, 3].map(i => g.querySelector('#cab-wall-d' + i));
+      wall.els.dim = g.querySelector('#cab-wall-dim');
     },
     update() {
       if (!wall.g) return;
       const open = !!G.get('drawerOpen');
+      wall.els.dim.setAttribute('opacity', G.get('lampLit') ? '0.08' : '0.32');
       wall.els.cavity.style.display = open ? '' : 'none';
       wall.els.glint.style.display = open && !G.get('gotKey') ? '' : 'none';
       wall.els.drawer.setAttribute('transform', open ? 'translate(800,636) scale(1.075) translate(-800,-584)' : '');
@@ -617,14 +649,14 @@
       m += `<rect width="1600" height="900" fill="#2a180e"/>
             <rect width="1600" height="900" fill="url(#cabWal)" opacity="0.8"/>`;
       m += grain(0, 0, 1600, 900, 60, 77, '#1a0e06', 0.45);
-      m += `<g filter="url(#cabGrain)"><rect width="1600" height="900" fill="#4a2e1c" opacity="0.25"/></g>`;
+      m += `<rect width="1600" height="900" fill="url(#cabPGrain)"/>`;
       // inner frame bevel
       m += `<rect x="92" y="34" width="1356" height="770" rx="4" fill="#1c100a" stroke="${INK}" stroke-width="3"/>
             <rect x="100" y="42" width="1340" height="754" fill="none" stroke="#a87a52" stroke-width="2" opacity="0.5"/>
             <rect x="112" y="54" width="1316" height="730" fill="#140a06"/>`;
       // backing card
       m += `<rect x="120" y="62" width="1300" height="714" fill="url(#cabBacking)"/>
-            <rect x="120" y="62" width="1300" height="714" fill="url(#cabBacking)" filter="url(#paper)" opacity="0.7"/>`;
+            <rect x="120" y="62" width="1300" height="714" fill="url(#cabPPaper)"/><rect x="120" y="62" width="1300" height="714" fill="url(#cabPStain)" opacity="0.6"/>`;
       // faint pencil guide lines
       m += `<g stroke="#8a7a5a" stroke-width="0.8" opacity="0.25">
               <path d="M140,419 L1400,419"/><path d="M553,80 L553,760"/><path d="M987,80 L987,760"/></g>`;
@@ -677,7 +709,7 @@
         const lx = c.cx, ly = c.labelY + 22;
         const lab = G.svg(`<g transform="translate(${f1(lx)},${f1(ly)}) rotate(${rot})">
             <rect x="-104" y="-18" width="208" height="46" fill="#1c0e06" opacity="0.18" filter="url(#cabShadowS)" transform="translate(3,4)"/>
-            <rect x="-104" y="-18" width="208" height="46" fill="#efe5cc" filter="url(#paper)"/>
+            <rect x="-104" y="-18" width="208" height="46" fill="#efe5cc"/><rect x="-104" y="-18" width="208" height="46" fill="url(#cabPPaper)"/>
             <rect x="-100" y="-14" width="200" height="38" fill="none" stroke="#6a5a40" stroke-width="0.8" opacity="0.6"/>
             <text x="0" y="3" text-anchor="middle" font-family="'IM Fell English', Georgia, serif" font-style="italic" font-size="${M.label.length > 20 ? 17 : 20}" fill="#2a1c10">${M.label}</text>
             <text x="0" y="20" text-anchor="middle" font-family="'Homemade Apple', 'IM Fell English', cursive" font-size="9.5" fill="#4a3624" opacity="0.9">${M.loc}</text>
@@ -736,7 +768,7 @@
       // interior (velvet tray) — slides with the drawer
       let inner = `<path d="M190,176 L1410,176 L1410,196 L190,196 Z" fill="#6a4229" stroke="${INK}" stroke-width="2"/>
         <path d="M200,196 L1400,196 L1470,590 L130,590 Z" fill="url(#cabVelvetG)"/>
-        <path d="M200,196 L1400,196 L1470,590 L130,590 Z" fill="#5e1a1c" opacity="0.5" filter="url(#cabVelvet)"/>
+        <path d="M200,196 L1400,196 L1470,590 L130,590 Z" fill="url(#cabPVelvet)"/>
         <path d="M180,176 L200,196 L130,590 L96,590 Z" fill="#5a3824" stroke="${INK}" stroke-width="2"/>
         <path d="M1420,176 L1400,196 L1470,590 L1504,590 Z" fill="#4a2e1c" stroke="${INK}" stroke-width="2"/>
         <path d="M200,196 L1400,196" stroke="#000" stroke-width="30" opacity="0.5" filter="url(#blur6)"/>
@@ -757,7 +789,7 @@
       const F = FRONT;
       let fr = `<rect x="${F.x}" y="${F.y}" width="${F.w}" height="${F.h}" rx="6" fill="url(#cabWal)" stroke="${INK}" stroke-width="3"/>
         ${grain(F.x + 4, F.y + 4, F.w - 8, F.h - 8, 34, 58, '#241208', 0.55)}
-        <g filter="url(#cabGrain)"><rect x="${F.x + 3}" y="${F.y + 3}" width="${F.w - 6}" height="${F.h - 6}" fill="#6a4229" opacity="0.25"/></g>
+        <rect x="${F.x + 3}" y="${F.y + 3}" width="${F.w - 6}" height="${F.h - 6}" fill="url(#cabPGrain)"/>
         <rect x="${F.x + 26}" y="${F.y + 26}" width="${F.w - 52}" height="${F.h - 52}" rx="4" fill="none" stroke="#b08058" stroke-width="2" opacity="0.45"/>
         <rect x="${F.x + 29}" y="${F.y + 29}" width="${F.w - 52}" height="${F.h - 52}" rx="4" fill="none" stroke="#140a04" stroke-width="2.5" opacity="0.6"/>
         <path d="M${F.x + 8},${F.y + 6} L${F.x + F.w - 8},${F.y + 6}" stroke="#c09068" stroke-width="2" opacity="0.5"/>`;
@@ -857,7 +889,7 @@
           <rect x="${x0 - 4}" y="${y0 - 4}" width="${WW + 8}" height="${WH + 8}" rx="9" fill="#2a1a06" stroke="#fff0c0" stroke-width="1" stroke-opacity="0.4"/>
           <g clip-path="url(#cab-wclip${i})">
             <rect x="${x0}" y="${y0}" width="${WW}" height="${WH}" fill="#e6d8b4"/>
-            <rect x="${x0}" y="${y0}" width="${WW}" height="${WH}" fill="#e6d8b4" filter="url(#paper)" opacity="0.6"/>
+            <rect x="${x0}" y="${y0}" width="${WW}" height="${WH}" fill="url(#cabPPaper)"/>
             <g class="digits">${[0, 1, 2, 3, 4].map(() => `<text x="${cx}" y="0" text-anchor="middle" font-family="'Times New Roman', Times, serif" font-weight="bold" font-size="66" fill="${INK}">0</text>`).join('')}</g>
             <g class="ticks">${[0, 1, 2, 3, 4].map(() => `<path d="" stroke="#6a5030" stroke-width="1.4" opacity="0.5"/>`).join('')}</g>
             <rect x="${x0}" y="${y0}" width="${WW}" height="${WH}" fill="url(#cabDrum)"/>

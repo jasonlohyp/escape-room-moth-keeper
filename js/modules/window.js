@@ -239,7 +239,7 @@
     // silhouettes
     const sk = skyline(x0, x1, c.horizon, k, r, y1, c.spire[0], c.spire[1]);
     s += `<path d="${sk.far}" fill="#0d1a22"/>`;
-    s += `<g fill="#070e13">${sk.trees}</g>`;
+    s += `<g fill="#0b171e">${sk.trees}</g>`;
     s += `<path d="${sk.near}" fill="#060b0f"/>`;
     s += '<g fill="#e7a85a">' + sk.lights.map(l => `<rect x="${f(l[0])}" y="${f(l[1])}" width="${f(l[2])}" height="${f(l[3])}" opacity="${f(l[4])}"/>`).join('') + '</g>';
     // outside rain streaks, two depths
@@ -264,14 +264,14 @@
   }
 
   function mothMarkup(scale, tint) {
-    return `<g transform="scale(${scale})"><g class="win-flap">
-      <path d="M0 -1C-5 -9 -14 -12 -16 -5C-17 0 -9 2 0 1Z" fill="${tint}"/>
-      <path d="M0 1C-7 3 -11 9 -6 11C-3 11.5 0 6 0 2Z" fill="${tint}" opacity=".85"/>
-      <path d="M0 -1C5 -9 14 -12 16 -5C17 0 9 2 0 1Z" fill="${tint}"/>
-      <path d="M0 1C7 3 11 9 6 11C3 11.5 0 6 0 2Z" fill="${tint}" opacity=".85"/>
-      <path d="M-11 -5.5l-2 .3M11 -5.5l2 .3" stroke="#6d5e48" stroke-width=".9" opacity=".6"/></g>
-      <ellipse cy="2" rx="1.5" ry="5.5" fill="#3b2e22"/>
-      <path d="M-.6 -3.5Q-3 -8 -5 -8.5M.6 -3.5Q3 -8 5 -8.5" stroke="#3b2e22" stroke-width=".7" fill="none"/></g>`;
+    const wing = sx => `<g transform="scale(${sx} 1)">
+        <path d="M0 -1.5C-6 -6 -15 -9.5 -19.5 -6.5C-18.5 -1.5 -12 2.5 0 2Z" fill="${tint}"/>
+        <path d="M-3.5 -1.8C-8.5 -4 -13 -5.6 -17 -5.8" stroke="#8a7a5e" stroke-width=".8" fill="none" opacity=".7"/>
+        <circle cx="-11" cy="-2.6" r="1.3" fill="#8a7a5e" opacity=".6"/>
+        <path d="M0 1C-6 2 -12 6 -10.5 9.5C-6.5 10.5 -2 6.5 0 3Z" fill="${tint}" opacity=".82"/></g>`;
+    return `<g transform="scale(${scale})"><g class="win-flap">${wing(1)}${wing(-1)}</g>
+      <ellipse cy="3" rx="1.7" ry="5.5" fill="#5c4b37"/><circle cy="-1.5" r="2.4" fill="#cbb994"/>
+      <path d="M-.8 -3.5Q-3 -8 -6 -9M.8 -3.5Q3 -8 6 -9" stroke="#5c4b37" stroke-width=".9" fill="none" stroke-linecap="round"/></g>`;
   }
 
   // ---------- rain on the glass (screen coords, clipped to glass) ----------
@@ -615,7 +615,7 @@
     id: 'c', cx: 800, cy: -50, s: 3, k: 2.4, seed: 23,
     moon: { x: 1212, y: 226, r: 64 }, horizon: 470, spire: [0.26, 1.9], stars: 70, clouds: 12, cloudW: 1560, cloudDur: 260,
     streaks: 150, drops: 190, dropR: [2.2, 6.5], rivs: 26, trail: 80,
-    moths: [[560, 300, 2.6, 9], [1010, 400, 2.1, 12]],
+    moths: [[560, 300, 2.1, 9], [1010, 400, 1.7, 12]],
   };
   CLOSE.backdrop = `<rect width="1600" height="900" fill="url(#win-damask)"/>
     <rect width="1600" height="900" fill="#0b1418" opacity=".35"/>`;
@@ -804,24 +804,28 @@
     });
   }
 
-  // south: diagonal shaft from the upper left, falling across the desk onto the journal
+  // south: the west window is on the viewer's RIGHT. Shaft from the upper right through the air above the
+  // portrait/box, its bright pool landing on the journal (x ~450-790, y ~540-620). The only south moonbeam.
   beamObject('south', `
-    ${shaft([-100, 40], [610, 598], 150, 600, 0.13)}
-    ${shaft([-100, 60], [615, 596], 80, 598, 0.14)}
-    ${shaft([-100, 70], [620, 594], 34, 596, 0.10)}
-    <ellipse cx="615" cy="592" rx="200" ry="26" fill="url(#win-pool)" opacity=".5"/>
-    <ellipse cx="620" cy="589" rx="115" ry="14" fill="url(#win-pool)" opacity=".5"/>`,
-    [80, 140, 700, 560], [1, 0.8], 101);
-  // north: faint spill at the left edge, onto the floor
-  beamObject('north', `
-    ${shaft([-160, 120], [200, 860], 110, 900, 0.10)}
-    <ellipse cx="150" cy="850" rx="230" ry="42" fill="url(#win-pool)" opacity=".3"/>`,
-    [0, 250, 220, 780], [0.6, 1], 202);
-  // west: moonlight falling from the open window onto the floor in front of it
-  beamObject('west', `
-    <ellipse cx="800" cy="860" rx="420" ry="52" fill="url(#win-pool)" opacity=".32"/>
-    <ellipse cx="800" cy="856" rx="250" ry="28" fill="url(#win-pool)" opacity=".3"/>`,
-    null, null, 303);
+    ${shaft([1700, 40], [621, 598], 150, 604, 0.2)}
+    ${shaft([1700, 56], [621, 594], 75, 600, 0.26)}
+    ${shaft([1700, 66], [621, 590], 30, 596, 0.16)}
+    <ellipse cx="621" cy="578" rx="170" ry="42" fill="url(#win-pool)" opacity=".5"/>
+    <ellipse cx="621" cy="580" rx="110" ry="22" fill="url(#win-pool)" opacity=".55"/>`,
+    [700, 120, 1400, 560], [-1, 0.6], 101);
+  // north / west spills are provided by the room art's lighting layer (room.js buildTop, class rl-moon);
+  // set EXTRA_SPILLS = true to add this module's own softer versions on top.
+  const EXTRA_SPILLS = false;
+  if (EXTRA_SPILLS) {
+    beamObject('north', `
+      ${shaft([-160, 120], [200, 860], 110, 900, 0.10)}
+      <ellipse cx="150" cy="850" rx="230" ry="42" fill="url(#win-pool)" opacity=".3"/>`,
+      [0, 250, 220, 780], [0.6, 1], 202);
+    beamObject('west', `
+      <ellipse cx="800" cy="860" rx="420" ry="52" fill="url(#win-pool)" opacity=".32"/>
+      <ellipse cx="800" cy="856" rx="250" ry="28" fill="url(#win-pool)" opacity=".3"/>`,
+      null, null, 303);
+  }
 
   // ---------- hint + debug step ----------
   G.registerHint({

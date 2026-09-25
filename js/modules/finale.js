@@ -15,9 +15,9 @@
   const PHASE_NAMES = ['new moon', 'waxing crescent', 'first quarter', 'waxing gibbous', 'full moon', 'waning gibbous', 'last quarter', 'waning crescent'];
 
   // Luna-moth wing geometry (right side; body axis x=0, wing root at 0,0; head toward -y). Wingspan ≈ 150u.
-  const FW = 'M3,-12 C14,-27 38,-41 64,-47 C70,-49 75,-47 72,-41 C67,-27 62,-11 55,2 C41,9 21,8 4,2 Z';
-  const HW = 'M4,0 C22,1 43,7 48,23 C51,35 44,44 35,51 C28,57 25,70 29,86 C31,95 30,101 25,104 C20,102 18,94 19,85 C19,71 16,59 10,49 C6,38 3,22 3,8 Z';
-  const COSTA = 'M-1,-10 C14,-27 38,-41 64,-47 C70,-49 75,-47 72,-41';
+  const FW = 'M3,-12 C18,-26 42,-42 66,-50 C71,-52 73,-48 70,-43 C64,-31 60,-17 55,-7 C49,4 35,8 21,7 C13,6 7,4 4,2 Z';
+  const HW = 'M4,0 C20,0 39,6 45,18 C49,28 45,38 37,46 C32,51 29,58 29,68 C29,80 33,92 31,102 C30,107 25,108 23,104 C20,96 21,84 19,74 C17,64 13,56 9,48 C5,38 3,22 3,8 Z';
+  const COSTA = 'M-1,-10 C18,-26 42,-42 66,-50 C71,-52 73,-48 70,-43';
   const lerp = (a, b, t) => a + (b - a) * t;
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const smooth = t => t * t * (3 - 2 * t);
@@ -55,10 +55,10 @@
         <stop offset="0" stop-color="#1f2c44"/><stop offset="1" stop-color="#0a1120"/>
       </radialGradient>
       <radialGradient id="fnSilk" cx="50%" cy="45%" r="75%">
-        <stop offset="0" stop-color="#e7d6c4"/><stop offset=".55" stop-color="#cfb3a1"/><stop offset="1" stop-color="#8e6b61"/>
+        <stop offset="0" stop-color="#d9bfae"/><stop offset=".55" stop-color="#b58f80"/><stop offset="1" stop-color="#6a4540"/>
       </radialGradient>
       <radialGradient id="fnCocoon" cx="45%" cy="40%" r="65%">
-        <stop offset="0" stop-color="#fffdf5"/><stop offset=".5" stop-color="#f1e9d6"/><stop offset=".85" stop-color="#d6c9a8"/><stop offset="1" stop-color="#b4a47f"/>
+        <stop offset="0" stop-color="#fffef6"/><stop offset=".45" stop-color="#f3ecd8"/><stop offset=".85" stop-color="#d4c6a2"/><stop offset="1" stop-color="#a8966e"/>
       </radialGradient>
       <radialGradient id="fnCore" cx="50%" cy="50%" r="50%">
         <stop offset="0" stop-color="#fffbe0" stop-opacity="1"/><stop offset=".5" stop-color="#ffe9a8" stop-opacity=".55"/><stop offset="1" stop-color="#ffd27a" stop-opacity="0"/>
@@ -218,7 +218,7 @@
           <feDisplacementMap class="m-disp" in="SourceGraphic" in2="n" scale="0" xChannelSelector="R" yChannelSelector="G"/>
         </filter>
       </defs>
-      <ellipse class="m-glow" cx="0" cy="18" rx="92" ry="80" fill="#c9f7d2" opacity=".32" filter="url(#blur20)"/>
+      <ellipse class="m-glow" cx="0" cy="14" rx="66" ry="58" fill="#c9f7d2" opacity=".32" filter="url(#blur20)"/>
       <g class="m-wings">
         <g class="m-hw">${right}<g transform="scale(-1 1)">${right}</g></g>
         <g class="m-fw">${rightF}<g transform="scale(-1 1)">${rightF}</g></g>
@@ -249,7 +249,7 @@
         m.fw.setAttribute('transform', `scale(${fo.toFixed(4)} ${(1 - 0.07 * (1 - fo)).toFixed(4)})`);
         m.hw.setAttribute('transform', `scale(${ho.toFixed(4)} ${(1 - 0.05 * (1 - ho)).toFixed(4)})`);
         m.wings.setAttribute('transform', m.grow === 1 ? '' : `translate(0 ${(-(1 - m.grow) * 8).toFixed(2)}) scale(${m.grow.toFixed(4)} ${(m.grow * (0.8 + 0.2 * m.grow)).toFixed(4)})`);
-        m.glowEl.setAttribute('opacity', m.glow.toFixed(3));
+        m.glowEl.setAttribute('opacity', (m.glow * 0.55).toFixed(3));
         g.setAttribute('opacity', m.alpha.toFixed(3));
       },
       crumple(v) {
@@ -267,25 +267,33 @@
   const COC = 'M-100,2 C-93,-28 -44,-42 16,-40 C60,-38 94,-24 102,-5 C106,6 98,16 84,24 C44,43 -36,44 -78,29 C-94,22 -104,13 -100,2 Z';
   const SEAM = [[-106, 1], [-78, -5], [-54, 2], [-28, -8], [-2, -1], [24, -10], [50, -3], [76, -9], [108, -4]];
   function cocoonBody(id) {
+    // helical silk wraps (diagonal, uneven), a faint pupa shadow inside, lit from within
     let strands = '';
-    for (let i = 0; i < 26; i++) {
-      const x = -104 + i * 8.4 + (i % 3) * 1.5;
-      strands += `<path d="M${x - 10},-46 Q${x + 18},${(i % 2 ? -4 : 6)} ${x + 4},48" stroke="#ffffff" stroke-width="${i % 4 ? .8 : 1.4}" fill="none" opacity="${i % 4 ? .35 : .5}"/>`;
+    for (let i = 0; i < 34; i++) {
+      const x = -118 + i * 7.2 + ((i * 37) % 5);
+      const tilt = 26 + ((i * 13) % 9);
+      const bow = (i % 2 ? -1 : 1) * (4 + (i % 5));
+      const w = i % 5 === 0 ? 1.6 : (i % 3 ? .6 : 1);
+      const op = i % 5 === 0 ? .55 : (i % 3 ? .28 : .4);
+      strands += `<path d="M${x - tilt},-46 Q${x + bow},0 ${x + tilt},46" stroke="#ffffff" stroke-width="${w}" fill="none" opacity="${op}"/>`;
     }
-    for (let i = 0; i < 6; i++) {
-      const y = -30 + i * 12;
-      strands += `<path d="M-106,${y + 4} C-40,${y - 10} 40,${y + 12} 106,${y - 4}" stroke="#fffaf0" stroke-width=".7" fill="none" opacity=".3"/>`;
+    for (let i = 0; i < 14; i++) {
+      const x = -104 + i * 15.5;
+      strands += `<path d="M${x + 30},-46 Q${x + 6},${(i % 2 ? 6 : -6)} ${x - 24},46" stroke="#fdf6e4" stroke-width=".5" fill="none" opacity=".3"/>`;
     }
     return `
       <path d="${COC}" fill="url(#fnCocoon)"/>
       <g clip-path="url(#${id}-cc)">
-        <ellipse class="coc-core" cx="-6" cy="2" rx="70" ry="24" fill="url(#fnCore)" opacity=".55"/>
+        <path d="M-70,2 C-66,-16 -20,-22 30,-18 C60,-15 76,-6 76,2 C76,12 56,20 20,21 C-30,22 -70,18 -70,2 Z" fill="#7d6a48" opacity=".3" filter="url(#fnBlur3)"/>
+        <path d="M-40,-14 C-38,4 -38,12 -40,20 M-14,-17 C-12,4 -12,14 -14,21 M12,-17 C14,4 14,14 12,21 M36,-15 C38,2 38,12 36,18" stroke="#6d5a3c" stroke-width="3" fill="none" opacity=".12" filter="url(#fnBlur3)"/>
+        <ellipse class="coc-core" cx="-4" cy="0" rx="74" ry="26" fill="url(#fnCore)" opacity=".7" style="mix-blend-mode:screen"/>
         ${strands}
         <path class="coc-warm" d="${COC}" fill="#ffae4a" opacity="0" style="mix-blend-mode:multiply"/>
-        <path d="M-96,10 C-60,34 40,38 92,14" stroke="#a8977a" stroke-width="7" fill="none" opacity=".35" filter="url(#fnBlur3)"/>
-        <path d="M-80,-18 C-40,-34 30,-34 70,-22" stroke="#ffffff" stroke-width="6" fill="none" opacity=".45" filter="url(#fnBlur3)"/>
+        <path d="M-98,12 C-60,36 40,40 94,14 L110,60 L-110,60 Z" fill="#8f7c5c" opacity=".35" filter="url(#fnBlur3)"/>
+        <path d="M-78,-20 C-40,-35 30,-35 72,-22" stroke="#ffffff" stroke-width="7" fill="none" opacity=".5" filter="url(#fnBlur3)"/>
       </g>
-      <path d="${COC}" fill="none" stroke="#6d5f47" stroke-width="1.6" opacity=".9"/>`;
+      <path d="${COC}" fill="none" stroke="#fffaf0" stroke-width="6" opacity=".35" filter="url(#fnBlur3)"/>
+      <path d="${COC}" fill="none" stroke="#6d5f47" stroke-width="1.4" opacity=".75"/>`;
   }
   function cocoonMarkup(id) {
     const seam = SEAM.map(p => p.join(',')).join(' L');
@@ -421,7 +429,7 @@
     z: 5,
     build(g) {
       ensureDefs();
-      const moons = [0, 2, 4, 6].map((k, i) => `<g transform="translate(${1068 + i * 14.5} 553)"><circle r="5.2" fill="#0f1a2c" stroke="${INK}" stroke-width="1"/><circle r="3.8" fill="#e9e3cc"/></g>`).join('');
+      const moons = [0, 1, 2, 3].map(i => `<g transform="translate(${1068 + i * 14.5} 553.5)"><circle r="5.6" fill="#0f1a2c" stroke="${INK}" stroke-width="1"/><path class="sb-moon" d="${moonLit(4, 4.2)}" fill="#efe9d4"/></g>`).join('');
       G.svg(`
         <ellipse cx="1090" cy="578" rx="92" ry="8" fill="#000" opacity=".55" filter="url(#blur6)"/>
       `, g);
@@ -474,6 +482,7 @@
       SB.lidShut.style.display = open ? 'none' : '';
       SB.inside.querySelector('.sb-coc').style.display = G.get('gotCocoon') ? 'none' : '';
       SB.inside.querySelector('.sb-let').style.display = G.get('letterRead') ? 'none' : '';
+      SB.body.querySelectorAll('.sb-moon').forEach((p, i) => p.setAttribute('d', moonLit(open ? SOLUTION[i] : BX.dials[i], 4.2)));
     },
   });
 
@@ -671,7 +680,7 @@
           <rect x="438" y="526" width="724" height="160" rx="7" fill="none" stroke="#f3dc9a" stroke-width="1" opacity=".6"/>
           <path d="M440,540 C700,528 900,552 1160,534" stroke="#fff4c8" stroke-width="10" fill="none" opacity=".18" filter="url(#fnBlur3)"/>
           ${[[438, 526], [1162, 526], [438, 686], [1162, 686]].map(([x, y]) => `<g transform="translate(${x} ${y})"><circle r="5" fill="#e7c476" stroke="${INK}" stroke-width="1.2"/><path d="M-3,-3 L3,3" stroke="#6e4d1c" stroke-width="1.4"/></g>`).join('')}
-          ${['I', 'II', 'III', 'IV'].map((n, i) => `<text x="${DIAL_X[i]}" y="${DIAL_Y + 90}" text-anchor="middle" font-family="${FELL}" font-size="17" fill="#5a3d16" opacity=".9">${n}</text>`).join('')}
+          ${['I', 'II', 'III', 'IV'].map((n, i) => `<text x="${DIAL_X[i]}" y="${DIAL_Y + 94}" text-anchor="middle" font-family="${FELL}" font-size="15" fill="#3a2a12" opacity=".9">${n}</text>`).join('')}
           ${[620, 800, 980].map(x => `<path transform="translate(${x} ${DIAL_Y})" d="M0,-8 L3,-3 L8,0 L3,3 L0,8 L-3,3 L-8,0 L-3,-3 Z" fill="#6e4d1c" opacity=".8"/>`).join('')}
           <text x="800" y="728" text-anchor="middle" font-family="${FELL}" font-style="italic" font-size="19" fill="#d8b98a" opacity=".55" letter-spacing="3">as the nights turn, so turns the key</text>
           <g class="bx-dials">${[0, 1, 2, 3].map(dialMarkup).join('')}</g>
@@ -862,7 +871,7 @@
 
   // ================================================================== DOOR (north)
   // closed-door geometry (stage units); the leaf is re-projected every frame while it swings (hinge = left edge).
-  const DL = 672, DR = 928, DT = 188, DB = 788, PX = 800, PY = 446, PLATE_S = 1.18;
+  const DL = 672, DR = 928, DT = 188, DB = 788, PX = 800, PY = 446, PLATE_S = 1.0;
   const CAMX = 800, CAMY = 470, CAMD = 1150, OPEN_ANG = 74;
   function proj(x, y, th) {
     const u = x - DL, X = DL + u * Math.cos(th), Z = u * Math.sin(th), f = CAMD / (CAMD + Z);
@@ -878,11 +887,7 @@
     for (let a = 0; a < 24; a++) { const r = a * 15 * Math.PI / 180; rays += `M${(Math.sin(r) * 34).toFixed(1)},${(-Math.cos(r) * 34).toFixed(1)} L${(Math.sin(r) * 120).toFixed(1)},${(-Math.cos(r) * 120).toFixed(1)} `; }
     return `
       <g class="pl">
-        <g class="pl-gear" fill="url(#gBrass)" stroke="${INK}" stroke-width="1.4">
-          ${teeth}<circle r="30"/><circle r="19" fill="#6e4d1c"/>
-          <path d="M0,-28 V28 M-28,0 H28" stroke="#4a3210" stroke-width="2"/>
-        </g>
-        <g class="pl-rays" fill="none" stroke="#fff1c1" stroke-width="1.2" opacity="0"><path d="${rays}"/></g>
+                <g class="pl-rays" fill="none" stroke="#fff1c1" stroke-width="1.2" opacity="0"><path d="${rays}"/></g>
         <!-- brass rim (outer silhouette) -->
         <g fill="none" stroke="${INK}" stroke-width="19" stroke-linejoin="round">${wing(FW)}${wing(HW)}</g>
         <g fill="none" stroke="url(#gBrass)" stroke-width="15" stroke-linejoin="round">${wing(FW)}${wing(HW)}</g>
@@ -891,8 +896,9 @@
         <!-- hollow recesses -->
         <g fill="#0b0705" stroke="#3a2a12" stroke-width="1.6" stroke-linejoin="round">${wing(FW)}${wing(HW)}</g>
         <g fill="none" stroke="#000" stroke-width="5" opacity=".7" transform="translate(0 2.5)" clip-path="url(#fnPlClip)">${wing(FW)}${wing(HW)}</g>
-        <g class="pl-fill" opacity="0" filter="url(#fnBloom)">
-          <g fill="#bff3c9" opacity=".9">${wing(FW)}${wing(HW)}</g>
+        <g class="pl-fill" opacity="0">
+          <g fill="#8fd4a4" opacity=".55">${wing(FW)}${wing(HW)}</g>
+          <g fill="none" stroke="#dcffe4" stroke-width="1.6" opacity=".8">${wing(FW)}${wing(HW)}</g>
         </g>
         <g class="pl-lines" fill="none" stroke="#fff4c4" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" filter="url(#fnBloom)">
           <g class="pl-l0" opacity="0">${wing(FW)}${wing(HW)}</g>
@@ -1067,9 +1073,12 @@
       LT.g = G.el('g', { class: 'fn-light' }, top);
       G.svg(`
         <g style="mix-blend-mode:screen">
-          <rect width="1600" height="900" fill="#9fb8e0" opacity=".09"/>
-          <ellipse cx="800" cy="470" rx="520" ry="420" fill="url(#fnWhitePool)" opacity=".28"/>
-          <polygon class="fn-spill" points="${DL + 40},${DB} ${DR},${DB} 1270,900 520,900" fill="url(#fnSpill)" filter="url(#blur6)" opacity=".85"/>
+          <rect width="1600" height="900" fill="#9fb8e0" opacity=".13"/>
+          <ellipse cx="820" cy="480" rx="620" ry="470" fill="url(#fnWhitePool)" opacity=".32"/>
+          <ellipse class="fn-burst" cx="830" cy="470" rx="420" ry="460" fill="url(#fnWhitePool)" opacity="0"/>
+          <polygon class="fn-spill" points="${DL + 60},${DB} ${DR},${DB} 1330,900 560,900" fill="url(#fnSpill)" filter="url(#blur6)"/>
+          <polygon points="${DL + 90},${DB} ${DR - 10},${DB} 1120,860 700,860" fill="#ffffff" opacity=".35" filter="url(#blur6)"/>
+          <rect x="${DL - 4}" y="${DT - 4}" width="${DR - DL + 8}" height="${DB - DT + 8}" fill="none" stroke="#e6f0ff" stroke-width="6" opacity=".35" filter="url(#blur6)"/>
           <g class="fn-rays" filter="url(#blur6)">
             <polygon points="760,${DT + 40} 820,${DT + 40} 1160,900 1010,900" fill="url(#fnRay)" opacity=".35"/>
             <polygon points="820,${DT + 120} 880,${DT + 140} 1440,900 1250,900" fill="url(#fnRay)" opacity=".22"/>
@@ -1080,6 +1089,7 @@
         <g class="fn-roommoths"></g>`, LT.g);
       LT.room = LT.g.querySelector('.fn-roommoths');
       LT.rays = LT.g.querySelector('.fn-rays');
+      LT.burst = LT.g.querySelector('.fn-burst');
     }
     LT.g.setAttribute('opacity', alpha.toFixed(3));
   }
@@ -1171,7 +1181,7 @@
         <text font-family="${FELL}" font-size="34" fill="#c9a877" letter-spacing="10" opacity=".55" transform="translate(-1 -1.5)"><textPath href="#fnArc" startOffset="50%" text-anchor="middle">ONLY  SHE  MAY  OPEN  IT</textPath></text>
         <text x="800" y="790" text-anchor="middle" font-family="${FELL}" font-style="italic" font-size="22" fill="#c9a877" opacity=".45" letter-spacing="4">A. Vane, clockmaker · 1871</text>
       `, g);
-      DV.plate = G.el('g', { transform: 'translate(800 392) scale(3.55)' }, g);
+      DV.plate = G.el('g', { transform: 'translate(800 392) scale(3.0)' }, g);
       G.svg(`<ellipse cx="0" cy="22" rx="92" ry="96" fill="#000" opacity=".55" filter="url(#blur6)" transform="translate(0 4)"/>${plateMarkup(true)}`, DV.plate);
       G.svg(`<rect width="1600" height="900" fill="url(#fnDoorVig)" pointer-events="none"/>`, g);
       const hot = G.el('rect', { x: 500, y: 190, width: 600, height: 590, fill: 'transparent' }, g);
@@ -1291,7 +1301,11 @@
     c.inside.setAttribute('opacity', 1);
     // (from here the cocoon is still; the moth takes over)
     const m = makeMoth(layer);
-    layer.insertBefore(m.g, c.up);          // behind the lifting upper shell, above the lower one
+    // lift the upper shell into its own group above the moth (so she emerges from between the halves)
+    c.breathe.querySelectorAll('animateTransform').forEach(a => a.remove());
+    const upWrap = G.el('g', { transform: c.outer.getAttribute('transform') }, layer);
+    upWrap.appendChild(c.up);
+    upWrap.appendChild(c.seam);
     Object.assign(m, { x: CX - 4, y: CY + 4, rot: -78, s: 0.26, open: 0.05, hopen: 0.05, grow: 0.3, glow: 0, alpha: 0 });
     m.crumple(22); m.apply();
     await G.tween(700, t => {
@@ -1352,7 +1366,6 @@
     });
     m.remove();
     // leave the empty shell by the lamp
-    c.breathe.querySelectorAll('animateTransform').forEach(a => a.remove());
     c.cores.forEach(e => e.setAttribute('opacity', 0.15));
     c.warms.forEach(e => e.setAttribute('opacity', 0.25));
     c.halo.setAttribute('opacity', 0.1);
@@ -1411,9 +1424,7 @@
     await G.tween(420, t => rays.setAttribute('opacity', (Math.sin(t * Math.PI) * 0.8).toFixed(3)), 'linear');
     // the mechanism turns
     G.sfx('doorUnlock');
-    const gear = D.plate.querySelector('.pl-gear');
     await G.tween(900, (t, raw) => {
-      gear.setAttribute('transform', `rotate(${(90 * t).toFixed(2)})`);
       const shake = raw > 0.55 && raw < 0.75 ? Math.sin(raw * 200) * 1.2 : 0;
       setCam('north', 1.6, 800 + shake, 452);
     }, 'inOut');
@@ -1437,6 +1448,7 @@
     const openP = G.tween(2900, t => {
       setDoor(t * OPEN_ANG * Math.PI / 180);
       ensureOpenLight(smooth(clamp(t * 1.4, 0, 1)));
+      LT.burst.setAttribute('opacity', (Math.sin(clamp(t * 1.6, 0, 1) * Math.PI) * 0.75).toFixed(3));
       plateGlow.setAttribute('opacity', (0.9 * (1 - t)).toFixed(3));
       SW.alpha = clamp(t * 1.5, 0, 1);
       if (t > 0.35) SW.roomOn = true;
