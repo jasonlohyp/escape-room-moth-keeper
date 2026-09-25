@@ -538,7 +538,7 @@
         <path d="M${DOOR.x},792 h${DOOR.w}" stroke="#8a5a37" stroke-width="2"/>
         <rect x="${DOOR.x}" y="${DOOR.y}" width="${DOOR.w}" height="18" fill="#000" opacity="0.5" filter="url(#ck-blur3)"/>
         <g class="ck-matchbox"></g>
-        <rect class="ck-doorShade" x="${DOOR.x}" y="${DOOR.y}" width="${DOOR.w}" height="${DOOR.h}" fill="#000" opacity="0"/>
+        <rect class="ck-doorShade" x="${DOOR.x}" y="${DOOR.y}" width="${DOOR.w}" height="${DOOR.h}" fill="#000" opacity="0" pointer-events="none"/>
       </g>
       <!-- the door -->
       <g class="ck-door">
@@ -708,7 +708,7 @@
 
   function matchboxScene() {
     // lying on the ledge, 3/4 view; centred around (812, 772)
-    return `<g transform="translate(764,742) scale(1.05)">
+    return `<g transform="translate(752,733) scale(1.18)">
       <ellipse cx="50" cy="48" rx="50" ry="6" fill="#000" opacity="0.5" filter="url(#ck-blur3)"/>
       ${matchboxBody()}
       <g class="ck-glint" transform="translate(84,8)">
@@ -1014,7 +1014,7 @@
     ],
   });
 
-  G.registerStep(10, 'clock', async () => { G.set('clockSolved'); G.give('matches'); G.set('gotMatches'); });
+  G.registerStep(10, 'clock', () => { G.set('clockSolved'); G.give('matches'); G.set('gotMatches'); });
 
   // exposed for tests / other modules
   window.ClockPuzzle = { centre: { x: CX, y: CY }, HOUR_LEN, MIN_LEN, R_ICON, iconAt: i => { const p = pol(R_ICON, i * 30, CX, CY); return { x: p[0], y: p[1], name: ICON_NAMES[i] }; } };
