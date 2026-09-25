@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Moth Keeper</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Homemade+Apple&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="app">
+  <div id="stage-wrap">
+    <svg id="stage" viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+      <defs id="defs"></defs>
+      <g id="views"></g>
+      <g id="fx" pointer-events="none"></g>
+    </svg>
+    <div id="overlay"></div><!-- ui.js builds HUD here: arrows, inventory, captions, hint, title, ending -->
+    <div id="fade"></div>
+  </div>
+</div>
+<script src="js/engine.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/art/defs.js"></script>
+<script src="js/art/room.js"></script>
+<script src="js/modules/clock.js"></script>
+<script src="js/modules/desk.js"></script>
+<script src="js/modules/cabinet.js"></script>
+<script src="js/modules/window.js"></script>
+<script src="js/modules/finale.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

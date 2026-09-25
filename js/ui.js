@@ -1,0 +1,2 @@
+/* STUB — UI agent replaces. window.UI = { init(), showTitle(), hideTitle(instant) } */
+window.UI = { init(){ const o=document.getElementById('overlay'); o.innerHTML='<button id="l" style="position:absolute;left:10px;top:45%">&lt;</button><button id="r" style="position:absolute;right:10px;top:45%">&gt;</button>'; o.querySelector('#l').onclick=()=>G.turn(-1); o.querySelector('#r').onclick=()=>G.turn(1);}, showTitle(){ G.start({}); }, hideTitle(){} };
