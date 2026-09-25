@@ -22,6 +22,10 @@
     const lg = (a1 - a0) > Math.PI ? 1 : 0;
     return `M${pt(r1, a0)}A${r1} ${r1} 0 ${lg} 1 ${pt(r1, a1)}L${pt(r0, a1)}A${r0} ${r0} 0 ${lg} 0 ${pt(r0, a0)}Z`;
   }
+  // ellipse as a sub-path (lets hundreds of static dots live in one <path>)
+  function circ(x, y, rx, ry) {
+    return `M${f(x - rx)} ${f(y)}a${f(rx)} ${f(ry)} 0 1 0 ${f(2 * rx)} 0a${f(rx)} ${f(ry)} 0 1 0 ${f(-2 * rx)} 0Z`;
+  }
   function ring(r0, r1, cx, cy) {
     cx = cx || 0; cy = cy || 0;
     const c = r => `M${f(cx + r)} ${f(cy)}A${r} ${r} 0 1 1 ${f(cx - r)} ${f(cy)}A${r} ${r} 0 1 1 ${f(cx + r)} ${f(cy)}Z`;
@@ -55,8 +59,8 @@
     27% { transform: translate(calc(var(--k)*-24px), calc(var(--k)*-10px)); } 50% { transform: translate(calc(var(--k)*18px), calc(var(--k)*-34px)); }
     74% { transform: translate(calc(var(--k)*40px), calc(var(--k)*4px)); } 100% { transform: translate(0px,0px); } }
   @keyframes win-flutter {
-    0%,100% { transform: skewX(0deg) scaleX(1); } 22% { transform: skewX(-4deg) scaleX(1.05); }
-    47% { transform: skewX(2.5deg) scaleX(.97); } 70% { transform: skewX(-2deg) scaleX(1.03); } }
+    0%,100% { transform: skewX(0deg) scaleX(1); } 22% { transform: skewX(-6deg) scaleX(1.1); }
+    47% { transform: skewX(3.5deg) scaleX(.95); } 70% { transform: skewX(-3deg) scaleX(1.06); } }
   .win-curtain { transform-box: fill-box; transform-origin: 50% 0%; }
   .win-open .win-curtain { animation: win-flutter 3.4s ease-in-out infinite; }
   .win-open .win-curtain.win-r { animation-duration: 2.9s; animation-delay: -1.1s; }
@@ -64,6 +68,18 @@
     0% { transform: translate(0px,0px); opacity: 0; } 20% { opacity: var(--o); } 80% { opacity: var(--o); }
     100% { transform: translate(var(--dx), var(--dy)); opacity: 0; } }
   .win-beam { transition: opacity 1.6s ease-in-out; }
+  .win-billow { transform-box: fill-box; }
+  .win-bl { transform-origin: 0% 0%; } .win-br { transform-origin: 100% 0%; }
+  @keyframes win-billowL { 0%,100% { transform: scaleX(1) skewX(0deg); } 30% { transform: scaleX(1.9) skewX(8deg); }
+    55% { transform: scaleX(1.3) skewX(2deg); } 78% { transform: scaleX(1.75) skewX(6deg); } }
+  @keyframes win-billowR { 0%,100% { transform: scaleX(1) skewX(0deg); } 30% { transform: scaleX(1.9) skewX(-8deg); }
+    55% { transform: scaleX(1.3) skewX(-2deg); } 78% { transform: scaleX(1.75) skewX(-6deg); } }
+  .win-open .win-bl { animation: win-billowL 3.6s ease-in-out infinite; }
+  .win-open .win-br { animation: win-billowR 3.1s ease-in-out -1.3s infinite; }
+  @keyframes win-splash { 0% { transform: scale(.15, .15); opacity: 0; } 12% { opacity: .95; } 55% { transform: scale(1, 1); opacity: .5; } 100% { transform: scale(1.25, .7); opacity: 0; } }
+  .win-splash { transform-box: fill-box; transform-origin: 50% 100%; animation: win-splash 1.2s ease-out infinite; }
+  @keyframes win-rest { 0%,100% { transform: scaleX(1); } 50% { transform: scaleX(.7); } }
+  .win-resting .win-flap { animation: win-rest 2.8s ease-in-out infinite; }
   @keyframes win-breathe { 0%,100% { opacity: .85; } 50% { opacity: 1; } }
   `;
   function ensureCss() {
@@ -179,7 +195,7 @@
         near += `L${f(cxp)} ${f(yRoof)}L${f(cxp)} ${f(yRoof - ch)}L${f(cxp + cw)} ${f(yRoof - ch)}L${f(cxp + cw)} ${f(yRoof - pitch * (cw / (w / 2)))}`;
       }
       near += `L${f(x + w / 2)} ${f(eave - pitch)}L${f(x + w)} ${f(eave)}`;
-      if (r() < 0.22) lights.push([x + w * (0.3 + r() * 0.4), eave + 5 * k, 4 * k, 5 * k, .5 + r() * .4]);
+      if (r() < 0.4) lights.push([x + w * (0.3 + r() * 0.4), eave + 5 * k, 4 * k, 5 * k, .5 + r() * .4]);
       x += w + (r() < 0.3 ? 6 * k : 0);
     }
     near += `L${f(x)} ${yb}Z`;
@@ -199,12 +215,13 @@
     const m = c.moon, k = c.k;
     let s = `<rect x="${x0}" y="${y0}" width="${x1 - x0}" height="${y1 - y0}" fill="url(#win-sky)"/>`;
     // stars
-    s += '<g fill="#dfe9f5">';
+    let st1 = '', st2 = '';
     for (let i = 0; i < c.stars; i++) {
-      const x = x0 + r() * (x1 - x0), y = y0 + r() * (c.horizon - y0 - 40 * k);
-      s += `<circle cx="${f(x)}" cy="${f(y)}" r="${f((0.5 + r() * 0.9) * Math.sqrt(k))}" opacity="${f(0.2 + r() * 0.55)}"/>`;
+      const x = x0 + r() * (x1 - x0), y = y0 + r() * (c.horizon - y0 - 40 * k), rr = (0.5 + r() * 0.9) * Math.sqrt(k);
+      const d = circ(x, y, rr, rr);
+      if (r() < 0.5) st1 += d; else st2 += d;
     }
-    s += '</g>';
+    s += `<path d="${st1}" fill="#dfe9f5" opacity=".35"/><path d="${st2}" fill="#dfe9f5" opacity=".7"/>`;
     // moon
     s += `<circle class="win-halo" cx="${m.x}" cy="${m.y}" r="${m.r * 5.5}" fill="url(#win-halo)"/>`;
     s += `<circle cx="${m.x}" cy="${m.y}" r="${m.r * 3.4}" fill="url(#win-moonring)"/>`;
@@ -233,7 +250,7 @@
       }
     }
     s += `<g class="win-anim" style="--cw:${-cw}px;animation:win-cloud ${c.cloudDur}s linear ${-c.cloudDur * 0.37}s infinite">
-      <g>${cl}</g><g transform="translate(${cw} 0)">${cl}</g></g>`;
+      <g id="win-cl-${c.id}">${cl}</g><use href="#win-cl-${c.id}" transform="translate(${cw} 0)"/></g>`;
     // horizon haze
     s += `<rect x="${x0}" y="${c.horizon - 120 * k}" width="${x1 - x0}" height="${120 * k + 4}" fill="url(#win-haze)"/>`;
     // lightning flash (below silhouettes)
@@ -279,17 +296,18 @@
   // ---------- rain on the glass (screen coords, clipped to glass) ----------
   function glassRain(c, r) {
     const S = c.s, R = R_GLASS * S;
-    let s = '';
+    let s = '', dA = '', dB = '', dC = '';
     const dr = c.dropR;
     for (let i = 0; i < c.drops; i++) {
       const a = r() * Math.PI * 2, d = Math.sqrt(r()) * R;
       const x = c.cx + d * Math.cos(a), y = c.cy + d * Math.sin(a);
-      if (y < -20 || y > 900) continue;
       const rr = dr[0] + Math.pow(r(), 2.2) * (dr[1] - dr[0]);
-      s += `<g transform="translate(${f(x)} ${f(y)})"><ellipse rx="${f(rr)}" ry="${f(rr * 1.12)}" fill="#07121a" fill-opacity=".38"/>
-        <ellipse cy="${f(rr * .28)}" rx="${f(rr * .78)}" ry="${f(rr * .66)}" fill="#bcd3e6" fill-opacity=".3"/>
-        <circle cx="${f(-rr * .32)}" cy="${f(-rr * .38)}" r="${f(Math.max(.5, rr * .26))}" fill="#fff" fill-opacity=".75"/></g>`;
+      if (y < -20 || y > 900) continue;
+      dA += circ(x, y, rr, rr * 1.12);
+      dB += circ(x, y + rr * .28, rr * .78, rr * .66);
+      const h = Math.max(.5, rr * .26); dC += circ(x - rr * .32, y - rr * .38, h, h);
     }
+    s += `<path d="${dA}" fill="#07121a" fill-opacity=".38"/><path d="${dB}" fill="#bcd3e6" fill-opacity=".3"/><path d="${dC}" fill="#fff" fill-opacity=".75"/>`;
     // sliding rivulets
     const TL = c.trail;
     for (let i = 0; i < c.rivs; i++) {
@@ -593,6 +611,7 @@
     const root = G.el('g', { class: 'win-root win-paused' }, g);
     G.svg(`<defs>
       <clipPath id="win-open-${id}"><circle cx="${c.cx}" cy="${c.cy}" r="${rO + 1}"/></clipPath>
+      <clipPath id="win-sillclip-${id}"><circle cx="${c.cx}" cy="${c.cy}" r="${rO}"/><rect x="${c.cx - 330}" y="${c.cy + rO * .82}" width="660" height="${Math.max(0, 712 - c.cy - rO * .82)}"/></clipPath>
       <clipPath id="win-glass-${id}"><circle cx="${c.cx}" cy="${c.cy}" r="${R_GLASS * S}"/></clipPath>
     </defs>`, root);
     if (c.backdrop) G.svg(c.backdrop, root);
@@ -627,12 +646,15 @@
     const openFx = G.el('g', { class: 'win-openfx', opacity: 0, 'pointer-events': 'none' }, root);
     const inR = rng(c.seed + 99);
     G.svg(`<g clip-path="url(#win-open-${id})">${rainStreaks(c, B, inR, 0.32, Math.round(c.streaks * 0.35), 0.42, 2.2)}</g>`, openFx);
+    if (c.rainToSill) G.svg(`<g clip-path="url(#win-sillclip-${id})">${rainStreaks(c, { x0: 380, x1: 1220, y0: 300, y1: 712 }, rng(c.seed + 61), 0.3, 60, 0.45, 1.8)}</g>`, openFx);
     if (c.openExtra) G.svg(c.openExtra, openFx);
     const curt = c.curtains ? G.svg(c.curtains, root) : null;
     // cold air wash (animated during opening)
     const wash = G.el('rect', { x: 0, y: 0, width: 1600, height: 900, fill: '#cfe3ff', opacity: 0, 'pointer-events': 'none' }, root);
+    const fr = rO + (R_MOULD - R_SASH + 60) * S;
+    const flash2 = G.el('rect', { x: c.cx - fr, y: Math.max(0, c.cy - fr), width: 2 * fr, height: Math.min(900, c.cy + fr + 80) - Math.max(0, c.cy - fr), fill: '#dbe8ff', opacity: 0, 'pointer-events': 'none', style: 'mix-blend-mode:screen' }, root);
     const R = {
-      c, tr, root, sky, sash, latch, latchWrap, latchInner, persp, moths, lampRef, openFx, curt, wash,
+      c, tr, root, sky, flash2, sash, latch, latchWrap, latchInner, persp, moths, lampRef, openFx, curt, wash,
       flash: sky.querySelector('.win-flash'), halo2: sky.querySelector('.win-halo2'),
       lever: latch.querySelector('.win-lever'), key: latch.querySelector('.win-key'), keyrot: latch.querySelector('.win-keyrot'),
       animating: false, timer: null, active: false,
@@ -684,8 +706,9 @@
       await G.tween(900, (e, t) => {
         const v = t < .08 ? t / .08 : t < .18 ? 1 - (t - .08) / .1 * .8 : t < .26 ? .2 + (t - .18) / .08 * .6 : Math.max(0, .8 * (1 - (t - .26) / .74));
         R.flash.setAttribute('opacity', f(v * peak));
+        R.flash2.setAttribute('opacity', f(v * peak * 0.3));
       }, 'linear');
-      R.flash.setAttribute('opacity', 0);
+      R.flash.setAttribute('opacity', 0); R.flash2.setAttribute('opacity', 0);
       scheduleFlash(R);
     }, 9000 + Math.random() * 14000);
   }
@@ -696,6 +719,32 @@
     if (on) scheduleFlash(R); else { clearTimeout(R.timer); R.flash.setAttribute('opacity', 0); }
   }
 
+  // A soft parallel shaft from P0 towards P1 (half-width w), cut at y = yEnd; edges fade via a cross-beam gradient.
+  let beamN = 0;
+  function shaft(P0, P1, w, yEnd, op) {
+    const id = 'win-shaft' + (beamN++);
+    const dx = P1[0] - P0[0], dy = P1[1] - P0[1], L = Math.hypot(dx, dy), d = [dx / L, dy / L], n = [d[1], -d[0]];
+    const A = [P0[0] + n[0] * w, P0[1] + n[1] * w], Bp = [P0[0] - n[0] * w, P0[1] - n[1] * w];
+    const toY = Q => { const t = (yEnd - Q[1]) / d[1]; return [Q[0] + d[0] * t, yEnd]; };
+    const C = toY(A), D = toY(Bp);
+    const M = [(P0[0] + P1[0]) / 2, (P0[1] + P1[1]) / 2];
+    return `<linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="${f(M[0] + n[0] * w)}" y1="${f(M[1] + n[1] * w)}" x2="${f(M[0] - n[0] * w)}" y2="${f(M[1] - n[1] * w)}">
+        <stop offset="0" stop-color="#cfe3ff" stop-opacity="0"/><stop offset=".16" stop-color="#cfe3ff" stop-opacity=".03"/>
+        <stop offset=".32" stop-color="#cfe3ff" stop-opacity=".22"/><stop offset=".5" stop-color="#e4efff" stop-opacity="1"/>
+        <stop offset=".68" stop-color="#cfe3ff" stop-opacity=".22"/><stop offset=".84" stop-color="#cfe3ff" stop-opacity=".03"/>
+        <stop offset="1" stop-color="#cfe3ff" stop-opacity="0"/></linearGradient>
+      <polygon points="${[A, C, D, Bp].map(q => f(q[0]) + ',' + f(q[1])).join(' ')}" fill="url(#${id})" opacity="${op}"/>`;
+  }
+  function motes(n, box, seed, dir) {
+    const r = rng(seed);
+    let s = '';
+    for (let i = 0; i < n; i++) {
+      const x = box[0] + r() * (box[2] - box[0]), y = box[1] + r() * (box[3] - box[1]);
+      s += `<circle cx="${f(x)}" cy="${f(y)}" r="${f(0.8 + r() * 1.6)}" fill="#eaf3ff" class="win-anim"
+        style="--o:${f(0.35 + r() * 0.5)};--dx:${f(dir[0] * (20 + r() * 40))}px;--dy:${f(dir[1] * (20 + r() * 40))}px;animation:win-mote ${f(7 + r() * 8)}s ease-in-out ${f(-r() * 15)}s infinite"/>`;
+    }
+    return s;
+  }
   // ---------- configs ----------
   const WEST = {
     id: 'w', cx: 800, cy: 360, s: 1, k: 1, seed: 11, eyeY: 0,
@@ -736,15 +785,38 @@
     </g>
     <g fill="#9fb6cc" opacity=".35"><circle cx="1030" cy="708" r="2.5"/><circle cx="1056" cy="702" r="1.8"/><circle cx="640" cy="705" r="2"/></g>
   </g>`;
-  CLOSE.openExtra = `
-    <ellipse cx="800" cy="700" rx="380" ry="16" fill="url(#win-pool)" opacity=".75"/>
-    <ellipse cx="800" cy="703" rx="330" ry="9" fill="#9fb6cc" opacity=".22"/>`;
+  CLOSE.openExtra = (() => {
+    const r = rng(808);
+    let beads = '', hi = '', spl = '';
+    for (let i = 0; i < 46; i++) {
+      const x = 430 + r() * 740, y = 693 + r() * 18, rr = 2 + r() * 4.5;
+      beads += circ(x, y, rr * 1.3, rr * .55); hi += circ(x - rr * .4, y - rr * .2, rr * .35, rr * .2);
+    }
+    for (let i = 0; i < 14; i++) {
+      const x = f(460 + r() * 680), y = f(696 + r() * 14), sc = f(0.8 + r() * 0.8);
+      spl += `<g transform="translate(${x} ${y}) scale(${sc})"><g class="win-splash" style="animation-duration:${f(0.8 + r() * 0.9)}s;animation-delay:${f(-r() * 2)}s">
+        <path d="M-5 0Q-7 -6 -10 -9M-1.5 0Q-2 -8 -3 -13M1.5 0Q3 -8 4.5 -12M5 0Q8 -5 11 -7" stroke="#d6e6f4" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+        <ellipse rx="9" ry="2.2" fill="none" stroke="#d6e6f4" stroke-width="1.2"/></g></g>`;
+    }
+    return `<g style="mix-blend-mode:screen">
+      ${shaft([800, 560], [800, 900], 330, 900, 0.10)}
+      <ellipse cx="800" cy="703" rx="480" ry="26" fill="url(#win-pool)" opacity=".95"/>
+      <ellipse cx="800" cy="700" rx="330" ry="10" fill="#e4efff" opacity=".35"/>
+      <ellipse cx="800" cy="732" rx="460" ry="18" fill="url(#win-pool)" opacity=".4"/>
+      <ellipse cx="800" cy="830" rx="520" ry="70" fill="url(#win-pool)" opacity=".16"/>
+    </g>
+    <path d="${beads}" fill="#0b151b" fill-opacity=".32"/>
+    <path d="${hi}" fill="#eef6ff" fill-opacity=".75"/>
+    <g>${spl}</g>`;
+  })();
+  CLOSE.rainToSill = true;
   // lace curtain edges in the close-up
   CLOSE.curtains = [[-1, 0], [1, 1600]].map(([sg, ex]) => {
     const X = x => ex - sg * x;
-    return `<g class="win-curtain ${sg > 0 ? 'win-r' : ''}">
-      <path d="M${X(0)} 0L${X(150)} 0C${X(130)} 200 ${X(90)} 420 ${X(120)} 690L${X(0)} 690Z" fill="url(#win-lace)"/>
-      <path d="M${X(40)} 0C${X(36)} 200 ${X(30)} 460 ${X(40)} 690M${X(90)} 0C${X(80)} 220 ${X(60)} 460 ${X(84)} 690" stroke="#f1ecdc" stroke-opacity=".12" stroke-width="7" fill="none"/>
+    return `<g class="win-billow ${sg < 0 ? 'win-bl' : 'win-br'}">
+      <path d="M${X(0)} 0L${X(170)} 0C${X(150)} 200 ${X(110)} 420 ${X(140)} 690L${X(0)} 690Z" fill="url(#win-lace)"/>
+      <path d="M${X(40)} 0C${X(36)} 200 ${X(30)} 460 ${X(40)} 690M${X(95)} 0C${X(85)} 220 ${X(64)} 460 ${X(90)} 690M${X(140)} 0C${X(122)} 220 ${X(98)} 460 ${X(126)} 690" stroke="#f1ecdc" stroke-opacity=".14" stroke-width="7" fill="none"/>
+      <path d="M${X(0)} 686${[...Array(8)].map((_, i) => `Q${X(i * 17.5 + 8.75)} 700 ${X((i + 1) * 17.5)} 686`).join('')}" stroke="#e6e0cf" stroke-opacity=".35" stroke-width="2" fill="none"/>
     </g>`;
   }).join('');
 
@@ -772,6 +844,9 @@
     parent: 'west',
     build(g) {
       RC = buildWindow(g, CLOSE);
+      // a moth that flies in through the open window and settles on the sill
+      RC.land = G.svg(`<g style="display:none"><g class="win-lm">${mothMarkup(1, '#e9dfc3')}</g></g>`, RC.root);
+      RC.landState = 'none';
       // vignette on top
       G.el('rect', { width: 1600, height: 900, fill: 'url(#win-vign)', 'pointer-events': 'none' }, RC.root);
       const glass = G.el('circle', { cx: 800, cy: -50, r: R_SASH * 3, fill: 'transparent' }, RC.root);
@@ -787,7 +862,7 @@
       G.hotspot(latchHot, {
         cursor: 'use',
         click() {
-          if (G.get('windowOpen')) { G.say('The latch hangs open. The key stays in it.'); return; }
+          if (G.get('windowOpen')) { G.say('The keeper is empty. The latch swung out with the window, my key still in it.'); return; }
           G.sfx('lockFail');
           G.say('Locked. The latch has a tiny keyhole.');
           wiggle();
@@ -800,8 +875,12 @@
         fail: 'It needs a key — a very small one.',
       });
     },
-    update() { applyState(RC); },
-    enter() { activate(RC, true); },
+    update() {
+      applyState(RC);
+      if (RC && RC.land && !G.get('windowOpen')) { RC.landState = 'none'; RC.land.style.display = 'none'; }
+      else if (RC && RC.landState === 'landed') showLanded();
+    },
+    enter() { activate(RC, true); scheduleLanding(2600); },
     exit() { activate(RC, false); },
   });
 
@@ -809,6 +888,33 @@
     if (!RC || RC.animating) return;
     await G.tween(260, (e, t) => setLever(RC, Math.sin(t * Math.PI * 3) * 0.06 * (1 - t)), 'linear');
     setLever(RC, 0);
+  }
+
+  const LAND = { x: 1040, y: 698, s: 2.5 };
+  function placeMoth(x, y, s, rot) { RC.land.firstChild.setAttribute('transform', `translate(${f(x)} ${f(y)}) rotate(${f(rot)}) scale(${f(s)})`); }
+  function showLanded() {
+    RC.land.style.display = ''; RC.land.classList.add('win-resting');
+    placeMoth(LAND.x, LAND.y, LAND.s, -8);
+  }
+  let landTimer = null;
+  function scheduleLanding(ms) {
+    clearTimeout(landTimer);
+    if (!RC || !G.get('windowOpen') || RC.landState !== 'none') return;
+    landTimer = setTimeout(async () => {
+      if (G.view() !== 'window' || RC.landState !== 'none' || !G.get('windowOpen')) return;
+      RC.landState = 'flying';
+      RC.land.style.display = ''; RC.land.classList.remove('win-resting');
+      const P0 = [1230, 250], P1 = [560, 260], P2 = [760, 560], P3 = [LAND.x, LAND.y - 40];
+      await G.tween(3400, (e, t) => {
+        const u = 1 - e, b = [0, 1].map(i => u * u * u * P0[i] + 3 * u * u * e * P1[i] + 3 * u * e * e * P2[i] + e * e * e * P3[i]);
+        const wob = Math.sin(t * 22) * 10 * (1 - e);
+        placeMoth(b[0] + wob, b[1] + Math.cos(t * 17) * 8 * (1 - e), 0.9 + 1.6 * e, Math.sin(t * 9) * 25 * (1 - e));
+      }, 'inOut');
+      G.sfx('mothFlutter');
+      await G.tween(700, e => placeMoth(LAND.x, LAND.y - 40 * (1 - e), LAND.s, -8 * e), 'out');
+      RC.landState = 'landed';
+      showLanded();
+    }, ms);
   }
 
   let justOpened = false;
@@ -840,34 +946,10 @@
       G.busy(false);
     }
     G.say('The window swings out into the rain. Moonlight spills across the room — over the desk.');
+    scheduleLanding(2400);
   }
 
   // ---------- moonbeams on the walls ----------
-  // A soft parallel shaft from P0 towards P1 (half-width w), cut at y = yEnd; edges fade via a cross-beam gradient.
-  let beamN = 0;
-  function shaft(P0, P1, w, yEnd, op) {
-    const id = 'win-shaft' + (beamN++);
-    const dx = P1[0] - P0[0], dy = P1[1] - P0[1], L = Math.hypot(dx, dy), d = [dx / L, dy / L], n = [d[1], -d[0]];
-    const A = [P0[0] + n[0] * w, P0[1] + n[1] * w], Bp = [P0[0] - n[0] * w, P0[1] - n[1] * w];
-    const toY = Q => { const t = (yEnd - Q[1]) / d[1]; return [Q[0] + d[0] * t, yEnd]; };
-    const C = toY(A), D = toY(Bp);
-    const M = [(P0[0] + P1[0]) / 2, (P0[1] + P1[1]) / 2];
-    return `<linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="${f(M[0] + n[0] * w)}" y1="${f(M[1] + n[1] * w)}" x2="${f(M[0] - n[0] * w)}" y2="${f(M[1] - n[1] * w)}">
-        <stop offset="0" stop-color="#cfe3ff" stop-opacity="0"/><stop offset=".22" stop-color="#cfe3ff" stop-opacity=".45"/>
-        <stop offset=".5" stop-color="#e4efff" stop-opacity="1"/><stop offset=".78" stop-color="#cfe3ff" stop-opacity=".45"/>
-        <stop offset="1" stop-color="#cfe3ff" stop-opacity="0"/></linearGradient>
-      <polygon points="${[A, C, D, Bp].map(q => f(q[0]) + ',' + f(q[1])).join(' ')}" fill="url(#${id})" opacity="${op}"/>`;
-  }
-  function motes(n, box, seed, dir) {
-    const r = rng(seed);
-    let s = '';
-    for (let i = 0; i < n; i++) {
-      const x = box[0] + r() * (box[2] - box[0]), y = box[1] + r() * (box[3] - box[1]);
-      s += `<circle cx="${f(x)}" cy="${f(y)}" r="${f(0.8 + r() * 1.6)}" fill="#eaf3ff" class="win-anim"
-        style="--o:${f(0.35 + r() * 0.5)};--dx:${f(dir[0] * (20 + r() * 40))}px;--dy:${f(dir[1] * (20 + r() * 40))}px;animation:win-mote ${f(7 + r() * 8)}s ease-in-out ${f(-r() * 15)}s infinite"/>`;
-    }
-    return s;
-  }
   function beamObject(wall, markup, moteBox, moteDir, seed) {
     const B = { g: null, shown: false };
     G.registerWallObject(wall, {
@@ -907,12 +989,12 @@
   // south: the west window is on the viewer's RIGHT. Shaft from the upper right through the air above the
   // portrait/box, its bright pool landing on the journal (x ~450-790, y ~540-620). The only south moonbeam.
   beamObject('south', `
-    ${shaft([1700, 40], [621, 598], 150, 604, 0.2)}
-    ${shaft([1700, 56], [621, 594], 75, 600, 0.26)}
-    ${shaft([1700, 66], [621, 590], 30, 596, 0.16)}
+    ${shaft([1500, -120], [621, 598], 170, 604, 0.2)}
+    ${shaft([1500, -110], [621, 594], 80, 600, 0.24)}
+    ${shaft([1500, -100], [621, 590], 32, 596, 0.14)}
     <ellipse cx="621" cy="578" rx="170" ry="42" fill="url(#win-pool)" opacity=".5"/>
     <ellipse cx="621" cy="580" rx="110" ry="22" fill="url(#win-pool)" opacity=".55"/>`,
-    [700, 120, 1400, 560], [-1, 0.6], 101);
+    [700, 150, 1150, 560], [-1, 0.8], 101);
   // north / west spills are provided by the room art's lighting layer (room.js buildTop, class rl-moon);
   // set EXTRA_SPILLS = true to add this module's own softer versions on top.
   const EXTRA_SPILLS = false;

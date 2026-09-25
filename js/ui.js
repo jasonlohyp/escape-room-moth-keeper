@@ -581,10 +581,12 @@
 
     const e = E.ending = h('div', { id: 'ui-ending', role: 'dialog', 'aria-label': 'The end', 'aria-live': 'polite' }, null, overlay);
     const cv = h('canvas', { 'aria-hidden': 'true' }, null, e);
-    h('div', { class: 'e-band', 'aria-hidden': 'true' }, null, e);
-    const meta = h('div', { class: 'e-body' }, null, e);
-    const l1 = h('p', { class: 'e-line fx', text: 'She never left.' }, null, meta);
-    const l2 = h('p', { class: 'e-line l2 fx', text: 'She was only waiting for someone to light the lamp.' }, null, meta);
+    h('div', { class: 'e-shade-top', 'aria-hidden': 'true' }, null, e);
+    h('div', { class: 'e-shade-bot', 'aria-hidden': 'true' }, null, e);
+    const top = h('div', { class: 'e-top' }, null, e);
+    const l1 = h('p', { class: 'e-line fx', text: 'She never left.' }, null, top);
+    const l2 = h('p', { class: 'e-line l2 fx', text: 'She was only waiting for someone to light the lamp.' }, null, top);
+    const meta = h('div', { class: 'e-bot' }, null, e);
     const m1 = h('div', { class: 'e-title fx', text: 'The Moth Keeper' }, null, meta);
     const m2 = h('div', { class: 'e-stats fx', text: `${fmtTime(time)}  ·  ${hints === 0 ? 'no hints' : hints === 1 ? '1 hint' : hints + ' hints'}` }, null, meta);
     const again = h('button', { class: 't-btn e-again fx', text: 'Play again', 'aria-label': 'Play again' }, null, meta);
@@ -663,7 +665,15 @@
     G.on('start', () => onStart(!!(G.state.flags && Object.keys(G.state.flags).length)));
     G.on('refresh', () => renderInv(false));
     G.on('hint', () => { S.hintEvents++; });
-    G.on('finish', () => showEnding());
+    G.on('finish', () => { document.body.classList.add('finale'); showEnding(); });
+    // the finale cutscene: fade the whole HUD out and keep it gone through the ending
+    const finaleHud = () => {
+      const on = !!G.get('hatched');
+      document.body.classList.toggle('finale', on);
+      if (on) { closeHint(); hideLabel(0); if (G.selected()) G.select(null); }
+    };
+    G.on('flag', k => { if (k === 'hatched') finaleHud(); });
+    G.on('start', finaleHud);
     renderInv(true);
     updateHUD();
   }
