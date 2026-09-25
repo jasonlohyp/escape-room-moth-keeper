@@ -10,11 +10,20 @@
 
   // ------------------------------------------------------------------ moth silhouettes
   // Right half of each moth (body at x=100). Mirrored + winding-normalised into one path.
+  function scallop(pts, c, depth) { // Q-bumps between successive points, pushed away from centre c
+    const out = [];
+    for (let i = 1; i < pts.length; i++) {
+      const a = pts[i - 1], b = pts[i], mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2;
+      const vx = mx - c[0], vy = my - c[1], L = Math.hypot(vx, vy) || 1;
+      out.push(['Q', mx + vx / L * depth, my + vy / L * depth, b[0], b[1]]);
+    }
+    return out;
+  }
   const HALF = {
     atlas: { // broad; forewing apex is a big "snake-head" lobe curling DOWN
       wings: [
-        [103, 48, ['C', 120, 32, 146, 20, 168, 14], ['C', 180, 8, 194, 3, 199, 11], ['C', 204, 20, 201, 33, 192, 37],
-          ['C', 186, 40, 180, 37, 178, 31], ['C', 172, 36, 170, 46, 170, 54], ['C', 170, 62, 168, 67, 164, 72], ['C', 148, 76, 126, 74, 104, 66]],
+        [103, 48, ['C', 122, 34, 150, 24, 170, 20], ['C', 183, 17, 193, 11, 200, 3], ['C', 204, 11, 200, 24, 189, 28],
+          ['C', 183, 30, 179, 29, 176, 30], ['C', 175, 44, 172, 58, 166, 70], ['C', 150, 76, 126, 74, 104, 66]],
         [104, 67, ['C', 132, 70, 164, 72, 177, 84], ['C', 184, 98, 176, 114, 162, 122], ['C', 148, 130, 130, 129, 120, 120],
           ['C', 111, 111, 105, 97, 103, 82]],
         [101, 44, ['C', 106, 34, 112, 26, 121, 19], ['C', 119, 28, 111, 38, 102, 46]],
@@ -41,12 +50,13 @@
       ],
       body: 'M100 29 C105 29 107 40 107 52 C107 70 106 96 103 118 C102 126 101 133 100 134 C99 133 98 126 97 118 C94 96 93 70 93 52 C93 40 95 29 100 29 Z',
     },
-    emperor: { // Saturnia: angled forewing apex, scalloped hindwing margin
+    emperor: { // Saturnia: round fan wings, soft-angled apex, strongly scalloped margins on all wings
       wings: [
-        [103, 52, ['C', 108, 34, 128, 20, 154, 15], ['L', 187, 14], ['C', 182, 30, 182, 48, 174, 60],
-          ['C', 168, 68, 158, 70, 150, 69], ['C', 134, 70, 116, 66, 104, 60]],
-        [104, 64, ['C', 128, 64, 160, 66, 172, 79], ['Q', 182, 82, 178, 90], ['Q', 184, 97, 176, 102], ['Q', 180, 111, 170, 112],
-          ['Q', 170, 122, 160, 120], ['Q', 156, 130, 148, 125], ['Q', 141, 132, 134, 124], ['Q', 124, 128, 120, 118], ['C', 110, 110, 105, 98, 104, 88], ['C', 103, 80, 103, 72, 104, 64]],
+        [103, 50, ['C', 106, 32, 122, 18, 146, 14], ['C', 160, 12, 172, 14, 180, 18], ['Q', 186, 21, 184, 28]].concat(
+          scallop([[184, 28], [183, 40], [179, 51], [171, 62]], [140, 40], 5.5), [['C', 156, 70, 124, 68, 104, 60]]),
+        [104, 64, ['C', 126, 64, 158, 66, 170, 76]].concat(
+          scallop([[170, 76], [176, 88], [174, 100], [168, 111], [158, 120], [146, 126], [132, 126], [120, 120]], [140, 92], 6.5),
+          [['C', 110, 112, 105, 98, 104, 88], ['C', 103, 80, 103, 72, 104, 64]]),
         [101, 44, ['C', 106, 35, 112, 28, 121, 23], ['C', 119, 31, 111, 39, 102, 46]],
       ],
       body: 'M100 42 C106 42 108 56 108 70 C108 86 105 96 100 99 C95 96 92 86 92 70 C92 56 94 42 100 42 Z',
@@ -687,7 +697,7 @@
     }, g => {
       pageBase(g, 'R');
       G.svg(clockSketch(1100, 340, 150), g);
-      G.svg(crescentDoodle(905, 640, 1.5) + candleDoodle(1300, 650, 1.3), g);
+      G.svg(crescentDoodle(866, 150, 1.0) + candleDoodle(868, 240, 0.95), g);
       const cap = handText(g, 1100, 598, '', { lines: ['Father’s tall clock.', 'Pictures, not numbers —', '“hours one can hold.”'], size: 18, lh: 38, maxw: 330, opacity: 0.8 });
       cap.setAttribute('text-anchor', 'middle'); cap.querySelectorAll('tspan').forEach(t => t.setAttribute('x', 1100));
       pageNum(g, 'R', 2);
@@ -715,37 +725,16 @@
     }, g => {
       pageBase(g, 'R');
       const refs = {};
-      // faint sheen (the blank page seems to hold something)
-      refs.sheen = G.el('path', { d: RIGHT_PAGE_D, fill: 'url(#dkPageSheen)', opacity: 0.6, 'pointer-events': 'none' }, g);
-      // moonlight bath
-      refs.moon = G.el('g', { opacity: 0, 'pointer-events': 'none' }, g);
-      G.el('path', { d: RIGHT_PAGE_D, fill: 'url(#dkMoonBath)', style: 'mix-blend-mode:multiply' }, refs.moon);
-      G.el('path', { d: 'M960 96 L1260 96 L1150 786 L830 786 Z', fill: '#cfe3ff', opacity: 0.3, filter: 'url(#blur20)', style: 'mix-blend-mode:screen' }, refs.moon);
-      G.el('path', { d: 'M1250 96 L1330 96 L1260 786 L1190 786 Z', fill: '#cfe3ff', opacity: 0.14, filter: 'url(#blur20)', style: 'mix-blend-mode:screen' }, refs.moon);
-      // silver ink
-      refs.ink = G.el('g', { 'pointer-events': 'none' }, g);
-      const MY = 360, RR = 50, XS = [912, 1040, 1168, 1296];
-      refs.outlines = []; refs.fills = [];
-      XS.forEach((x, i) => {
-        const mg = G.el('g', {}, refs.ink);
-        const fillG = G.el('g', {}, mg);
-        G.el('circle', { cx: x, cy: MY, r: RR, fill: '#1e2735' }, fillG);
-        let lit = null;
-        if (i === 1) lit = `M${x} ${MY - RR} A${RR} ${RR} 0 0 1 ${x} ${MY + RR} Z`;
-        if (i === 2) lit = `M${x} ${MY - RR} A${RR} ${RR} 0 0 1 ${x} ${MY + RR} A${RR} ${RR} 0 0 1 ${x} ${MY - RR} Z`;
-        if (i === 3) lit = `M${x} ${MY - RR} A${RR} ${RR} 0 0 0 ${x} ${MY + RR} Z`;
-        if (lit) G.el('path', { d: lit, fill: 'url(#dkSilver)', filter: 'url(#moonglow)' }, fillG);
-        const ol = G.el('circle', { cx: x, cy: MY, r: RR, fill: 'none', stroke: '#eef4ff', 'stroke-width': 2.6, filter: 'url(#moonglow)' }, mg);
-        refs.fills.push(fillG); refs.outlines.push(ol);
-      });
-      // silver guide flourish + words
-      refs.flour = G.el('path', { d: 'M880 450 C980 436 1100 462 1200 444 C1250 436 1300 446 1330 440', fill: 'none', stroke: '#e6eefc', 'stroke-width': 1.6, opacity: 0.8, filter: 'url(#moonglow)' }, refs.ink);
-      refs.words = handText(refs.ink, 1104, 540, '', { lines: ['for the box'], size: 34, fill: '#f2f7ff', opacity: 1, maxw: 420 });
-      refs.words.setAttribute('text-anchor', 'middle');
-      refs.words.querySelector('tspan').setAttribute('x', 1104);
-      refs.words.setAttribute('filter', 'url(#moonglow)');
-      refs.wordsClipRect = G.el('rect', { x: 860, y: 480, width: 500, height: 100 }, G.el('clipPath', { id: 'dkWordsClip' + (++clipN) }, g));
-      refs.words.setAttribute('clip-path', `url(#dkWordsClip${clipN})`);
+      // pearlescent sheen: the page is deliberately, conspicuously blank
+      refs.sheen = G.el('g', { 'pointer-events': 'none' }, g);
+      G.el('path', { d: RIGHT_PAGE_D, fill: 'url(#dkPearl)', style: 'mix-blend-mode:screen' }, refs.sheen);
+      G.el('path', { d: RIGHT_PAGE_D, fill: 'url(#dkPearl2)', opacity: 0.8, style: 'mix-blend-mode:soft-light' }, refs.sheen);
+      G.svg(`<g fill="#ffffff">
+        <circle cx="990" cy="300" r="1.6"><animate attributeName="opacity" values="0;0.9;0;0" dur="3.8s" repeatCount="indefinite"/></circle>
+        <circle cx="1180" cy="420" r="1.3"><animate attributeName="opacity" values="0;0;0.8;0" dur="4.6s" repeatCount="indefinite"/></circle>
+        <circle cx="1090" cy="520" r="1.4"><animate attributeName="opacity" values="0.7;0;0;0.7" dur="5.2s" repeatCount="indefinite"/></circle>
+        <circle cx="1270" cy="250" r="1.2"><animate attributeName="opacity" values="0;0.8;0;0" dur="6.1s" begin="1.2s" repeatCount="indefinite"/></circle>
+      </g>`, refs.sheen);
       // tiny line at the bottom
       handText(g, 1100, 716, '', { lines: ['Some words I write only for the moon.'], size: 13, opacity: 0.62, maxw: 380 }).setAttribute('text-anchor', 'middle');
       pageNum(g, 'R', 6);
@@ -772,17 +761,82 @@
   ];
   let clipN = 0;
 
-  function applyMoon(refs, moonlit, inkVisible) {
-    if (!refs || !refs.moon) return;
-    refs.moon.setAttribute('opacity', moonlit ? 1 : 0);
-    refs.sheen.setAttribute('opacity', moonlit ? 0 : 0.6);
-    refs.ink.setAttribute('opacity', moonlit && inkVisible ? 1 : 0);
-    if (moonlit && inkVisible) {
-      refs.outlines.forEach(o => { o.removeAttribute('stroke-dasharray'); o.removeAttribute('stroke-dashoffset'); });
-      refs.fills.forEach(f => f.setAttribute('opacity', 1));
-      refs.flour.setAttribute('opacity', 0.8);
-      refs.wordsClipRect.setAttribute('width', 500);
+  function applyMoon(refs, moonlit) {
+    if (!refs || !refs.sheen) return;
+    refs.sheen.setAttribute('opacity', moonlit ? 0 : 1);
+  }
+
+  // --- silver moon-ink (view level, drawn above the moonlight so it can glint) ---
+  function hatchD(x0, y0, x1, y1, sp, angDeg, seed) {
+    const r = rng(seed || 5);
+    const a = angDeg * Math.PI / 180, dx = Math.cos(a), dy = Math.sin(a), nx = -dy, ny = dx;
+    const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2, R = Math.hypot(x1 - x0, y1 - y0) / 2;
+    let d = '';
+    for (let o = -R; o <= R; o += sp) {
+      const j = (r() - 0.5) * sp * 0.35;
+      const px = cx + nx * (o + j), py = cy + ny * (o + j);
+      const e0 = R * (0.9 + r() * 0.1), e1 = R * (0.9 + r() * 0.1);
+      d += `M${(px - dx * e0).toFixed(1)} ${(py - dy * e0).toFixed(1)} L${(px + dx * e1).toFixed(1)} ${(py + dy * e1).toFixed(1)} `;
     }
+    return d;
+  }
+  function buildInk(parent) {
+    const refs = { outlines: [], darks: [], lits: [] };
+    refs.ink = G.el('g', { 'pointer-events': 'none' }, parent);
+    const defs = G.el('defs', {}, refs.ink);
+    const MY = 356, RR = 50, XS = [912, 1040, 1168, 1296];
+    const half = (x, sweep) => `M${x} ${MY - RR} A${RR} ${RR} 0 0 ${sweep} ${x} ${MY + RR} Z`;
+    const disc = x => `M${x} ${MY - RR} A${RR} ${RR} 0 0 1 ${x} ${MY + RR} A${RR} ${RR} 0 0 1 ${x} ${MY - RR} Z`;
+    XS.forEach((x, i) => {
+      // i: 0 new, 1 first quarter (right lit), 2 full, 3 last quarter (left lit)
+      const litD = [null, half(x, 1), disc(x), half(x, 0)][i];
+      const darkD = [disc(x), half(x, 0), null, half(x, 1)][i];
+      const mg = G.el('g', {}, refs.ink);
+      // slate under-stroke separates the moon from the page
+      G.el('circle', { cx: x, cy: MY, r: RR, fill: 'none', stroke: '#1a2230', 'stroke-width': 5, opacity: 0.45 }, mg);
+      const dg = G.el('g', {}, mg), lg = G.el('g', {}, mg);
+      if (darkD) {
+        const cp = G.el('clipPath', { id: 'dkMD' + i }, defs); G.el('path', { d: darkD }, cp);
+        G.el('path', { d: darkD, fill: '#18202d', opacity: 0.85 }, dg);
+        G.el('path', { d: hatchD(x - RR, MY - RR, x + RR, MY + RR, 6, 45, 11 + i), stroke: '#c8d6ea', 'stroke-width': 0.7, opacity: 0.3, 'clip-path': `url(#dkMD${i})` }, dg);
+        G.el('path', { d: hatchD(x - RR, MY - RR, x + RR, MY + RR, 7, -45, 31 + i), stroke: '#c8d6ea', 'stroke-width': 0.6, opacity: 0.2, 'clip-path': `url(#dkMD${i})` }, dg);
+      }
+      if (litD) {
+        const cp = G.el('clipPath', { id: 'dkML' + i }, defs); G.el('path', { d: litD }, cp);
+        G.el('path', { d: litD, fill: '#dfe8f5', opacity: 0.42 }, lg);
+        const h = G.el('path', { d: hatchD(x - RR, MY - RR, x + RR, MY + RR, 3.3, 62, 51 + i), stroke: '#f6f9ff', 'stroke-width': 1.5, 'stroke-linecap': 'round', opacity: 0.95, 'clip-path': `url(#dkML${i})`, filter: 'url(#moonglow)' }, lg);
+        G.el('animate', { attributeName: 'opacity', values: '0.8;1;0.8', dur: (2.6 + i * 0.5).toFixed(1) + 's', repeatCount: 'indefinite' }, h);
+        G.el('g', { 'clip-path': `url(#dkML${i})` }, lg).innerHTML =
+          `<circle cx="${x + (i === 3 ? -18 : 16)}" cy="${MY - 14}" r="7" fill="none" stroke="#8ea2c0" stroke-width="1.2" opacity="0.7"/>` +
+          `<circle cx="${x + (i === 3 ? -26 : 24)}" cy="${MY + 18}" r="4.5" fill="none" stroke="#8ea2c0" stroke-width="1" opacity="0.6"/>`;
+      }
+      const ol = G.el('circle', { cx: x, cy: MY, r: RR, fill: 'none', stroke: '#eef4ff', 'stroke-width': 2.4, filter: 'url(#moonglow)' }, mg);
+      refs.outlines.push(ol); refs.darks.push(dg); refs.lits.push(lg);
+    });
+    // twinkles
+    G.svg(`<g fill="#ffffff" filter="url(#moonglow)">
+      <path d="M1046 300 l1.5 -6 l1.5 6 l6 1.5 l-6 1.5 l-1.5 6 l-1.5 -6 l-6 -1.5 Z"><animate attributeName="opacity" values="0;1;0;0" dur="3.1s" repeatCount="indefinite"/></path>
+      <path d="M1188 330 l1.2 -5 l1.2 5 l5 1.2 l-5 1.2 l-1.2 5 l-1.2 -5 l-5 -1.2 Z"><animate attributeName="opacity" values="0;0;1;0" dur="3.7s" repeatCount="indefinite"/></path>
+      <path d="M1276 392 l1.2 -5 l1.2 5 l5 1.2 l-5 1.2 l-1.2 5 l-1.2 -5 l-5 -1.2 Z"><animate attributeName="opacity" values="1;0;0;1" dur="4.3s" repeatCount="indefinite"/></path>
+    </g>`, refs.ink);
+    refs.flour = G.el('path', { d: 'M880 446 C980 432 1100 458 1200 440 C1250 432 1300 442 1330 436', fill: 'none', stroke: '#e6eefc', 'stroke-width': 1.6, opacity: 0.85, filter: 'url(#moonglow)' }, refs.ink);
+    refs.words = handText(refs.ink, 1104, 536, '', { lines: ['for the box'], size: 36, fill: '#f2f7ff', opacity: 1, maxw: 420 });
+    refs.words.setAttribute('text-anchor', 'middle');
+    refs.words.querySelector('tspan').setAttribute('x', 1104);
+    refs.words.setAttribute('stroke', '#1a2230'); refs.words.setAttribute('stroke-width', 3);
+    refs.words.setAttribute('paint-order', 'stroke'); refs.words.setAttribute('stroke-linejoin', 'round');
+    const wc = G.el('clipPath', { id: 'dkWordsClip' }, defs);
+    refs.wordsClipRect = G.el('rect', { x: 860, y: 470, width: 500, height: 110 }, wc);
+    const wg = G.el('g', { 'clip-path': 'url(#dkWordsClip)', filter: 'url(#moonglow)' }, refs.ink);
+    wg.appendChild(refs.words);
+    return refs;
+  }
+  function inkFull(r) {
+    const C = 2 * Math.PI * 50;
+    r.outlines.forEach(o => { o.setAttribute('stroke-dasharray', C); o.setAttribute('stroke-dashoffset', 0); });
+    r.darks.concat(r.lits).forEach(f => f.setAttribute('opacity', 1));
+    r.flour.setAttribute('opacity', 0.85);
+    r.wordsClipRect.setAttribute('width', 500);
   }
 
   const J = { spread: 0, turning: false };
@@ -819,6 +873,24 @@
           </radialGradient>
           <linearGradient id="dkMoonBath" x1="0" y1="0" x2="1" y2="1">
             <stop offset="0" stop-color="#8aa3c8"/><stop offset="0.5" stop-color="#6d86ab"/><stop offset="1" stop-color="#4a5f80"/>
+          </linearGradient>
+          <linearGradient id="dkPearl" x1="0" y1="0" x2="1" y2="0.35">
+            <stop offset="0" stop-color="#ffffff" stop-opacity="0"/>
+            <stop offset="0.3" stop-color="#f7e6f2" stop-opacity="0.32"/>
+            <stop offset="0.45" stop-color="#e2f4ee" stop-opacity="0.38"/>
+            <stop offset="0.6" stop-color="#e4ebfc" stop-opacity="0.32"/>
+            <stop offset="0.8" stop-color="#ffffff" stop-opacity="0"/>
+            <animateTransform attributeName="gradientTransform" type="translate" values="-0.6 0;0.6 0;-0.6 0" dur="9s" repeatCount="indefinite"/>
+          </linearGradient>
+          <radialGradient id="dkPearl2" cx="50%" cy="45%" r="60%">
+            <stop offset="0" stop-color="#fff8ff" stop-opacity="0.9"/><stop offset="0.6" stop-color="#e8f0f8" stop-opacity="0.4"/><stop offset="1" stop-color="#e8f0f8" stop-opacity="0"/>
+          </radialGradient>
+          <radialGradient id="dkMoonAmb" gradientUnits="userSpaceOnUse" cx="1110" cy="430" r="820">
+            <stop offset="0" stop-color="#6f86ac"/><stop offset="0.42" stop-color="#8fa3c3"/><stop offset="1" stop-color="#c6cfdd"/>
+          </radialGradient>
+          <filter id="dkBlur40" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="40"/></filter>
+          <linearGradient id="dkGutterShadow" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset="0.5" stop-color="#1a0f06" stop-opacity="0.55"/><stop offset="1" stop-color="#000" stop-opacity="0"/>
           </linearGradient>
           <linearGradient id="dkLeafShade" x1="0" y1="0" x2="1" y2="0">
             <stop offset="0" stop-color="#000" stop-opacity="0.35"/><stop offset="0.3" stop-color="#000" stop-opacity="0.05"/><stop offset="1" stop-color="#000" stop-opacity="0"/>
@@ -858,13 +930,40 @@
       // ribbon bookmark
       G.svg(`<path d="M805 97 C808 300 812 560 818 800 L814 826 L822 816 L830 828 L830 800 C824 560 818 300 815 97 Z" fill="#6e2a26" stroke="${INK}" stroke-width="1.3" opacity="0.95"/>
              <path d="M809 110 C812 300 816 560 821 796" fill="none" stroke="#a35a5a" stroke-width="1" opacity="0.5"/>`, g);
+      // turning leaf (curved, lifted, with thickness, cast shadow and moving gutter shadow)
+      J.turnG = G.el('g', { style: 'display:none', 'pointer-events': 'none' }, g);
+      J.gutter = G.el('rect', { x: 730, y: 96, width: 140, height: 700, fill: 'url(#dkGutterShadow)', opacity: 0 }, J.turnG);
+      J.leafCast = G.el('path', { fill: '#000', filter: 'url(#blur20)', opacity: 0 }, J.turnG);
+      J.leafThick = G.el('path', { fill: '#b3a079', stroke: INK, 'stroke-width': 1 }, J.turnG);
+      J.leafBase = G.el('path', { fill: '#e8dcc0', filter: 'url(#paper)' }, J.turnG);
+      const lc = G.el('clipPath', { id: 'dkLeafClip' }, J.turnG);
+      J.leafClip = G.el('path', {}, lc);
+      J.leafContent = G.el('g', {}, G.el('g', { 'clip-path': 'url(#dkLeafClip)' }, J.turnG));
+      J.leafGrad = G.el('linearGradient', { id: 'dkLeafGrad', gradientUnits: 'userSpaceOnUse', x1: 800, y1: 0, x2: 1395, y2: 0 }, J.turnG);
+      G.el('stop', { offset: 0, 'stop-color': '#000', 'stop-opacity': 0.9 }, J.leafGrad);
+      G.el('stop', { offset: 0.5, 'stop-color': '#000', 'stop-opacity': 0.35 }, J.leafGrad);
+      G.el('stop', { offset: 0.92, 'stop-color': '#000', 'stop-opacity': 0.1 }, J.leafGrad);
+      G.el('stop', { offset: 1, 'stop-color': '#fff6e0', 'stop-opacity': 0.5 }, J.leafGrad);
+      J.leafShade = G.el('path', { fill: 'url(#dkLeafGrad)', opacity: 0 }, J.turnG);
+      J.leafEdge = G.el('path', { fill: 'none', stroke: '#fff6e0', 'stroke-width': 2, opacity: 0 }, J.turnG);
+      G.el('path', { d: 'M0 0', fill: 'none' }, J.turnG);
       // light overlays
       J.warm = G.el('rect', { width: 1600, height: 900, fill: 'url(#dkWarm)', 'pointer-events': 'none', style: 'mix-blend-mode:screen' }, g);
       J.cold = G.el('rect', { width: 1600, height: 900, fill: '#16262b', opacity: 0.18, 'pointer-events': 'none', style: 'mix-blend-mode:multiply' }, g);
+      // moonlight (window open): soft ambient cooling + a diagonal shaft crossing both pages
+      J.moon = G.el('g', { opacity: 0, 'pointer-events': 'none' }, g);
+      G.el('rect', { width: 1600, height: 900, fill: 'url(#dkMoonAmb)', style: 'mix-blend-mode:multiply' }, J.moon);
+      G.el('path', { d: 'M520 -160 L1080 -160 L1580 1060 L980 1060 Z', fill: '#cfe3ff', opacity: 0.26, filter: 'url(#dkBlur40)', style: 'mix-blend-mode:screen' }, J.moon);
+      G.el('path', { d: 'M720 -160 L880 -160 L1330 1060 L1150 1060 Z', fill: '#e6f0ff', opacity: 0.14, filter: 'url(#dkBlur40)', style: 'mix-blend-mode:screen' }, J.moon);
+      G.svg(`<g fill="#e6f0ff">
+        <circle cx="900" cy="200" r="1.6" opacity="0.5"><animate attributeName="cy" values="200;260;200" dur="14s" repeatCount="indefinite"/></circle>
+        <circle cx="1010" cy="480" r="1.2" opacity="0.45"><animate attributeName="cx" values="1010;1040;1010" dur="11s" repeatCount="indefinite"/></circle>
+        <circle cx="1180" cy="660" r="1.4" opacity="0.4"><animate attributeName="cy" values="660;610;660" dur="13s" repeatCount="indefinite"/></circle>
+        <circle cx="760" cy="120" r="1.1" opacity="0.4"><animate attributeName="cx" values="760;790;760" dur="12s" repeatCount="indefinite"/></circle>
+      </g>`, J.moon);
+      J.inkLayer = G.el('g', { style: 'display:none', 'pointer-events': 'none' }, g);
+      J.inkRefs = buildInk(J.inkLayer);
       G.el('rect', { width: 1600, height: 900, fill: 'url(#dkVig)', 'pointer-events': 'none' }, g);
-      // turning leaf
-      J.leaf = G.el('g', { style: 'display:none', 'pointer-events': 'none' }, g);
-      J.leafShadow = G.el('rect', { x: 805, y: 100, width: 595, height: 690, fill: 'url(#dkLeafShade)', 'pointer-events': 'none', opacity: 0 }, g);
       // page-turn controls: page curls in the corners
       J.nextCurl = G.svg(`
         <path d="M1398 784 L1398 724 C1376 740 1352 764 1338 786 Z" fill="#d8c8a4" stroke="${INK}" stroke-width="1.4"/>
@@ -885,10 +984,10 @@
       const lit = !!G.get('lampLit');
       J.warm.setAttribute('opacity', lit ? 1 : 0);
       J.cold.setAttribute('opacity', lit ? 0.06 : 0.2);
-      if (!J.revealing) {
-        const rr = J.static[2].rr;
-        applyMoon(rr, !!G.get('windowOpen'), !!G.get('inkSeen'));
-      }
+      const moonlit = !!G.get('windowOpen');
+      J.moon.setAttribute('opacity', moonlit ? 1 : 0);
+      applyMoon(J.static[2].rr, moonlit);
+      syncInk();
       J.nextCurl.style.display = J.spread < PAGES.length - 1 ? '' : 'none';
       J.prevCurl.style.display = J.spread > 0 ? '' : 'none';
       J.hotNext.style.cursor = J.spread < PAGES.length - 1 ? '' : 'default';
@@ -911,11 +1010,36 @@
   }
 
   function leafContent(spread, side) {
-    J.leaf.innerHTML = '';
-    const refs = PAGES[spread][side === 'L' ? 0 : 1](J.leaf) || {};
-    applyMoon(refs, !!G.get('windowOpen'), !!G.get('inkSeen'));
-    fitText(J.leaf);
-    G.el('path', { d: side === 'L' ? LEFT_PAGE_D : RIGHT_PAGE_D, fill: '#000', opacity: 0, class: 'leafdark' }, J.leaf);
+    J.leafContent.innerHTML = '';
+    const refs = PAGES[spread][side === 'L' ? 0 : 1](J.leafContent) || {};
+    applyMoon(refs, !!G.get('windowOpen'));
+    fitText(J.leafContent);
+  }
+
+  // curved, lifted leaf: spine at x=800, free edge at ex
+  const TOPY = 104, BOTY = 788, MIDY = 446;
+  function leafFrame(p, dir) {
+    const w = dir * 595 * Math.cos(Math.PI * p), ex = 800 + w;
+    const lift = Math.sin(Math.PI * p), h = 44 * lift, side = w >= 0 ? 1 : -1, b = side * 34 * lift;
+    const d = `M800 ${TOPY} Q${(800 + w * 0.55).toFixed(1)} ${(TOPY - h * 0.95).toFixed(1)} ${ex.toFixed(1)} ${(TOPY - h * 0.55).toFixed(1)} ` +
+      `Q${(ex + b).toFixed(1)} ${MIDY} ${ex.toFixed(1)} ${(BOTY + h * 0.55).toFixed(1)} ` +
+      `Q${(800 + w * 0.55).toFixed(1)} ${(BOTY + h * 0.95).toFixed(1)} 800 ${BOTY} Z`;
+    J.leafClip.setAttribute('d', d);
+    J.leafBase.setAttribute('d', d);
+    J.leafShade.setAttribute('d', d);
+    J.leafThick.setAttribute('d', d);
+    J.leafThick.setAttribute('transform', `translate(${side * 3.5} 3)`);
+    J.leafCast.setAttribute('d', d);
+    J.leafCast.setAttribute('transform', `translate(${(side * 26 * lift).toFixed(1)} ${(12 * lift).toFixed(1)})`);
+    J.leafCast.setAttribute('opacity', (0.42 * lift).toFixed(3));
+    J.leafEdge.setAttribute('d', `M${ex.toFixed(1)} ${(TOPY - h * 0.55).toFixed(1)} Q${(ex + b).toFixed(1)} ${MIDY} ${ex.toFixed(1)} ${(BOTY + h * 0.55).toFixed(1)}`);
+    J.leafEdge.setAttribute('opacity', (0.8 * lift).toFixed(3));
+    // shade: darker as the leaf stands up (facing away from the light)
+    J.leafShade.setAttribute('opacity', (0.05 + 0.3 * Math.pow(lift, 1.5)).toFixed(3));
+    J.leafGrad.setAttribute('x1', 800); J.leafGrad.setAttribute('x2', ex.toFixed(1));
+    const sy = 1 + (h * 1.1) / 684;
+    J.leafContent.setAttribute('transform', `translate(800 ${MIDY}) scale(${Math.max(0.001, Math.abs(w) / 595).toFixed(4)} ${sy.toFixed(4)}) translate(-800 ${-MIDY})`);
+    J.gutter.setAttribute('opacity', (0.75 * lift).toFixed(3));
   }
 
   async function turn(dir) {
@@ -924,62 +1048,59 @@
     J.turning = true;
     G.sfx('pageTurn');
     const from = J.spread, S = J.static;
-    // underneath: the page that stays + the page being revealed
     S.forEach(s => { s.L.style.display = 'none'; s.R.style.display = 'none'; });
     if (dir > 0) { S[from].L.style.display = ''; S[to].R.style.display = ''; }
     else { S[to].L.style.display = ''; S[from].R.style.display = ''; }
     fitText(J.pagesRoot);
-    J.leaf.style.display = '';
+    syncInk();
     const firstSide = dir > 0 ? 'R' : 'L', secondSide = dir > 0 ? 'L' : 'R';
     leafContent(from, firstSide);
-    const setT = (sx, lift) => J.leaf.setAttribute('transform', `translate(800 0) skewY(${lift.toFixed(2)}) scale(${sx.toFixed(4)} 1) translate(-800 0)`);
-    const dark = () => J.leaf.querySelector('.leafdark');
-    J.leafShadow.setAttribute('x', dir > 0 ? 805 : 205);
-    J.leafShadow.setAttribute('transform', dir > 0 ? '' : 'translate(1000 0) scale(-1 1) translate(-1000 0)');
-    await G.tween(360, t => {
-      setT(1 - t, (dir > 0 ? -1 : 1) * 4 * Math.sin(t * Math.PI / 2));
-      dark().setAttribute('opacity', 0.35 * t);
-      J.leafShadow.setAttribute('opacity', 1 - t);
-    }, 'in');
-    leafContent(to, secondSide);
-    J.leafShadow.setAttribute('x', dir > 0 ? 205 : 805);
-    await G.tween(380, t => {
-      setT(t, (dir > 0 ? 1 : -1) * 4 * Math.cos(t * Math.PI / 2));
-      dark().setAttribute('opacity', 0.35 * (1 - t));
-    }, 'out');
-    J.leaf.style.display = 'none';
-    J.leaf.innerHTML = '';
-    J.leafShadow.setAttribute('opacity', 0);
-    showSpread(to);
+    leafFrame(0, dir);
+    J.turnG.style.display = '';
+    let swapped = false;
+    await G.tween(920, (e) => {
+      if (!swapped && e >= 0.5) { swapped = true; leafContent(to, secondSide); }
+      leafFrame(e, dir);
+    }, 'inOut');
+    J.turnG.style.display = 'none';
+    J.leafContent.innerHTML = '';
     J.turning = false;
+    showSpread(to);
     maybeReveal();
+  }
+
+  function syncInk() {
+    if (!J.inkRefs) return;
+    const show = J.spread === 2 && !J.turning && !!G.get('windowOpen') && (!!G.get('inkSeen') || !!J.revealing);
+    J.inkLayer.style.display = show ? '' : 'none';
+    if (show && !J.revealing) inkFull(J.inkRefs);
   }
 
   async function maybeReveal() {
     if (J.spread !== 2 || !G.get('windowOpen') || G.get('inkSeen') || J.revealing) return;
     J.revealing = true;
-    const rr = J.static[2].rr;
-    rr.moon.setAttribute('opacity', 1); rr.sheen.setAttribute('opacity', 0);
-    rr.ink.setAttribute('opacity', 1);
+    const r = J.inkRefs;
     const C = 2 * Math.PI * 50;
-    rr.outlines.forEach(o => { o.setAttribute('stroke-dasharray', C); o.setAttribute('stroke-dashoffset', C); });
-    rr.fills.forEach(f => f.setAttribute('opacity', 0));
-    rr.flour.setAttribute('opacity', 0);
-    rr.wordsClipRect.setAttribute('width', 0);
+    r.outlines.forEach(o => { o.setAttribute('stroke-dasharray', C); o.setAttribute('stroke-dashoffset', C); });
+    r.darks.concat(r.lits).forEach(f => f.setAttribute('opacity', 0));
+    r.flour.setAttribute('opacity', 0);
+    r.wordsClipRect.setAttribute('width', 0);
+    J.inkLayer.style.display = '';
     G.busy(true);
     await G.wait(450);
     G.sfx('magic');
     await G.tween(1500, t => {
-      rr.outlines.forEach((o, i) => {
+      r.outlines.forEach((o, i) => {
         const u = Math.max(0, Math.min(1, (t - i * 0.14) / 0.58));
         o.setAttribute('stroke-dashoffset', C * (1 - G.ease.inOut(u)));
       });
     }, 'linear');
-    await G.tween(900, t => {
-      rr.fills.forEach((f, i) => f.setAttribute('opacity', Math.max(0, Math.min(1, t * 1.6 - i * 0.2))));
-      rr.flour.setAttribute('opacity', 0.8 * t);
+    await G.tween(1000, t => {
+      r.darks.forEach((f, i) => f.setAttribute('opacity', Math.max(0, Math.min(1, t * 1.6 - i * 0.2))));
+      r.lits.forEach((f, i) => f.setAttribute('opacity', Math.max(0, Math.min(1, t * 1.6 - i * 0.2))));
+      r.flour.setAttribute('opacity', 0.85 * t);
     }, 'inOut');
-    await G.tween(1100, t => rr.wordsClipRect.setAttribute('width', 500 * t), 'inOut');
+    await G.tween(1100, t => r.wordsClipRect.setAttribute('width', 500 * t), 'inOut');
     J.revealing = false;
     G.busy(false);
     G.set('inkSeen');

@@ -10,8 +10,8 @@
   const R_EN = 226, R_ICON = 160;
   const HOUR_LEN = 126, MIN_LEN = 212;
   const SOL_H = 8, SOL_M = 3, START_H = 10, START_M = 6;
-  const DOOR = { x: 668, y: 604, w: 264, h: 208 };   // close-up case door
-  const LEN = { x: 800, y: 668, r: 36 };              // lenticle (pendulum window)
+  const DOOR = { x: 654, y: 602, w: 292, h: 230 };   // close-up case door
+  const LEN = { x: 800, y: 674, r: 38 };              // lenticle (pendulum window)
   const OPEN_DEG = 112;
   const W = { cx: 400, dialY: 250, dialR: 60 };      // wall-object geometry
 
@@ -146,6 +146,27 @@
     <radialGradient id="ck-wallLight" cx="50%" cy="35%" r="55%">
       <stop offset="0" stop-color="#56634f" stop-opacity="0.35"/><stop offset="1" stop-color="#0e171b" stop-opacity="0"/>
     </radialGradient>
+    <radialGradient id="ck-iconGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0.45" stop-color="#ffc85a" stop-opacity="0.85"/><stop offset="1" stop-color="#ffb040" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="ck-dialWarm" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#ffdca0" stop-opacity="0.55"/><stop offset="0.7" stop-color="#f3b25a" stop-opacity="0.3"/><stop offset="1" stop-color="#d9822e" stop-opacity="0.35"/>
+    </radialGradient>
+    <linearGradient id="ck-shaft" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0" stop-color="#ffd89a" stop-opacity="0.05"/><stop offset="1" stop-color="#ffd89a" stop-opacity="0.32"/>
+    </linearGradient>
+    <radialGradient id="ck-pool" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#ffcf7a" stop-opacity="0.55"/><stop offset="1" stop-color="#ffcf7a" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="ck-lampR" gradientUnits="userSpaceOnUse" cx="1650" cy="560" r="1250">
+      <stop offset="0" stop-color="#ffb55a" stop-opacity="1"/><stop offset="0.5" stop-color="#e0853a" stop-opacity="0.6"/><stop offset="1" stop-color="#e0853a" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="ck-lampR2" gradientUnits="userSpaceOnUse" cx="1600" cy="520" r="900">
+      <stop offset="0" stop-color="#ffcf7a" stop-opacity="0.28"/><stop offset="1" stop-color="#ffcf7a" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="ck-moonL" gradientUnits="userSpaceOnUse" x1="0" y1="200" x2="900" y2="600">
+      <stop offset="0" stop-color="#8fb3d9" stop-opacity="0.3"/><stop offset="1" stop-color="#8fb3d9" stop-opacity="0"/>
+    </linearGradient>
     <pattern id="ck-damask" width="140" height="180" patternUnits="userSpaceOnUse">
       <g fill="#2f3a2e">
         <path d="M70,18 C84,40 98,58 88,80 C82,94 74,98 70,112 C66,98 58,94 52,80 C42,58 56,40 70,18Z"/>
@@ -272,8 +293,7 @@
         <path d="M-13,3 q13,4.5 26,0 M-14,7 q14,4.5 28,0" stroke="#6e4d1c" stroke-width="1.1" fill="none"/>
         <path d="M-7,-13 C-9,-5 -9,3 -12,10" stroke="#fff4cc" stroke-width="2.2" fill="none" opacity="0.75" stroke-linecap="round"/>`,
     // 8 crescent moon
-    () => `<circle r="26" fill="url(#ck-moonHalo)" opacity="0.7"/>
-        <path d="M-4.09,-20.59 A21,21 0 1 0 15.33,14.35 A20,20 0 0 1 -4.09,-20.59Z" fill="url(#ck-crescG)" stroke="${INK}" stroke-width="1.9" stroke-linejoin="round"/>
+    () => `<path d="M-4.09,-20.59 A21,21 0 1 0 15.33,14.35 A20,20 0 0 1 -4.09,-20.59Z" fill="url(#ck-crescG)" stroke="${INK}" stroke-width="1.9" stroke-linejoin="round"/>
         <circle cx="-14" cy="3" r="1.9" fill="none" stroke="#b9892e" stroke-width="0.9"/>
         <circle cx="-9" cy="12" r="1.4" fill="none" stroke="#b9892e" stroke-width="0.8"/>
         <path d="M-9,-15 a18,18 0 0 0 -8,18" stroke="#fffbe6" stroke-width="1.6" fill="none" opacity="0.8" stroke-linecap="round"/>`,
@@ -359,12 +379,32 @@
 
   // ------------------------------------------------------------------ state
   const ang = { h: START_H * 30, m: START_M * 30 };   // current displayed (unwrapped) angles
+  const lift = { h: 0, m: 0 };                          // 0..1 "picked up" amount per hand
   let drag = null, animating = false, swinging = false, swingStart = 0, saidEnter = false;
+  let active = 'h', hovered = null, hoverIcon = null;
   let V = {}, WO = {};   // element refs for the view / wall object
 
   function posOf(which) { const f = G.get(which === 'h' ? 'clockH' : 'clockM'); return typeof f === 'number' ? f : (which === 'h' ? START_H : START_M); }
 
+  // generic hinged-door transform (hinge on the left edge). Past 90deg the back face shows, left of the hinge.
+  function applyDoor(R, D, deg, thick) {
+    const c = Math.cos(rad(deg)), s = Math.sin(rad(deg));
+    const hx = D.x, cy = D.y + D.h / 2;
+    R.front.style.display = c >= 0 ? '' : 'none';
+    R.back.style.display = c < 0 ? '' : 'none';
+    const k = s * 0.045 * (c >= 0 ? 1 : -1);
+    const m = deg ? `translate(${hx},${cy}) matrix(${c.toFixed(4)},${(-k).toFixed(4)},0,${(1 + s * 0.05).toFixed(4)},0,0) translate(${-hx},${-cy})` : '';
+    R.front.setAttribute('transform', m);
+    R.back.setAttribute('transform', m);
+    if (R.fshade) R.fshade.setAttribute('opacity', (s * 0.5).toFixed(3));
+    const T = thick * s, ex = hx + D.w * c;
+    R.edge.setAttribute('x', f1(c >= 0 ? ex : ex - T));
+    R.edge.setAttribute('width', f1(deg > 0.5 ? T : 0));
+    R.edge.setAttribute('transform', `translate(0,${f1(-k * D.w * c * 0.5)})`);
+  }
+
   // ------------------------------------------------------------------ WALL OBJECT (north)
+  const WD = { x: 356, y: 362, w: 88, h: 322 };
   function buildWall(g) {
     ensureDefs();
     const cx = W.cx, dy = W.dialY;
@@ -384,24 +424,40 @@
       <rect x="342" y="338" width="116" height="376" fill="url(#ck-walnutV)" stroke="${INK}" stroke-width="2.5" filter="url(#ck-grainV)"/>
       <path d="M346,344 v364 M454,344 v364" stroke="#8a5a37" stroke-width="1.2" opacity="0.6"/>
       <g class="ck-wcavity">
-        <rect x="356" y="362" width="88" height="322" fill="url(#ck-cavityG)" stroke="${INK}" stroke-width="1.5"/>
+        <rect x="${WD.x}" y="${WD.y}" width="${WD.w}" height="${WD.h}" fill="url(#ck-cavityG)" stroke="${INK}" stroke-width="1.5"/>
+        <path d="M372,362 v322 M388,362 v322 M412,362 v322 M428,362 v322" stroke="#2a1a10" stroke-width="1" opacity="0.8"/>
+        <path d="M368,362 v8 M432,362 v4" stroke="#8a6a3a" stroke-width="1"/>
+        <rect x="363" y="370" width="10" height="58" rx="2" fill="url(#ck-colBrass)" stroke="${INK}" stroke-width="1"/>
+        <rect x="427" y="366" width="10" height="52" rx="2" fill="url(#ck-colBrass)" stroke="${INK}" stroke-width="1"/>
         <g class="ck-wpend">
-          <path d="M400,362 L400,440" stroke="#8a6a3a" stroke-width="2"/>
+          <path d="M400,362 L400,430" stroke="#c8963e" stroke-width="2"/>
           <circle cx="400" cy="440" r="11" fill="url(#ck-bobG)" stroke="${INK}" stroke-width="1.5"/>
         </g>
-        <rect x="366" y="366" width="8" height="46" rx="2" fill="url(#ck-colBrass)" stroke="${INK}" stroke-width="1"/>
-        <rect x="426" y="366" width="8" height="40" rx="2" fill="url(#ck-colBrass)" stroke="${INK}" stroke-width="1"/>
+        <path d="M356,662 h88 v10 h-88Z" fill="#5a3824" stroke="${INK}" stroke-width="1"/>
+        <ellipse cx="402" cy="660" rx="34" ry="6" fill="#ffcf7a" opacity="0.18" class="ck-wpool"/>
+        <g class="ck-wmb"><g transform="translate(374,634) scale(0.5)">${matchboxBody()}</g></g>
       </g>
       <g class="ck-wdoor">
-        <path d="M356,362 h88 v322 h-88Z M400,425 a15,15 0 1 0 0.01,0Z" fill-rule="evenodd" fill="url(#ck-walnutV)" stroke="${INK}" stroke-width="2" filter="url(#ck-grainV)"/>
-        <rect x="366" y="480" width="68" height="186" rx="4" fill="none" stroke="#2a1a10" stroke-width="2"/>
-        <rect x="368" y="482" width="64" height="182" rx="3" fill="none" stroke="#8a5a37" stroke-width="1" opacity="0.7"/>
-        <circle cx="400" cy="440" r="15" fill="url(#ck-glassG)"/>
-        <circle cx="400" cy="440" r="16.5" fill="none" stroke="url(#ck-brassH)" stroke-width="3.5"/>
-        <circle cx="400" cy="440" r="18.5" fill="none" stroke="${INK}" stroke-width="1.2"/>
-        <path d="M391,432 a12,12 0 0 1 9,-5" stroke="#fff" stroke-width="1.2" fill="none" opacity="0.5"/>
-        <path d="M436,540 m-3,0 a3,3 0 1 0 6,0 a3,3 0 1 0 -6,0 M436,543 l0,6" stroke="${INK}" stroke-width="1.2" fill="#6e4d1c"/>
-        <g transform="translate(400,560) scale(0.42)" fill="#4a2e1e" stroke="#20140c" stroke-width="2.4"><path d="M-2,0 C-12,-16 -38,-22 -48,-12 C-50,-4 -36,6 -18,4 C-30,8 -34,20 -24,22 C-12,22 -6,12 -2,6Z"/><path d="M2,0 C12,-16 38,-22 48,-12 C50,-4 36,6 18,4 C30,8 34,20 24,22 C12,22 6,12 2,6Z"/><ellipse cx="0" cy="3" rx="3.5" ry="12" fill="#6a4229"/></g>
+        <g class="ck-wfront">
+          <path d="M356,362 h88 v322 h-88Z M400,425 a15,15 0 1 0 0.01,0Z" fill-rule="evenodd" fill="url(#ck-walnutV)" stroke="${INK}" stroke-width="2" filter="url(#ck-grainV)"/>
+          <rect x="366" y="480" width="68" height="186" rx="4" fill="none" stroke="#2a1a10" stroke-width="2"/>
+          <rect x="368" y="482" width="64" height="182" rx="3" fill="none" stroke="#8a5a37" stroke-width="1" opacity="0.7"/>
+          <circle cx="400" cy="440" r="15" fill="url(#ck-glassG)"/>
+          <circle cx="400" cy="440" r="16.5" fill="none" stroke="url(#ck-brassH)" stroke-width="3.5"/>
+          <circle cx="400" cy="440" r="18.5" fill="none" stroke="${INK}" stroke-width="1.2"/>
+          <path d="M391,432 a12,12 0 0 1 9,-5" stroke="#fff" stroke-width="1.2" fill="none" opacity="0.5"/>
+          <path d="M436,540 m-3,0 a3,3 0 1 0 6,0 a3,3 0 1 0 -6,0 M436,543 l0,6" stroke="${INK}" stroke-width="1.2" fill="#6e4d1c"/>
+          <g transform="translate(400,560) scale(0.42)" fill="#4a2e1e" stroke="#20140c" stroke-width="2.4"><path d="M-2,0 C-12,-16 -38,-22 -48,-12 C-50,-4 -36,6 -18,4 C-30,8 -34,20 -24,22 C-12,22 -6,12 -2,6Z"/><path d="M2,0 C12,-16 38,-22 48,-12 C50,-4 36,6 18,4 C30,8 34,20 24,22 C12,22 6,12 2,6Z"/><ellipse cx="0" cy="3" rx="3.5" ry="12" fill="#6a4229"/></g>
+          <rect class="ck-wfshade" x="356" y="362" width="88" height="322" fill="#000" opacity="0" pointer-events="none"/>
+        </g>
+        <g class="ck-wback" style="display:none">
+          <rect x="356" y="362" width="88" height="322" fill="#3a2418" stroke="${INK}" stroke-width="2" filter="url(#ck-grainV)"/>
+          <rect x="360" y="380" width="80" height="10" fill="#4e3020" stroke="${INK}" stroke-width="1"/>
+          <rect x="360" y="650" width="80" height="10" fill="#4e3020" stroke="${INK}" stroke-width="1"/>
+          <circle cx="400" cy="440" r="15" fill="#0c0806" stroke="${INK}" stroke-width="1.5"/>
+          <rect x="356" y="362" width="88" height="322" fill="#000" opacity="0.35"/>
+        </g>
+        <rect class="ck-wedge" x="444" y="362" width="0" height="322" fill="#7a4e30" stroke="${INK}" stroke-width="1"/>
       </g>
       <!-- hood base moulding -->
       <path d="M312,322 h176 l-6,10 h-164Z" fill="url(#ck-walnutH)" stroke="${INK}" stroke-width="2"/>
@@ -450,17 +506,15 @@
       </g>
       <circle cx="${cx}" cy="${dy}" r="3.5" fill="url(#ck-bossG)" stroke="${INK}" stroke-width="1"/>
       <path d="M352,212 a58,58 0 0 1 44,-20" stroke="#ffffff" stroke-width="3" fill="none" opacity="0.18" stroke-linecap="round"/>
-      <!-- sheen on case -->
       <path d="M350,346 v360" stroke="#c89468" stroke-width="3" opacity="0.18"/>
     `, g);
     WO.root = root;
     WO.h = root.querySelector('.ck-wh');
     WO.m = root.querySelector('.ck-wm');
-    WO.door = root.querySelector('.ck-wdoor');
     WO.pend = root.querySelector('.ck-wpend');
-    WO.edge = G.el('rect', { y: 362, height: 322, width: 0, x: 444, fill: '#7a4e30', stroke: INK, 'stroke-width': 1 }, WO.door.parentNode);
-    WO.door.parentNode.insertBefore(WO.edge, WO.door.nextSibling);
-    // invisible hit area over the whole clock
+    WO.mb = root.querySelector('.ck-wmb');
+    WO.pool = root.querySelector('.ck-wpool');
+    WO.door = { front: root.querySelector('.ck-wfront'), back: root.querySelector('.ck-wback'), edge: root.querySelector('.ck-wedge'), fshade: root.querySelector('.ck-wfshade') };
     const hit = G.el('rect', { x: 306, y: 108, width: 188, height: 694, fill: 'transparent', 'pointer-events': 'all' }, g);
     G.hotspot(hit, { cursor: 'look', click() { G.go('clock'); } });
   }
@@ -470,26 +524,26 @@
     const h = solved ? SOL_H : posOf('h'), m = solved ? SOL_M : posOf('m');
     WO.h.setAttribute('transform', `translate(${W.cx},${W.dialY}) rotate(${h * 30})`);
     WO.m.setAttribute('transform', `translate(${W.cx},${W.dialY}) rotate(${m * 30})`);
-    setWallDoor(solved ? 38 : 0);
+    applyDoor(WO.door, WD, solved ? OPEN_DEG : 0, 6);
+    WO.mb.style.display = solved && !G.get('gotMatches') ? '' : 'none';
+    WO.pool.style.display = solved ? '' : 'none';
     ensureLoop();
-  }
-  function setWallDoor(deg) {
-    const c = Math.cos(rad(deg));
-    WO.door.setAttribute('transform', deg ? `translate(356,0) matrix(${c.toFixed(4)},0,0,1,0,0) translate(-356,0)` : '');
-    WO.edge.setAttribute('x', f1(356 + 88 * c));
-    WO.edge.setAttribute('width', f1(6 * Math.sin(rad(deg))));
   }
 
   // ------------------------------------------------------------------ CLOSE-UP VIEW
   function buildView(g) {
     ensureDefs();
-    // ---- backdrop: wall, clock hood, trunk
-    let icons = '', medallions = '', florets = '';
+    let icons = '', medallions = '', florets = '', lits = '';
     for (let i = 0; i < 12; i++) {
       const p = pol(R_ICON, i * 30, CX, CY);
-      medallions += `<circle cx="${f1(p[0])}" cy="${f1(p[1])}" r="33" fill="#f7f0dc" fill-opacity="0.55" stroke="#8a6a3a" stroke-width="1.3"/>
-                     <circle cx="${f1(p[0])}" cy="${f1(p[1])}" r="29.5" fill="none" stroke="#8a6a3a" stroke-width="0.6" stroke-dasharray="2 2.5"/>`;
-      icons += `<g class="ck-icon" data-i="${i}" transform="translate(${f1(p[0])},${f1(p[1])}) scale(1.1)">${ICONS[i]()}</g>`;
+      const X = f1(p[0]), Y = f1(p[1]);
+      medallions += `<circle cx="${X}" cy="${Y}" r="33" fill="#f7f0dc" fill-opacity="0.55" stroke="#8a6a3a" stroke-width="1.3"/>
+                     <circle cx="${X}" cy="${Y}" r="29.5" fill="none" stroke="#8a6a3a" stroke-width="0.6" stroke-dasharray="2 2.5"/>`;
+      lits += `<g class="ck-lit" data-i="${i}" style="opacity:0;transition:opacity .35s ease">
+                 <circle cx="${X}" cy="${Y}" r="50" fill="url(#ck-iconGlow)"/>
+                 <circle cx="${X}" cy="${Y}" r="33" fill="#ffe2a0" fill-opacity="0.55" stroke="#d9982e" stroke-width="3.2"/>
+               </g>`;
+      icons += `<g class="ck-icon" data-i="${i}" transform="translate(${X},${Y}) scale(1.1)">${ICONS[i]()}</g>`;
       const q = pol(R_ICON + 2, i * 30 + 15, CX, CY);
       florets += `<g transform="translate(${f1(q[0])},${f1(q[1])}) rotate(${i * 30 + 15})"><path d="M0,-6 L2,0 L0,6 L-2,0Z" fill="#b8893a" stroke="#6e4d1c" stroke-width="0.6"/><circle r="1.4" fill="#6e4d1c"/></g>`;
     }
@@ -503,82 +557,94 @@
     for (let k = 0; k < 12; k++) { const p = pol(211, k * 30, CX, CY); dots += `<circle cx="${f1(p[0])}" cy="${f1(p[1])}" r="3.4" fill="#2a1f14"/>`; }
     let beads = '';
     for (let k = 0; k < 90; k++) { const p = pol(241, k * 4, CX, CY); beads += `<circle cx="${f1(p[0])}" cy="${f1(p[1])}" r="3.1"/>`; }
-    // hairline crack
     const crackPts = [[226, 139], [214, 140.5], [203, 138], [192, 139.5], [181, 137.2], [168, 135.8], [150, 137.5], [134, 134], [121, 135.5], [108, 131]];
     const crack = 'M' + crackPts.map(p => pol(p[0], p[1], CX, CY).map(f1).join(',')).join('L');
     const crackB = 'M' + [[181, 137.2], [176, 141], [168, 142.6], [161, 146]].map(p => pol(p[0], p[1], CX, CY).map(f1).join(',')).join('L');
-    // dial-plate damask behind bezel
+    // wainscot panels
+    let panels = '';
+    for (let x = -60; x < 1600; x += 250) {
+      panels += `<rect x="${x + 16}" y="748" width="218" height="140" rx="3" fill="url(#gPanel)" stroke="${INK}" stroke-width="2"/>
+                 <path d="M${x + 22},754 h206" stroke="#6a4229" stroke-width="1.4" opacity="0.6"/>
+                 <path d="M${x + 22},882 h206" stroke="#0e0906" stroke-width="2" opacity="0.7"/>`;
+    }
+    const D = DOOR;
     const root = G.svg(`
-      <rect x="0" y="0" width="1600" height="900" fill="#1f2820"/>
-      <rect x="0" y="0" width="1600" height="900" fill="url(#ck-damask)" opacity="0.6"/>
-      <rect x="0" y="0" width="1600" height="900" fill="url(#ck-wallLight)"/>
-      <!-- wainscot hint at the bottom -->
-      <rect x="0" y="770" width="1600" height="130" fill="#23160f"/>
-      <rect x="0" y="770" width="1600" height="10" fill="#3a2418"/>
-      <path d="M0,780 h1600" stroke="#6a4229" stroke-width="1.5" opacity="0.6"/>
+      <!-- surroundings: same wallpaper + dado as the room, seen closer -->
+      <rect x="0" y="0" width="1600" height="900" fill="#3e4b3c"/>
+      <g transform="scale(1.45)"><rect x="0" y="0" width="1104" height="476" fill="url(#pWall)"/></g>
+      <rect x="0" y="0" width="1600" height="700" fill="url(#gWallTone)"/>
+      <rect x="0" y="690" width="1600" height="210" fill="#22160e"/>
+      ${panels}
+      <rect x="0" y="708" width="1600" height="26" fill="url(#gRailShadow)"/>
+      <rect x="-4" y="686" width="1608" height="24" fill="url(#gBeam)" stroke="${INK}" stroke-width="2"/>
+      <path d="M0,690 h1600" stroke="#a87650" stroke-width="1.8" opacity="0.55"/>
+      <path d="M0,709 h1600" stroke="#1a100a" stroke-width="1.4" opacity="0.7"/>
+      <g class="ck-clock">
       <!-- clock drop shadow on the wall -->
       <path d="M470,-10 h660 v590 h-120 v330 h-420 v-330 h-120Z" fill="#000" opacity="0.6" filter="url(#ck-blur12)" transform="translate(16,10)"/>
       <!-- trunk -->
       <rect x="600" y="570" width="400" height="340" fill="url(#ck-walnutV)" stroke="${INK}" stroke-width="3" filter="url(#ck-grainV)"/>
-      <rect x="612" y="590" width="30" height="320" fill="url(#ck-colG)" stroke="${INK}" stroke-width="2" opacity="0.9"/>
-      <rect x="958" y="590" width="30" height="320" fill="url(#ck-colG)" stroke="${INK}" stroke-width="2" opacity="0.9"/>
-      <path d="M620,600 v300 M627,600 v300 M634,600 v300 M966,600 v300 M973,600 v300 M980,600 v300" stroke="#1c120b" stroke-width="1.2" opacity="0.55"/>
-      <path d="M657,594 h286 v230 h-286Z" fill="#241610" stroke="${INK}" stroke-width="2"/>
+      <rect x="606" y="590" width="30" height="320" fill="url(#ck-colG)" stroke="${INK}" stroke-width="2" opacity="0.9"/>
+      <rect x="964" y="590" width="30" height="320" fill="url(#ck-colG)" stroke="${INK}" stroke-width="2" opacity="0.9"/>
+      <path d="M614,600 v300 M621,600 v300 M628,600 v300 M972,600 v300 M979,600 v300 M986,600 v300" stroke="#1c120b" stroke-width="1.2" opacity="0.55"/>
+      <path d="M${D.x - 10},${D.y - 10} h${D.w + 20} v${D.h + 20} h-${D.w + 20}Z" fill="#241610" stroke="${INK}" stroke-width="2"/>
       <!-- cavity (behind the door) -->
       <g class="ck-cavity">
-        <rect x="${DOOR.x}" y="${DOOR.y}" width="${DOOR.w}" height="${DOOR.h}" fill="url(#ck-cavityG)"/>
-        <path d="M700,604 v208 M735,604 v208 M770,604 v208 M830,604 v208 M865,604 v208 M900,604 v208" stroke="#2a1a10" stroke-width="1.5" opacity="0.7"/>
-        <g class="ck-weightL"><path d="M716,604 v14" stroke="#8a6a3a" stroke-width="1.5"/><rect x="704" y="618" width="24" height="88" rx="4" fill="url(#ck-colBrass)" stroke="${INK}" stroke-width="1.6"/><path d="M704,630 h24 M704,694 h24" stroke="#5e4015" stroke-width="1.5"/></g>
-        <g class="ck-weightR"><path d="M884,604 v6" stroke="#8a6a3a" stroke-width="1.5"/><rect x="872" y="610" width="24" height="88" rx="4" fill="url(#ck-colBrass)" stroke="${INK}" stroke-width="1.6"/><path d="M872,622 h24 M872,686 h24" stroke="#5e4015" stroke-width="1.5"/></g>
+        <rect x="${D.x}" y="${D.y}" width="${D.w}" height="${D.h}" fill="url(#ck-cavityG)"/>
+        <path d="M690,${D.y}v${D.h} M728,${D.y}v${D.h} M766,${D.y}v${D.h} M834,${D.y}v${D.h} M872,${D.y}v${D.h} M910,${D.y}v${D.h}" stroke="#2a1a10" stroke-width="1.5" opacity="0.7"/>
+        <g><path d="M702,${D.y} v16" stroke="#8a6a3a" stroke-width="1.5"/><rect x="690" y="${D.y + 16}" width="26" height="96" rx="4" fill="url(#ck-colBrass)" stroke="${INK}" stroke-width="1.6"/><path d="M690,${D.y + 28} h26 M690,${D.y + 100} h26" stroke="#5e4015" stroke-width="1.5"/></g>
+        <g><path d="M898,${D.y} v8" stroke="#8a6a3a" stroke-width="1.5"/><rect x="885" y="${D.y + 8}" width="26" height="96" rx="4" fill="url(#ck-colBrass)" stroke="${INK}" stroke-width="1.6"/><path d="M885,${D.y + 20} h26 M885,${D.y + 92} h26" stroke="#5e4015" stroke-width="1.5"/></g>
         <g class="ck-pend">
-          <path d="M800,${DOOR.y - 2} L800,${LEN.y - 20}" stroke="#6e4d1c" stroke-width="5"/>
-          <path d="M800,${DOOR.y - 2} L800,${LEN.y - 20}" stroke="#c8963e" stroke-width="2"/>
-          <circle cx="${LEN.x}" cy="${LEN.y}" r="29" fill="url(#ck-bobG)" stroke="${INK}" stroke-width="2"/>
-          <circle cx="${LEN.x}" cy="${LEN.y}" r="21" fill="none" stroke="#7a5520" stroke-width="1.2" opacity="0.7"/>
-          <path d="M${LEN.x - 16},${LEN.y - 12} a20,20 0 0 1 14,-10" stroke="#fff6d6" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.8"/>
+          <path d="M800,${D.y - 2} L800,${LEN.y - 22}" stroke="#6e4d1c" stroke-width="5"/>
+          <path d="M800,${D.y - 2} L800,${LEN.y - 22}" stroke="#c8963e" stroke-width="2"/>
+          <circle cx="${LEN.x}" cy="${LEN.y}" r="31" fill="url(#ck-bobG)" stroke="${INK}" stroke-width="2"/>
+          <circle cx="${LEN.x}" cy="${LEN.y}" r="22" fill="none" stroke="#7a5520" stroke-width="1.2" opacity="0.7"/>
+          <path d="M${LEN.x - 17},${LEN.y - 13} a21,21 0 0 1 15,-11" stroke="#fff6d6" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.8"/>
         </g>
-        <!-- inner ledge -->
-        <path d="M${DOOR.x},792 h${DOOR.w} v20 h-${DOOR.w}Z" fill="#4a2e1e" stroke="${INK}" stroke-width="1.5"/>
-        <path d="M${DOOR.x},792 h${DOOR.w}" stroke="#8a5a37" stroke-width="2"/>
-        <rect x="${DOOR.x}" y="${DOOR.y}" width="${DOOR.w}" height="18" fill="#000" opacity="0.5" filter="url(#ck-blur3)"/>
+        <g class="ck-rewardLight" style="opacity:0;transition:opacity 1.4s ease">
+          <path d="M${D.x},${D.y} L${D.x + 90},${D.y} L${D.x + 250},${D.y + D.h - 22} L${D.x + 40},${D.y + D.h - 22}Z" fill="url(#ck-shaft)" style="mix-blend-mode:screen"/>
+          <ellipse cx="806" cy="${D.y + D.h - 22}" rx="130" ry="22" fill="url(#ck-pool)" style="mix-blend-mode:screen"/>
+        </g>
+        <path d="M${D.x},${D.y + D.h - 22} h${D.w} v22 h-${D.w}Z" fill="#4a2e1e" stroke="${INK}" stroke-width="1.5"/>
+        <path d="M${D.x},${D.y + D.h - 22} h${D.w}" stroke="#8a5a37" stroke-width="2"/>
+        <rect x="${D.x}" y="${D.y}" width="${D.w}" height="18" fill="#000" opacity="0.5" filter="url(#ck-blur3)"/>
         <g class="ck-matchbox"></g>
-        <rect class="ck-doorShade" x="${DOOR.x}" y="${DOOR.y}" width="${DOOR.w}" height="${DOOR.h}" fill="#000" opacity="0" pointer-events="none"/>
       </g>
       <!-- the door -->
       <g class="ck-door">
         <g class="ck-doorFront">
-          <path d="M${DOOR.x},${DOOR.y} h${DOOR.w} v${DOOR.h} h-${DOOR.w}Z M${LEN.x},${LEN.y - LEN.r} a${LEN.r},${LEN.r} 0 1 0 0.01,0Z" fill-rule="evenodd" fill="url(#ck-walnutV)" stroke="${INK}" stroke-width="2.5" filter="url(#ck-grainV)"/>
+          <path d="M${D.x},${D.y} h${D.w} v${D.h} h-${D.w}Z M${LEN.x},${LEN.y - LEN.r} a${LEN.r},${LEN.r} 0 1 0 0.01,0Z" fill-rule="evenodd" fill="url(#ck-walnutV)" stroke="${INK}" stroke-width="2.5" filter="url(#ck-grainV)"/>
           <circle cx="${LEN.x}" cy="${LEN.y}" r="${LEN.r}" fill="url(#ck-glassG)"/>
-          <path d="M${LEN.x - 24},${LEN.y - 18} a30,30 0 0 1 22,-15" stroke="#e6f0ff" stroke-width="3" fill="none" opacity="0.35" stroke-linecap="round"/>
-          <path d="M${LEN.x + 22},${LEN.y + 16} a28,28 0 0 1 -10,10" stroke="#e6f0ff" stroke-width="2" fill="none" opacity="0.2" stroke-linecap="round"/>
+          <path d="M${LEN.x - 25},${LEN.y - 19} a31,31 0 0 1 23,-16" stroke="#e6f0ff" stroke-width="3" fill="none" opacity="0.35" stroke-linecap="round"/>
+          <path d="M${LEN.x + 23},${LEN.y + 17} a29,29 0 0 1 -10,10" stroke="#e6f0ff" stroke-width="2" fill="none" opacity="0.2" stroke-linecap="round"/>
           <circle cx="${LEN.x}" cy="${LEN.y}" r="${LEN.r + 4}" fill="none" stroke="${INK}" stroke-width="10"/>
           <circle cx="${LEN.x}" cy="${LEN.y}" r="${LEN.r + 4}" fill="none" stroke="url(#ck-bezelG)" stroke-width="7"/>
           <circle cx="${LEN.x}" cy="${LEN.y}" r="${LEN.r + 9}" fill="none" stroke="#2a1a10" stroke-width="1.5"/>
-          <rect x="${DOOR.x + 14}" y="728" width="${DOOR.w - 28}" height="70" rx="5" fill="#4a2e1e" stroke="#20140c" stroke-width="2"/>
-          <rect x="${DOOR.x + 18}" y="732" width="${DOOR.w - 36}" height="62" rx="4" fill="none" stroke="#8a5a37" stroke-width="1.2" opacity="0.7"/>
-          <g transform="translate(800,763)" stroke="#20140c" stroke-width="1.3" stroke-linejoin="round">
+          <rect x="${D.x + 16}" y="${D.y + 150}" width="${D.w - 32}" height="66" rx="5" fill="#4a2e1e" stroke="#20140c" stroke-width="2"/>
+          <rect x="${D.x + 20}" y="${D.y + 154}" width="${D.w - 40}" height="58" rx="4" fill="none" stroke="#8a5a37" stroke-width="1.2" opacity="0.7"/>
+          <g transform="translate(800,${D.y + 183})" stroke="#20140c" stroke-width="1.3" stroke-linejoin="round">
             <path d="M-2,0 C-12,-16 -38,-22 -48,-12 C-50,-4 -36,6 -18,4 C-30,8 -34,20 -24,22 C-12,22 -6,12 -2,6Z" fill="#5e3b26"/>
             <path d="M2,0 C12,-16 38,-22 48,-12 C50,-4 36,6 18,4 C30,8 34,20 24,22 C12,22 6,12 2,6Z" fill="#5e3b26"/>
             <path d="M-8,-4 C-18,-12 -32,-16 -42,-12 M8,-4 C18,-12 32,-16 42,-12" fill="none" stroke="#8a5a37" stroke-width="1"/>
             <ellipse cx="0" cy="3" rx="3.5" ry="12" fill="#6a4229"/>
           </g>
-          <g transform="translate(906,700)">
+          <g transform="translate(${D.x + D.w - 26},${D.y + 104})">
             <path d="M-8,-14 C-8,-20 8,-20 8,-14 L9,14 C9,20 -9,20 -9,14Z" fill="url(#ck-brassH)" stroke="${INK}" stroke-width="1.6"/>
             <path d="M0,-6 m-3,0 a3,3 0 1 0 6,0 a3,3 0 1 0 -6,0 M-1.4,-4 L-2.4,6 L2.4,6 L1.4,-4Z" fill="${INK}"/>
           </g>
-          <rect x="${DOOR.x - 3}" y="620" width="9" height="26" rx="2" fill="url(#ck-colBrass)" stroke="${INK}" stroke-width="1.3"/>
-          <rect x="${DOOR.x - 3}" y="768" width="9" height="26" rx="2" fill="url(#ck-colBrass)" stroke="${INK}" stroke-width="1.3"/>
-          <path d="M${DOOR.x + 6},${DOOR.y + 6} v${DOOR.h - 12}" stroke="#c89468" stroke-width="2" opacity="0.22"/>
-          <rect class="ck-doorFrontShade" x="${DOOR.x}" y="${DOOR.y}" width="${DOOR.w}" height="${DOOR.h}" fill="#000" opacity="0" pointer-events="none"/>
+          <rect x="${D.x - 3}" y="${D.y + 18}" width="9" height="28" rx="2" fill="url(#ck-colBrass)" stroke="${INK}" stroke-width="1.3"/>
+          <rect x="${D.x - 3}" y="${D.y + D.h - 46}" width="9" height="28" rx="2" fill="url(#ck-colBrass)" stroke="${INK}" stroke-width="1.3"/>
+          <path d="M${D.x + 6},${D.y + 6} v${D.h - 12}" stroke="#c89468" stroke-width="2" opacity="0.22"/>
+          <rect class="ck-doorFrontShade" x="${D.x}" y="${D.y}" width="${D.w}" height="${D.h}" fill="#000" opacity="0" pointer-events="none"/>
         </g>
         <g class="ck-doorBack" style="display:none">
-          <rect x="${DOOR.x}" y="${DOOR.y}" width="${DOOR.w}" height="${DOOR.h}" fill="#3e2618" stroke="${INK}" stroke-width="2.5" filter="url(#ck-grainV)"/>
-          <rect x="${DOOR.x + 10}" y="${DOOR.y + 22}" width="${DOOR.w - 20}" height="16" fill="#4e3020" stroke="${INK}" stroke-width="1.5"/>
-          <rect x="${DOOR.x + 10}" y="${DOOR.y + DOOR.h - 38}" width="${DOOR.w - 20}" height="16" fill="#4e3020" stroke="${INK}" stroke-width="1.5"/>
+          <rect x="${D.x}" y="${D.y}" width="${D.w}" height="${D.h}" fill="#3e2618" stroke="${INK}" stroke-width="2.5" filter="url(#ck-grainV)"/>
+          <rect x="${D.x + 10}" y="${D.y + 22}" width="${D.w - 20}" height="16" fill="#4e3020" stroke="${INK}" stroke-width="1.5"/>
+          <rect x="${D.x + 10}" y="${D.y + D.h - 38}" width="${D.w - 20}" height="16" fill="#4e3020" stroke="${INK}" stroke-width="1.5"/>
           <circle cx="${LEN.x}" cy="${LEN.y}" r="${LEN.r}" fill="#0c0806" stroke="${INK}" stroke-width="2"/>
-          <rect class="ck-doorBackShade" x="${DOOR.x}" y="${DOOR.y}" width="${DOOR.w}" height="${DOOR.h}" fill="#000" opacity="0.3"/>
+          <rect x="${D.x}" y="${D.y}" width="${D.w}" height="${D.h}" fill="#000" opacity="0.3"/>
         </g>
-        <rect class="ck-doorEdge" x="0" y="${DOOR.y}" width="0" height="${DOOR.h}" fill="#7a4e30" stroke="${INK}" stroke-width="1.5"/>
+        <rect class="ck-doorEdge" x="0" y="${D.y}" width="0" height="${D.h}" fill="#7a4e30" stroke="${INK}" stroke-width="1.5"/>
       </g>
       <!-- hood base moulding -->
       <path d="M440,540 h720 l-10,18 h-700Z" fill="url(#ck-walnutH)" stroke="${INK}" stroke-width="2.5" filter="url(#ck-grainH)"/>
@@ -622,6 +688,7 @@
         <ellipse cx="${CX + 150}" cy="${CY - 120}" rx="60" ry="40" fill="url(#ck-stain)"/>
         <ellipse cx="${CX - 130}" cy="${CY + 150}" rx="70" ry="45" fill="url(#ck-stain)"/>
         <ellipse cx="${CX - 170}" cy="${CY - 60}" rx="30" ry="50" fill="url(#ck-stain)" opacity="0.7"/>
+        <circle class="ck-warm" cx="${CX}" cy="${CY}" r="${R_EN}" fill="url(#ck-dialWarm)" style="opacity:0"/>
         <circle cx="${CX}" cy="${CY}" r="222" fill="none" stroke="#2a1f14" stroke-width="1.6"/>
         <circle cx="${CX}" cy="${CY}" r="200" fill="none" stroke="#2a1f14" stroke-width="1.2"/>
         <circle cx="${CX}" cy="${CY}" r="196" fill="none" stroke="#8a6a3a" stroke-width="0.6"/>
@@ -629,25 +696,29 @@
         ${dots}
         <circle cx="${CX}" cy="${CY}" r="118" fill="none" stroke="#8a6a3a" stroke-width="1"/>
         <circle cx="${CX}" cy="${CY}" r="114" fill="none" stroke="#8a6a3a" stroke-width="0.5"/>
-        ${medallions}${florets}
+        ${medallions}${lits}${florets}
         <g opacity="0.72">${lunaMoth(CX, CY - 60, 0.95)}</g>
-        <text x="${CX}" y="${CY + 70}" font-family="IM Fell English, Georgia, serif" font-style="italic" font-size="24" fill="#3a2a1c" text-anchor="middle">Jos. Vane</text>
-        <path d="M${CX - 34},${CY + 79} q34,7 68,0" stroke="#6e5438" stroke-width="0.9" fill="none"/>
-        <text x="${CX}" y="${CY + 97}" font-family="IM Fell English SC, IM Fell English, Georgia, serif" font-size="12" letter-spacing="5" fill="#5a4630" text-anchor="middle">LONDON</text>
+        <text x="${CX - 5}" y="${CY + 68}" font-family="IM Fell English, Georgia, serif" font-style="italic" font-size="24" fill="#3a2a1c" text-anchor="end">Jos.</text>
+        <text x="${CX + 7}" y="${CY + 68}" font-family="IM Fell English, Georgia, serif" font-style="italic" font-size="24" fill="#3a2a1c" text-anchor="start">Vane</text>
+        <path d="M${CX - 46},${CY + 78} q46,8 92,0" stroke="#6e5438" stroke-width="0.9" fill="none"/>
+        <text x="${CX - 9}" y="${CY + 96}" font-family="IM Fell English SC, IM Fell English, Georgia, serif" font-size="12" letter-spacing="4" fill="#5a4630" text-anchor="end">LON</text>
+        <text x="${CX + 11}" y="${CY + 96}" font-family="IM Fell English SC, IM Fell English, Georgia, serif" font-size="12" letter-spacing="4" fill="#5a4630" text-anchor="start">DON</text>
         ${icons}
         <path d="${crack}" stroke="#fffaf0" stroke-width="1.2" fill="none" opacity="0.5" transform="translate(0.8,0.8)"/>
         <path d="${crack}" stroke="#3a2c1e" stroke-width="1.1" fill="none" stroke-linejoin="round"/>
         <path d="${crackB}" stroke="#3a2c1e" stroke-width="0.8" fill="none"/>
         <circle cx="${CX}" cy="${CY}" r="${R_EN}" fill="none" stroke="#000" stroke-width="12" opacity="0.18" filter="url(#ck-blur3)"/>
       </g>
-      <g class="ck-shadows" opacity="0.32" filter="url(#ck-blur3)">
+      <g class="ck-shadows" opacity="0.34" filter="url(#ck-blur3)">
         <g class="ck-hshadow">${handMarkup(HOUR_PATHS, '#000')}</g>
         <g class="ck-mshadow">${handMarkup(MIN_PATHS, '#000')}</g>
       </g>
       <g class="ck-hour">${handMarkup(HOUR_PATHS, 'url(#ck-steelG)', INK, 1.3)}
-        <path d="M0,10 L0,-40 M0,-88 L0,-102" stroke="#6f8fb0" stroke-width="0.9" opacity="0.6"/></g>
+        <path d="M0,10 L0,-40 M0,-88 L0,-102" stroke="#6f8fb0" stroke-width="0.9" opacity="0.6"/>
+        <g class="ck-rim" style="opacity:0">${handMarkup(HOUR_PATHS, 'none', '#f3d27e', 2.2)}</g></g>
       <g class="ck-min">${handMarkup(MIN_PATHS, 'url(#ck-steelG)', INK, 1.2)}
-        <path d="M0,8 L0,-56 M0,-90 L0,-176" stroke="#6f8fb0" stroke-width="0.7" opacity="0.6"/></g>
+        <path d="M0,8 L0,-56 M0,-90 L0,-176" stroke="#6f8fb0" stroke-width="0.7" opacity="0.6"/>
+        <g class="ck-rim" style="opacity:0">${handMarkup(MIN_PATHS, 'none', '#f3d27e', 2)}</g></g>
       <circle cx="${CX}" cy="${CY}" r="14" fill="url(#ck-bossG)" stroke="${INK}" stroke-width="2"/>
       <circle cx="${CX}" cy="${CY}" r="6.5" fill="#8a6424" stroke="${INK}" stroke-width="1.2"/>
       <circle cx="${CX - 2}" cy="${CY - 2}" r="2.2" fill="#fff4cc" opacity="0.9"/>
@@ -655,27 +726,35 @@
       <path d="M${CX - 196},${CY - 40} A200,200 0 0 1 ${CX - 40},${CY - 196}" stroke="#ffffff" stroke-width="22" fill="none" opacity="0.07" stroke-linecap="round"/>
       <path d="M${CX - 210},${CY - 20} A212,212 0 0 1 ${CX - 110},${CY - 180}" stroke="#ffffff" stroke-width="3" fill="none" opacity="0.2" stroke-linecap="round"/>
       <path d="M${CX + 150},${CY + 130} A200,200 0 0 1 ${CX + 90},${CY + 180}" stroke="#cfe3ff" stroke-width="6" fill="none" opacity="0.08" stroke-linecap="round"/>
-      <!-- light -->
-      <rect class="ck-tint" x="0" y="0" width="1600" height="900" fill="#1b3040" opacity="0.16" pointer-events="none" style="mix-blend-mode:multiply"/>
-      <rect x="0" y="0" width="1600" height="900" fill="url(#ck-vign)" pointer-events="none"/>
+      </g>
+      <g class="ck-fx" pointer-events="none"></g>
+      <!-- light: cold+dim before the lamp, warm from the right after; moonlight from the left once the window is open -->
+      <g pointer-events="none">
+        <rect class="ck-cold" x="0" y="0" width="1600" height="900" fill="#1b3040" style="mix-blend-mode:multiply;opacity:0.4;transition:opacity 1.2s ease"/>
+        <rect class="ck-dim" x="0" y="0" width="1600" height="900" fill="#05080a" style="opacity:0.22;transition:opacity 1.2s ease"/>
+        <rect class="ck-warmL" x="0" y="0" width="1600" height="900" fill="url(#ck-lampR)" style="mix-blend-mode:soft-light;opacity:0;transition:opacity 1.2s ease"/>
+        <rect class="ck-warmG" x="0" y="0" width="1600" height="900" fill="url(#ck-lampR2)" style="mix-blend-mode:screen;opacity:0;transition:opacity 1.2s ease"/>
+        <rect class="ck-moonL" x="0" y="0" width="1600" height="900" fill="url(#ck-moonL)" style="mix-blend-mode:screen;opacity:0;transition:opacity 1.2s ease"/>
+        <rect x="0" y="0" width="1600" height="900" fill="url(#ck-vign)"/>
+      </g>
     `, g);
     V.root = root;
-    V.hour = root.querySelector('.ck-hour');
-    V.min = root.querySelector('.ck-min');
-    V.hsh = root.querySelector('.ck-hshadow');
-    V.msh = root.querySelector('.ck-mshadow');
-    V.pend = root.querySelector('.ck-pend');
-    V.door = root.querySelector('.ck-door');
-    V.doorFront = root.querySelector('.ck-doorFront');
-    V.doorBack = root.querySelector('.ck-doorBack');
-    V.doorEdge = root.querySelector('.ck-doorEdge');
-    V.doorFrontShade = root.querySelector('.ck-doorFrontShade');
-    V.doorShade = root.querySelector('.ck-doorShade');
-    V.tint = root.querySelector('.ck-tint');
-    V.mbWrap = root.querySelector('.ck-matchbox');
-    V.face = root.querySelector('.ck-face');
+    const q = s => root.querySelector(s);
+    V.clock = q('.ck-clock');
+    V.fx = q('.ck-fx');
+    V.hour = q('.ck-hour');
+    V.min = q('.ck-min');
+    V.rim = { h: V.hour.querySelector('.ck-rim'), m: V.min.querySelector('.ck-rim') };
+    V.hsh = q('.ck-hshadow');
+    V.msh = q('.ck-mshadow');
+    V.pend = q('.ck-pend');
+    V.doorR = { front: q('.ck-doorFront'), back: q('.ck-doorBack'), edge: q('.ck-doorEdge'), fshade: q('.ck-doorFrontShade') };
+    V.warm = q('.ck-warm');
+    V.lits = Array.from(root.querySelectorAll('.ck-lit'));
+    V.rewardLight = q('.ck-rewardLight');
+    V.light = { cold: q('.ck-cold'), dim: q('.ck-dim'), warmL: q('.ck-warmL'), warmG: q('.ck-warmG'), moon: q('.ck-moonL') };
+    V.mbWrap = q('.ck-matchbox');
 
-    // matchbox (reward) inside the case
     V.matchbox = G.svg(matchboxScene(), V.mbWrap);
     G.hotspot(V.matchbox, {
       cursor: 'take',
@@ -687,47 +766,45 @@
       },
     });
 
-    // hotspots on the lower case (captions)
     const lenHit = G.el('circle', { cx: LEN.x, cy: LEN.y, r: LEN.r + 8, fill: 'transparent', 'pointer-events': 'all' }, root);
     G.hotspot(lenHit, {
       cursor: 'look', click() {
         G.say(G.get('clockSolved') ? 'The pendulum swings again, slow as breathing.' : 'Behind the little window the pendulum hangs dead still.');
       },
     });
-    V.doorHit = G.el('rect', { x: DOOR.x, y: DOOR.y, width: DOOR.w, height: DOOR.h, fill: 'transparent', 'pointer-events': 'all' }, root);
+    V.lenHit = lenHit;
+    V.doorHit = G.el('rect', { x: D.x, y: D.y, width: D.w, height: D.h, fill: 'transparent', 'pointer-events': 'all' }, root);
     root.insertBefore(V.doorHit, lenHit);
     G.hotspot(V.doorHit, { cursor: 'look', click() { G.sfx('lockFail'); G.say('The case door is shut fast. Something inside the clock must release it.'); } });
 
-    // dial interaction layer
     V.hit = G.el('circle', { cx: CX, cy: CY, r: R_EN + 4, fill: 'transparent', 'pointer-events': 'all', class: 'hot' }, root);
     V.hit.style.touchAction = 'none';
     V.hit.addEventListener('pointerdown', onDown);
     V.hit.addEventListener('pointermove', onMove);
     V.hit.addEventListener('pointerup', onUp);
     V.hit.addEventListener('pointercancel', onCancel);
-    V.hit.addEventListener('pointerleave', () => { if (!drag) hover(null); });
+    V.hit.addEventListener('pointerleave', () => { if (!drag) { hovered = null; setHoverIcon(null); updateRims(); } });
     V.hit.addEventListener('click', ev => ev.stopPropagation());
     renderHands();
   }
 
   function matchboxScene() {
-    // lying on the ledge, 3/4 view; centred around (812, 772)
-    return `<g transform="translate(752,733) scale(1.18)">
-      <ellipse cx="50" cy="48" rx="50" ry="6" fill="#000" opacity="0.5" filter="url(#ck-blur3)"/>
+    // lying on the ledge inside the case, 3/4 view
+    return `<g transform="translate(724,${DOOR.y + DOOR.h - 22 - 76}) scale(1.58)">
+      <ellipse cx="50" cy="48" rx="52" ry="6" fill="#000" opacity="0.55" filter="url(#ck-blur3)"/>
       ${matchboxBody()}
-      <g class="ck-glint" transform="translate(84,8)">
+      <path d="M26,8 L90,0" stroke="#ffe0a0" stroke-width="1.6" opacity="0.7"/>
+      <g transform="translate(88,4)">
         <path d="M0,-9 L2,-2 L9,0 L2,2 L0,9 L-2,2 L-9,0 L-2,-2Z" fill="#fff6d6">
           <animate attributeName="opacity" values="0;0.95;0;0" keyTimes="0;0.15;0.35;1" dur="2.8s" repeatCount="indefinite"/>
-          <animateTransform attributeName="transform" type="scale" values="0.3;1;0.3;0.3" keyTimes="0;0.15;0.35;1" dur="2.8s" repeatCount="indefinite"/>
+          <animateTransform attributeName="transform" type="scale" values="0.3;1.2;0.3;0.3" keyTimes="0;0.15;0.35;1" dur="2.8s" repeatCount="indefinite"/>
         </path>
       </g>
-      <rect x="-6" y="-10" width="112" height="66" fill="transparent"/>
+      <rect x="-4" y="-8" width="108" height="66" fill="transparent"/>
     </g>`;
   }
-  // matchbox drawing in a ~100x50 box (used in-scene); the inventory icon has its own framing
   function matchboxBody() {
     return `
-      <!-- tray (pulled out to the left) -->
       <path d="M2,14 L28,10 L30,34 L4,38Z" fill="#d7b27a" stroke="${INK}" stroke-width="1.6" stroke-linejoin="round"/>
       <path d="M4,38 L30,34 L30,43 L4,47Z" fill="#b98c52" stroke="${INK}" stroke-width="1.6" stroke-linejoin="round"/>
       <path d="M2,14 L4,38 L4,47 L2,23Z" fill="#9c7040" stroke="${INK}" stroke-width="1.4" stroke-linejoin="round"/>
@@ -735,33 +812,51 @@
         <path d="M8,19 L34,15.5" stroke="${INK}" stroke-width="4.2"/><path d="M8,19 L34,15.5" stroke="#efd9a8" stroke-width="2.4"/>
         <path d="M9,25 L34,21.5" stroke="${INK}" stroke-width="4.2"/><path d="M9,25 L34,21.5" stroke="#efd9a8" stroke-width="2.4"/>
       </g>
-      <ellipse cx="7.5" cy="19.1" rx="3.6" ry="3" fill="#b3261e" stroke="${INK}" stroke-width="1.2"/>
-      <ellipse cx="8.5" cy="25.1" rx="3.6" ry="3" fill="#b3261e" stroke="${INK}" stroke-width="1.2"/>
-      <!-- sleeve -->
-      <path d="M26,8 L90,0 L94,26 L30,34Z" fill="#c9482f" stroke="${INK}" stroke-width="1.8" stroke-linejoin="round"/>
+      <ellipse cx="7.5" cy="19.1" rx="3.6" ry="3" fill="#c02a20" stroke="${INK}" stroke-width="1.2"/>
+      <ellipse cx="8.5" cy="25.1" rx="3.6" ry="3" fill="#c02a20" stroke="${INK}" stroke-width="1.2"/>
+      <path d="M26,8 L90,0 L94,26 L30,34Z" fill="#d04c30" stroke="${INK}" stroke-width="1.8" stroke-linejoin="round"/>
       <path d="M30,34 L94,26 L94,40 L30,48Z" fill="#8f2d1f" stroke="${INK}" stroke-width="1.8" stroke-linejoin="round"/>
       <path d="M33,38.5 L91,31.3 L91,36 L33,43.2Z" fill="#5a3522"/>
       <g transform="matrix(1,-0.125,0.154,1,26,8)">
-        <rect x="6" y="3.5" width="52" height="19" rx="1.5" fill="#ecc85c" stroke="#7a2a1a" stroke-width="1.2"/>
+        <rect x="6" y="3.5" width="52" height="19" rx="1.5" fill="#f0cf64" stroke="#7a2a1a" stroke-width="1.2"/>
         <rect x="8.5" y="5.5" width="47" height="15" rx="1" fill="none" stroke="#7a2a1a" stroke-width="0.6"/>
         <text x="32" y="12" font-family="IM Fell English SC, Georgia, serif" font-size="5.2" fill="#3a1a10" text-anchor="middle">BRYANT &amp; MAY</text>
         <text x="32" y="18.2" font-family="IM Fell English, Georgia, serif" font-style="italic" font-size="4.4" fill="#7a2a1a" text-anchor="middle">Safety Matches</text>
       </g>
-      <path d="M28,10 L88,2.5" stroke="#f08a6a" stroke-width="1.2" opacity="0.6"/>
-      <!-- loose match -->
       <path d="M44,54 L82,46" stroke="${INK}" stroke-width="4.2" stroke-linecap="round"/>
       <path d="M44,54 L82,46" stroke="#efd9a8" stroke-width="2.4" stroke-linecap="round"/>
-      <ellipse cx="83.5" cy="45.6" rx="3.8" ry="3" transform="rotate(-12 83.5 45.6)" fill="#b3261e" stroke="${INK}" stroke-width="1.2"/>`;
+      <ellipse cx="83.5" cy="45.6" rx="3.8" ry="3" transform="rotate(-12 83.5 45.6)" fill="#c02a20" stroke="${INK}" stroke-width="1.2"/>`;
   }
 
   // ------------------------------------------------------------------ hands rendering + interaction
+  let jolt = 0;
   function renderHands() {
     if (!V.hour) return;
-    const tH = `translate(${CX},${CY}) rotate(${f1(ang.h)})`, tM = `translate(${CX},${CY}) rotate(${f1(ang.m)})`;
-    V.hour.setAttribute('transform', tH);
-    V.min.setAttribute('transform', tM);
-    V.hsh.setAttribute('transform', `translate(${CX + 6},${CY + 9}) rotate(${f1(ang.h)})`);
-    V.msh.setAttribute('transform', `translate(${CX + 8},${CY + 11}) rotate(${f1(ang.m)})`);
+    const parts = [['h', V.hour, V.hsh, 6, 9], ['m', V.min, V.msh, 8, 11]];
+    for (const [w, el, sh, ox, oy] of parts) {
+      const L = lift[w], a = f1(ang[w] + jolt * (w === 'h' ? 1 : -1.4)), sc = (1 + 0.045 * L).toFixed(3);
+      el.setAttribute('transform', `translate(${CX},${CY}) rotate(${a}) scale(${sc})`);
+      sh.setAttribute('transform', `translate(${f1(CX + ox + 12 * L)},${f1(CY + oy + 16 * L)}) rotate(${a}) scale(${sc})`);
+    }
+  }
+  function updateRims() {
+    if (!V.rim) return;
+    const solvedOrBusy = !!G.get('clockSolved') || swinging;
+    ['h', 'm'].forEach(w => {
+      const on = !solvedOrBusy && ((drag && drag.which === w && drag.moved) || hovered === w || lift[w] > 0.5);
+      const idle = !solvedOrBusy && active === w;
+      V.rim[w].style.opacity = on ? 1 : idle ? 0.4 : 0;
+      (w === 'h' ? V.hour : V.min).style.filter = on ? 'drop-shadow(0 0 5px rgba(255,210,120,0.8))' : '';
+    });
+  }
+  function setHoverIcon(i) {
+    if (hoverIcon === i) return;
+    hoverIcon = i;
+    V.lits.forEach(l => { if (!l.dataset.hold) l.style.opacity = (+l.dataset.i === i) ? 0.4 : 0; });
+  }
+  function liftTo(w, v, ms) {
+    const from = lift[w];
+    return G.tween(ms || 120, t => { lift[w] = from + (v - from) * t; renderHands(); }, 'out');
   }
   function angleAt(p) { return mod(Math.atan2(p.x - CX, -(p.y - CY)) * 180 / Math.PI, 360); }
   function distToHand(p, a, len) {
@@ -774,50 +869,58 @@
     const r = Math.hypot(p.x - CX, p.y - CY);
     if (r > R_EN + 6) return null;
     const dh = distToHand(p, ang.h, HOUR_LEN + 2), dm = distToHand(p, ang.m, MIN_LEN + 2);
-    const TH = 30;
+    const TH = 28;
     if (dh > TH && dm > TH) return null;
     if (dh <= TH && dm <= TH && Math.abs(dh - dm) < 6) return r <= HOUR_LEN + 4 ? 'h' : 'm';
     return dh < dm ? 'h' : 'm';
   }
-  function hover(which) {
-    const glow = 'drop-shadow(0 0 4px rgba(255,214,130,0.85))';
-    V.hour.style.filter = which === 'h' ? glow : '';
-    V.min.style.filter = which === 'm' ? glow : '';
+  function iconAt(p) {
+    for (let i = 0; i < 12; i++) {
+      const c = pol(R_ICON, i * 30, CX, CY);
+      if (Math.hypot(p.x - c[0], p.y - c[1]) < 34) return i;
+    }
+    return null;
   }
   function locked() { return !!G.get('clockSolved') || animating || swinging || G.isBusy(); }
 
   function onDown(e) {
     if (e.button != null && e.button !== 0) return;
     const p = G.toStage(e);
-    const which = locked() ? null : pickHand(p);
     e.preventDefault();
     try { V.hit.setPointerCapture(e.pointerId); } catch (err) { }
-    drag = { which, start: p, moved: false, raw: which ? ang[which] : 0, detent: which ? Math.round(ang[which] / 30) : 0, id: e.pointerId, handOnLocked: locked() && !!pickHand(p) };
-    if (which) { hover(which); V.hit.style.cursor = 'grabbing'; }
+    if (locked()) { drag = { which: null, start: p, lockedHand: !!pickHand(p) }; return; }
+    const which = pickHand(p);
+    drag = { which, start: p, moved: false, raw: which ? ang[which] : 0, detent: which ? Math.round(ang[which] / 30) : 0 };
+    if (which) V.hit.style.cursor = 'grabbing';
   }
   function onMove(e) {
     const p = G.toStage(e);
     if (!drag) {
-      if (locked()) { V.hit.style.cursor = 'pointer'; hover(null); return; }
-      const w = pickHand(p);
-      hover(w);
+      if (locked()) { V.hit.style.cursor = 'default'; if (hovered) { hovered = null; updateRims(); } setHoverIcon(null); return; }
+      const w = pickHand(p), ic = w ? null : iconAt(p);
+      if (w !== hovered) { hovered = w; updateRims(); }
+      setHoverIcon(ic);
       V.hit.style.cursor = w ? 'grab' : 'pointer';
       return;
     }
     if (!drag.which) return;
-    if (!drag.moved && Math.hypot(p.x - drag.start.x, p.y - drag.start.y) > 6) drag.moved = true;
+    if (!drag.moved && Math.hypot(p.x - drag.start.x, p.y - drag.start.y) > 6) {
+      drag.moved = true;
+      active = drag.which;
+      setHoverIcon(null);
+      liftTo(drag.which, 1, 130);
+      updateRims();
+    }
     if (!drag.moved) return;
-    if (Math.hypot(p.x - CX, p.y - CY) < 18) return;   // too close to the arbor: unstable
+    if (Math.hypot(p.x - CX, p.y - CY) < 18) return;
     const a = angleAt(p);
     const delta = mod(a - mod(drag.raw, 360) + 540, 360) - 180;
     drag.raw += delta;
-    // gentle detent magnet — the stiff old movement "clicks" into each picture
     const near = Math.round(drag.raw / 30) * 30;
     const off = drag.raw - near;
-    const shaped = near + Math.sign(off) * Math.pow(Math.abs(off) / 15, 1.6) * 15;
-    ang[drag.which] = shaped;
+    ang[drag.which] = near + Math.sign(off) * Math.pow(Math.abs(off) / 15, 1.6) * 15;
     const d = Math.round(drag.raw / 30);
-    if (d !== drag.detent) { drag.detent = d; G.sfx('tick', { volume: 0.35 }); }
+    if (d !== drag.detent) { drag.detent = d; G.sfx('tick', { vol: 0.35 }); }
     renderHands();
   }
   async function onUp(e) {
@@ -825,86 +928,171 @@
     const d = drag; drag = null;
     try { V.hit.releasePointerCapture(e.pointerId); } catch (err) { }
     const p = G.toStage(e);
-    if (!d.which) {
-      if (Math.hypot(p.x - d.start.x, p.y - d.start.y) < 8) {
-        if (d.handOnLocked && G.get('clockSolved')) G.say('The hands will not budge now. The clock keeps its own time again.');
-        else if (!G.isBusy() && !animating && !swinging) G.say('Pictures instead of numbers. Father’s work, surely.');
-      }
+    V.hit.style.cursor = 'pointer';
+    if (d.which && d.moved) {
+      await settle(d.which, ang[d.which], Math.round(d.raw / 30) * 30, 200);
+      hovered = pickHand(p); updateRims();
       return;
     }
-    const which = d.which;
-    const from = ang[which];
-    const target = d.moved ? Math.round(d.raw / 30) * 30 : Math.round(from / 30) * 30 + 30;
-    V.hit.style.cursor = 'grab';
-    await settle(which, from, target, d.moved ? 200 : 300);
-    hover(pickHand(p));
+    if (Math.hypot(p.x - d.start.x, p.y - d.start.y) > 8) return;
+    if (d.lockedHand !== undefined) {   // clicked while locked
+      if (G.get('clockSolved')) G.say(d.lockedHand ? 'The hands will not budge now. The clock keeps its own time again.' : 'Pictures instead of numbers. Father’s work, surely.');
+      return;
+    }
+    // click resolution: a hand -> step it clockwise; a picture -> send the active hand there; else caption
+    const r = Math.hypot(p.x - CX, p.y - CY), icon = iconAt(p), hand = d.which;
+    let handClick = false;
+    if (hand) {
+      if (icon == null) handClick = true;
+      else if (hand === 'h' && r <= HOUR_LEN + 6) handClick = true;
+      else if (hand === 'm' && posOf('m') === icon && distToHand(p, ang.m, MIN_LEN) < 12) handClick = true;
+    }
+    if (handClick) {
+      active = hand;
+      liftTo(hand, 1, 90);
+      await settle(hand, ang[hand], Math.round(ang[hand] / 30) * 30 + 30, 280);
+    } else if (icon != null) {
+      const cur = posOf(active);
+      const steps = icon === cur ? 1 : mod(icon - cur + 6, 12) - 6;
+      await sweep(active, steps);
+    } else {
+      G.say('Pictures instead of numbers. Father’s work, surely.');
+    }
+    hovered = pickHand(p); updateRims();
   }
   function onCancel() {
     if (!drag) return;
     const d = drag; drag = null;
-    if (d.which) settle(d.which, ang[d.which], Math.round(ang[d.which] / 30) * 30, 150);
+    if (d.which && d.moved) settle(d.which, ang[d.which], Math.round(ang[d.which] / 30) * 30, 150);
+  }
+  async function sweep(which, steps) {
+    animating = true;
+    liftTo(which, 1, 90);
+    updateRims();
+    const dir = Math.sign(steps);
+    const base = Math.round(ang[which] / 30) * 30;
+    for (let k = 1; k < Math.abs(steps); k++) {
+      const from = ang[which], to = base + 30 * dir * k;
+      await G.tween(95, t => { ang[which] = from + (to - from) * t; renderHands(); }, 'inOut');
+      G.sfx('tick', { vol: 0.4 });
+    }
+    await settle(which, ang[which], base + 30 * steps, 190);
   }
   async function settle(which, from, target, ms) {
     animating = true;
     await G.tween(ms, t => { ang[which] = from + (target - from) * t; renderHands(); }, 'outBack');
-    ang[which] = target;
-    renderHands();
     G.sfx('tick');
     const pos = mod(Math.round(target / 30), 12);
     ang[which] = pos * 30; renderHands();
+    await liftTo(which, 0, 140);
     animating = false;
     G.set(which === 'h' ? 'clockH' : 'clockM', pos);
+    updateRims();
     if (!G.get('clockSolved') && posOf('h') === SOL_H && posOf('m') === SOL_M) solve();
   }
 
-  // ------------------------------------------------------------------ solve sequence
+  // ------------------------------------------------------------------ solve payoff
+  function shake(ms, amp) {
+    return G.tween(ms, t => {
+      const k = (1 - t) * amp;
+      V.clock.setAttribute('transform', t >= 1 ? '' : `translate(${f1(Math.sin(t * 70) * k)},${f1(Math.cos(t * 53) * k * 0.5)})`);
+    }, 'linear');
+  }
+  function particles(n, spawn, ms) {
+    const els = [];
+    for (let i = 0; i < n; i++) {
+      const s = spawn(i);
+      const c = G.el('circle', { cx: s.x, cy: s.y, r: s.r0, fill: s.fill || '#d8c8a4', opacity: 0, filter: s.blur ? 'url(#ck-blur3)' : null }, V.fx);
+      els.push([c, s]);
+    }
+    return G.tween(ms, t => {
+      for (const [c, s] of els) {
+        const u = Math.max(0, Math.min(1, (t - s.delay) / (1 - s.delay)));
+        const e = 1 - Math.pow(1 - u, 2);
+        c.setAttribute('cx', f1(s.x + s.dx * e));
+        c.setAttribute('cy', f1(s.y + s.dy * e + (s.g || 0) * u * u));
+        c.setAttribute('r', f1(s.r0 + (s.r1 - s.r0) * e));
+        c.setAttribute('opacity', (u <= 0 ? 0 : s.op * Math.sin(Math.PI * Math.min(1, u * 1.15))).toFixed(3));
+      }
+    }, 'linear').then(() => els.forEach(([c]) => c.remove()));
+  }
+  function dustFall() {
+    return particles(26, i => {
+      const top = i % 3 === 0;
+      return { x: 470 + Math.random() * 660, y: top ? 20 : 560 + Math.random() * 20, r0: 1 + Math.random() * 1.6, r1: 1.2 + Math.random() * 1.2,
+        dx: (Math.random() - 0.5) * 30, dy: 40 + Math.random() * 90, g: 30, op: 0.75, delay: Math.random() * 0.3, fill: '#d9c9a2' };
+    }, 1700);
+  }
+  function doorPuff() {
+    const D = DOOR;
+    return particles(22, i => {
+      const y = D.y + 20 + Math.random() * (D.h - 40);
+      return { x: D.x + D.w * (0.2 + Math.random() * 0.8), y, r0: 4 + Math.random() * 4, r1: 16 + Math.random() * 14,
+        dx: (Math.random() - 0.3) * 120, dy: -20 - Math.random() * 50, op: 0.35, delay: Math.random() * 0.25, blur: true, fill: '#cbbd9c' };
+    }, 1500);
+  }
+  function mothFlight() {
+    const m = G.svg(`<g class="ck-moth" opacity="0">
+        <g class="ck-mw" fill="#e9e0c4" stroke="${INK}" stroke-width="1.2" stroke-linejoin="round">
+          <path d="M-1,-2 C-8,-12 -22,-14 -24,-6 C-24,0 -14,4 -2,2Z"/><path d="M1,-2 C8,-12 22,-14 24,-6 C24,0 14,4 2,2Z"/>
+          <path d="M-1,2 C-8,4 -16,10 -14,16 C-10,19 -4,12 -1,6Z" fill="#d8ccaa"/><path d="M1,2 C8,4 16,10 14,16 C10,19 4,12 1,6Z" fill="#d8ccaa"/>
+        </g>
+        <ellipse rx="2.6" ry="8" cy="2" fill="#bfae86" stroke="${INK}" stroke-width="1"/>
+        <path d="M-1,-6 q-3,-6 -7,-7 M1,-6 q3,-6 7,-7" fill="none" stroke="${INK}" stroke-width="0.9"/>
+      </g>`, V.fx);
+    const mg = m.firstElementChild, wings = m.querySelector('.ck-mw');
+    const P = [[820, 780], [900, 600], [1060, 520], [1500, 120]];
+    const bez = (t, i) => { const u = 1 - t; return u * u * u * P[0][i] + 3 * u * u * t * P[1][i] + 3 * u * t * t * P[2][i] + t * t * t * P[3][i]; };
+    let px = P[0][0], py = P[0][1];
+    return G.tween(2600, t => {
+      const x = bez(t, 0) + Math.sin(t * 22) * 10, y = bez(t, 1) + Math.cos(t * 17) * 8;
+      const hd = Math.atan2(x - px, -(y - py)) * 180 / Math.PI; px = x; py = y;
+      const flap = 0.25 + 0.75 * Math.abs(Math.sin(t * 60));
+      wings.setAttribute('transform', `scale(${flap.toFixed(2)},1)`);
+      mg.setAttribute('transform', `translate(${f1(x)},${f1(y)}) rotate(${f1(hd * 0.6)}) scale(${(1 + t * 0.5).toFixed(2)})`);
+      mg.setAttribute('opacity', (Math.min(1, t * 6) * Math.min(1, (1 - t) * 4)).toFixed(2));
+    }, 'inOut').then(() => m.remove());
+  }
+  function glowIcons(on) {
+    [SOL_H, SOL_M].forEach(i => { const l = V.lits[i]; l.dataset.hold = on ? '1' : ''; l.style.transition = on ? 'opacity .25s ease' : 'opacity 1.2s ease'; l.style.opacity = on ? 1 : 0; });
+  }
+
   async function solve() {
     if (swinging || G.get('clockSolved')) return;
     G.busy(true);
-    hover(null);
+    hovered = null; active = null; setHoverIcon(null); updateRims();
     try {
-      await G.wait(450);
+      await G.wait(380);
+      // the strike: chime, the case shudders, the dial warms, the hands jolt, dust sifts down
       G.sfx('chime');
-      // brief brass shimmer on the two chosen pictures
-      [SOL_H, SOL_M].forEach(i => {
-        const ic = V.root.querySelector(`.ck-icon[data-i="${i}"]`);
-        if (ic) { ic.style.transition = 'filter 0.6s'; ic.style.filter = 'drop-shadow(0 0 7px rgba(255,214,130,0.95))'; setTimeout(() => { ic.style.filter = ''; }, 1600); }
-      });
+      glowIcons(true);
+      V.warm.style.transition = 'opacity .3s ease'; V.warm.style.opacity = 1;
+      shake(520, 5);
+      dustFall();
+      await G.tween(520, t => { jolt = Math.sin(t * Math.PI * 5) * 4 * (1 - t); renderHands(); }, 'linear');
+      jolt = 0; renderHands();
       await G.wait(700);
+      glowIcons(false);
+      V.warm.style.transition = 'opacity 1.6s ease'; V.warm.style.opacity = 0.25;
       swinging = true; swingStart = performance.now();
+      updateRims();
       ensureLoop();
-      await G.wait(1500);
+      await G.wait(1300);
+      // the latch: a click, the door jumps ajar, then swings wide
       G.sfx('clockOpen');
       V.matchbox.style.display = '';
-      // latch pops: door jumps ajar
-      await G.tween(220, t => setDoor(9 * t), 'outBack');
-      await G.wait(380);
-      await G.tween(1300, t => setDoor(9 + (OPEN_DEG - 9) * t), 'inOut');
+      shake(180, 2);
+      await G.tween(220, t => applyDoor(V.doorR, DOOR, 9 * t, 13), 'outBack');
+      await G.wait(320);
+      doorPuff();
+      V.rewardLight.style.opacity = 1;
+      setTimeout(mothFlight, 350);
+      await G.tween(1300, t => applyDoor(V.doorR, DOOR, 9 + (OPEN_DEG - 9) * t, 13), 'inOut');
+      V.doorHit.style.display = 'none';
       G.set('clockSolved');
     } finally {
       G.busy(false);
     }
-  }
-
-  function setDoor(deg) {
-    if (!V.door) return;
-    const c = Math.cos(rad(deg)), s = Math.sin(rad(deg));
-    const hx = DOOR.x, cy = DOOR.y + DOOR.h / 2;
-    V.doorFront.style.display = c >= 0 ? '' : 'none';
-    V.doorBack.style.display = c < 0 ? '' : 'none';
-    // affine stand-in for perspective: foreshorten + slight vertical skew as the free edge swings toward us
-    const k = s * 0.045 * (c >= 0 ? 1 : -1);
-    const m = `translate(${hx},${cy}) matrix(${c.toFixed(4)},${(-k).toFixed(4)},0,${(1 + s * 0.05).toFixed(4)},0,0) translate(${-hx},${-cy})`;
-    V.doorFront.setAttribute('transform', m);
-    V.doorBack.setAttribute('transform', m);
-    V.doorFrontShade.setAttribute('opacity', (s * 0.45).toFixed(3));
-    const T = 13 * s;
-    const ex = hx + DOOR.w * c;
-    V.doorEdge.setAttribute('x', f1(c >= 0 ? ex : ex - T));
-    V.doorEdge.setAttribute('width', f1(deg > 0.5 ? T : 0));
-    V.doorEdge.setAttribute('transform', `translate(0,${f1(-k * DOOR.w * c * 0.5)})`);
-    V.doorShade.setAttribute('opacity', (0.35 * Math.max(0, c)).toFixed(3));
-    V.doorHit.style.display = deg > 1 ? 'none' : '';
   }
 
   // ------------------------------------------------------------------ pendulum loop
@@ -923,11 +1111,11 @@
     if (!(swinging || G.get('clockSolved')) || (v !== 'clock' && v !== 'north')) { loopOn = false; return; }
     const ramp = swingStart ? Math.min(1, (now - swingStart) / 1800) : 1;
     const s = Math.sin((now / PERIOD) * Math.PI * 2);
-    const th = 3.2 * s * (0.3 + 0.7 * ramp) * (ramp > 0 ? 1 : 0);
+    const th = 3.2 * s * (0.3 + 0.7 * ramp);
     if (V.pend) V.pend.setAttribute('transform', `rotate(${th.toFixed(3)} ${CX} ${CY})`);
     if (WO.pend) WO.pend.setAttribute('transform', `rotate(${(th * 1.2).toFixed(3)} 400 250)`);
     const sign = s >= 0 ? 1 : -1;
-    if (lastSign && sign !== lastSign && v === 'clock') G.sfx('tick', { volume: 0.18 });
+    if (lastSign && sign !== lastSign && v === 'clock') G.sfx('tick', { vol: 0.14 });
     lastSign = sign;
     requestAnimationFrame(loop);
   }
@@ -942,17 +1130,23 @@
       ang.m = (solved ? SOL_M : posOf('m')) * 30;
       renderHands();
     }
-    if (!swinging || solved) setDoor(solved ? OPEN_DEG : 0);
-    if (solved && !swingStart) swingStart = 0;
+    if (!swinging || solved) {
+      applyDoor(V.doorR, DOOR, solved ? OPEN_DEG : 0, 13);
+      V.doorHit.style.display = solved ? 'none' : '';
+      V.rewardLight.style.opacity = solved ? 1 : 0;
+      if (solved) V.warm.style.opacity = 0.25;
+    }
     V.matchbox.style.display = solved && !G.get('gotMatches') ? '' : 'none';
     V.hit.classList.toggle('hot', !solved);
-    const lit = !!G.get('lampLit');
-    V.tint.setAttribute('fill', lit ? '#e0853a' : '#1b3040');
-    V.tint.setAttribute('opacity', lit ? '0.10' : '0.16');
-    V.tint.style.mixBlendMode = lit ? 'soft-light' : 'multiply';
+    updateRims();
+    const lit = !!G.get('lampLit'), open = !!G.get('windowOpen');
+    V.light.cold.style.opacity = lit ? 0.08 : 0.4;
+    V.light.dim.style.opacity = lit ? 0 : 0.22;
+    V.light.warmL.style.opacity = lit ? 1 : 0;
+    V.light.warmG.style.opacity = lit ? 1 : 0;
+    V.light.moon.style.opacity = open ? 1 : 0;
     ensureLoop();
   }
-
   // ------------------------------------------------------------------ registration
   G.registerWallObject('north', { z: 10, build: buildWall, update: updateWall, enter: ensureLoop });
 
@@ -967,7 +1161,7 @@
         setTimeout(() => { if (G.view() === 'clock') G.say('The hands are stiff, but they move.'); }, 250);
       }
     },
-    exit() { if (drag) onCancel(); hover(null); },
+    exit() { if (drag) onCancel(); hovered = null; if (V.lits) setHoverIcon(null); updateRims(); },
   });
 
   G.registerItem('matches', {

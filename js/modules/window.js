@@ -103,6 +103,8 @@
     <stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
   <linearGradient id="win-brass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f3d995"/>
     <stop offset=".35" stop-color="#c9983f"/><stop offset=".75" stop-color="#8a6224"/><stop offset="1" stop-color="#5a3e14"/></linearGradient>
+  <linearGradient id="win-keyG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6dc96"/>
+    <stop offset=".4" stop-color="#d0a24a"/><stop offset=".75" stop-color="#9a6c28"/><stop offset="1" stop-color="#5a3c12"/></linearGradient>
   <linearGradient id="win-brass2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e7c476"/>
     <stop offset=".5" stop-color="#a97c32"/><stop offset="1" stop-color="#5e4216"/></linearGradient>
   <linearGradient id="win-sheen" x1="0" y1="0" x2="1" y2="1"><stop offset=".3" stop-color="#fff" stop-opacity="0"/>
@@ -374,6 +376,29 @@
     return s;
   }
 
+  // the player's brass key, seen from the front: moth-shaped bow (as the inventory icon) above a short shaft
+  function keyMarkup(S) {
+    const sc = 0.15, ink = f(1.7 / Math.sqrt(S) / sc), hi = f(1.2 / Math.sqrt(S) / sc);
+    const wingF = 'M0,-6 C-10,-40 -44,-66 -70,-58 C-88,-50 -86,-22 -70,-8 C-56,2 -30,2 0,-2 Z';
+    const wingH = 'M0,2 C-20,6 -52,12 -64,32 C-72,50 -56,64 -38,58 C-20,50 -6,28 0,8 Z';
+    const holeF = 'M-18,-12 C-26,-30 -44,-46 -60,-44 C-70,-38 -66,-22 -54,-14 C-44,-8 -30,-8 -18,-12 Z';
+    const holeH = 'M-14,14 C-26,18 -44,26 -50,38 C-52,48 -44,50 -36,46 C-26,40 -18,28 -14,14 Z';
+    const side = `<path d="${wingF} ${holeF}" fill-rule="evenodd"/><path d="${wingH} ${holeH}" fill-rule="evenodd"/>`;
+    const lines = `<path d="${wingF}" fill="none" stroke="#fff0c0" stroke-width="${hi}" opacity=".6" transform="translate(-4,-2) scale(0.9)"/>`;
+    return `<rect x="-1.6" y="172" width="3.2" height="17" rx="1" fill="url(#win-keyG)" stroke="${INK}" stroke-width="${f(0.9 / Math.sqrt(S))}"/>
+      <rect x="-3" y="171" width="6" height="2.4" rx="1" fill="url(#win-keyG)" stroke="${INK}" stroke-width="${f(0.7 / Math.sqrt(S))}"/>
+      <g transform="translate(0 164) scale(${sc})">
+        <g fill="url(#win-keyG)" stroke="${INK}" stroke-width="${ink}" stroke-linejoin="round"><g>${side}</g><g transform="scale(-1,1)">${side}</g></g>
+        <g>${lines}</g><g transform="scale(-1,1)">${lines}</g>
+        <g transform="rotate(-90)">
+          <path d="M-58,0 C-50,-9 -20,-11 6,-9 C18,-8 28,-5 30,0 C28,5 18,8 6,9 C-20,11 -50,9 -58,0 Z" fill="url(#win-keyG)" stroke="${INK}" stroke-width="${ink}"/>
+          <path d="M-40,-5 L-40,5 M-30,-6 L-30,6 M-20,-7 L-20,7 M-10,-7 L-10,7" stroke="${INK}" stroke-width="${f(ink * .6)}" opacity=".6"/>
+          <path d="M30,-2 C44,-14 54,-26 60,-38 M30,2 C44,14 54,26 60,38" stroke="${INK}" stroke-width="${ink}" fill="none" stroke-linecap="round"/>
+        </g>
+      </g>
+      <circle cx="0" cy="188.5" r="2.6" fill="url(#win-keyG)" stroke="${INK}" stroke-width="${f(0.9 / Math.sqrt(S))}"/>`;
+  }
+
   function latchLocal(c) {
     const S = c.s, ink = f(1.8 / Math.sqrt(S)), thin = f(0.9 / Math.sqrt(S));
     return `
@@ -389,12 +414,7 @@
       <path d="M-5 190.5a5 7.5 0 0 1 10 0" fill="none" stroke="#f3d995" stroke-opacity=".55" stroke-width="${thin}"/>
     </g>
     <g class="win-key" opacity="0">
-      <g class="win-keyrot">
-        <rect x="-1.5" y="174" width="3" height="15" rx="1" fill="url(#win-brass2)" stroke="${INK}" stroke-width="${thin}"/>
-        <path d="M0 154c5.5 0 7.5 5 7.5 10s-3 9-7.5 9-7.5-4-7.5-9 2-10 7.5-10z" fill="url(#win-brass)" stroke="${INK}" stroke-width="${ink}"/>
-        <path d="M0 158.5c2.4 0 3.2 2.4 3.2 5s-1.4 4.6-3.2 4.6-3.2-2-3.2-4.6 .8-5 3.2-5z" fill="#0b0705"/>
-        <circle cx="0" cy="188.5" r="2.6" fill="url(#win-brass2)" stroke="${INK}" stroke-width="${thin}"/>
-      </g>
+      <g class="win-keyrot">${keyMarkup(S)}</g>
     </g>
     <g class="win-lever" transform="rotate(0 -10 210.3)">
       <path d="M-18 208L-10 207.5L17 214.5Q22 216 21.5 220.5L20.5 226Q19.8 228.5 17.6 227.6L16.6 227Q15.6 226.2 16 224.8L17 220.5Q17 218.8 15 218.2L-10 213L-18 212.5Q-20.5 210.2 -18 208Z"
@@ -493,6 +513,76 @@
     </g>${one(-1)}${one(1)}`;
   }
 
+  // ---------- the opened sash, drawn in true perspective ----------
+  // The sash is hinged on its left edge (local x = -R_SASH) and swings outward (away from the viewer) by angle th.
+  const OPEN_ANG = 64 * Math.PI / 180, PERSP_D = 560, SASH_T = 11;
+  function projector(c, th) {
+    const H = R_SASH, ct = Math.cos(th), st = Math.sin(th), ey = c.eyeY;
+    return (x, y, zo) => {
+      zo = zo || 0;
+      const xr = -H + (x + H) * ct - zo * st, z = (x + H) * st + zo * ct, k = PERSP_D / (PERSP_D + z);
+      return [c.cx + c.s * xr * k, c.cy + c.s * (ey + (y - ey) * k), k];
+    };
+  }
+  function ringD(P, r, zo, n) {
+    n = n || 56; let d = '';
+    for (let i = 0; i < n; i++) { const a = i / n * 6.2832, q = P(r * Math.cos(a), r * Math.sin(a), zo); d += (i ? 'L' : 'M') + f(q[0]) + ' ' + f(q[1]); }
+    return d + 'Z';
+  }
+  function buildPersp(parent, c) {
+    const g = G.el('g', { class: 'win-persp', style: 'display:none' }, parent);
+    const mk = (tag, a) => G.el(tag, a, g);
+    const r = rng(c.seed + 404), drops = [];
+    for (let i = 0; i < 22; i++) { const a = r() * 6.283, d = Math.sqrt(r()) * 188; drops.push([d * Math.cos(a), d * Math.sin(a), 1.2 + r() * 2]); }
+    return {
+      g, drops,
+      back: mk('path', { fill: '#0c120f', stroke: INK, 'stroke-linejoin': 'round' }),
+      edge: mk('path', { fill: 'none', stroke: '#4d5f54', 'stroke-opacity': .55 }),
+      glass: mk('path', { fill: '#0d1a22', 'fill-opacity': .38 }),
+      tint: mk('path', { fill: '#9fc4d8', 'fill-opacity': .08 }),
+      dropsP: mk('path', { fill: '#cfe0ee', 'fill-opacity': .35 }),
+      mullInk: mk('path', { fill: 'none', stroke: INK, 'stroke-linecap': 'butt' }),
+      mull: mk('path', { fill: 'none', stroke: '#27342e', 'stroke-linecap': 'butt' }),
+      rim: mk('path', { fill: '#2b3831', 'fill-rule': 'evenodd', stroke: INK, 'stroke-linejoin': 'round' }),
+      rimHi: mk('path', { fill: 'none', stroke: '#6f8578', 'stroke-opacity': .5 }),
+      glint: mk('path', { fill: 'none', stroke: '#eef6ff', 'stroke-linecap': 'round', 'stroke-opacity': .5 }),
+      glint2: mk('path', { fill: 'none', stroke: '#eef6ff', 'stroke-linecap': 'round', 'stroke-opacity': .16 }),
+      shade: mk('path', { fill: '#05090c', opacity: .25 }),
+    };
+  }
+  function drawPersp(R, th) {
+    const c = R.c, Pp = R.persp, P = projector(c, th), S = c.s;
+    const kc = P(0, 0)[2], w = px => f(px * S * kc);
+    Pp.back.setAttribute('d', ringD(P, R_SASH, SASH_T));
+    Pp.back.setAttribute('stroke-width', w(1.6));
+    Pp.edge.setAttribute('d', ringD(P, R_SASH - 1, SASH_T * .5));
+    Pp.edge.setAttribute('stroke-width', w(2));
+    const gl = ringD(P, R_GLASS);
+    Pp.glass.setAttribute('d', gl); Pp.tint.setAttribute('d', gl); Pp.shade.setAttribute('d', gl);
+    let dd = '';
+    for (const q of Pp.drops) { const p = P(q[0], q[1]), rr = f(q[2] * S * p[2]); dd += `M${f(p[0] - rr)} ${f(p[1])}a${rr} ${rr} 0 1 0 ${f(2 * rr)} 0a${rr} ${rr} 0 1 0 ${f(-2 * rr)} 0Z`; }
+    Pp.dropsP.setAttribute('d', dd);
+    let md = ringD(P, 130, 0, 44) + ringD(P, 58, 0, 28);
+    for (let k = 0; k < 8; k++) { const a = (-90 + k * 45) * Math.PI / 180, p0 = P(56 * Math.cos(a), 56 * Math.sin(a)), p1 = P(R_GLASS * Math.cos(a), R_GLASS * Math.sin(a)); md += `M${f(p0[0])} ${f(p0[1])}L${f(p1[0])} ${f(p1[1])}`; }
+    for (let k = 0; k < 8; k++) { const a = (-67.5 + k * 45) * Math.PI / 180, p0 = P(128 * Math.cos(a), 128 * Math.sin(a)), p1 = P(R_GLASS * Math.cos(a), R_GLASS * Math.sin(a)); md += `M${f(p0[0])} ${f(p0[1])}L${f(p1[0])} ${f(p1[1])}`; }
+    Pp.mull.setAttribute('d', md); Pp.mullInk.setAttribute('d', md);
+    Pp.mull.setAttribute('stroke-width', w(8.5)); Pp.mullInk.setAttribute('stroke-width', w(8.5 + 4.8 / Math.sqrt(S)));
+    Pp.rim.setAttribute('d', ringD(P, R_SASH) + ringD(P, R_GLASS));
+    Pp.rim.setAttribute('stroke-width', w(2.4 / Math.sqrt(S)));
+    Pp.rimHi.setAttribute('d', ringD(P, R_SASH - 3)); Pp.rimHi.setAttribute('stroke-width', w(1.4));
+    const seg = (pts) => pts.map((q, i) => { const p = P(q[0], q[1]); return (i ? 'L' : 'M') + f(p[0]) + ' ' + f(p[1]); }).join('');
+    Pp.glint.setAttribute('d', seg([[-150, -40], [-60, -120], [20, -160]]) + seg([[-120, 40], [-40, -30]]));
+    Pp.glint.setAttribute('stroke-width', w(3.2));
+    Pp.glint2.setAttribute('d', seg([[-170, 10], [-40, -110], [60, -170]]));
+    Pp.glint2.setAttribute('stroke-width', w(9));
+    Pp.shade.setAttribute('opacity', f(0.1 + 0.25 * th / OPEN_ANG));
+    // latch (plate, lever, key) follows the sash: local affine fit of the projection around the keyhole
+    const X = 0, Y = 196, p0 = P(X, Y), px = P(X + 1, Y), py = P(X, Y + 1);
+    const a = px[0] - p0[0], b = px[1] - p0[1], cc = py[0] - p0[0], d = py[1] - p0[1];
+    const r4 = v => Math.round(v * 10000) / 10000;
+    R.latchInner.setAttribute('transform', `matrix(${r4(a)} ${r4(b)} ${r4(cc)} ${r4(d)} ${f(p0[0] - a * X - cc * Y)} ${f(p0[1] - b * X - d * Y)})`);
+  }
+
   // ---------- build a window instance ----------
   function buildWindow(g, c) {
     ensureCss(); ensureDefs();
@@ -518,17 +608,20 @@
     const sash = G.el('g', { class: 'win-sash' }, sashWrap);
     G.svg(sashLocal(c, r), sash).setAttribute('transform', tr);
     G.svg(glassRain(c, r), sash).setAttribute('clip-path', `url(#win-glass-${id})`);
-    const lampRef = G.svg(`<circle cx="${c.cx}" cy="${c.cy}" r="${R_GLASS * S}" fill="url(#win-lampref)"/>
-      <circle class="win-lampdot" cx="${c.cx - 120 * S}" cy="${c.cy + 110 * S}" r="${16 * S}" fill="url(#win-flame)" style="animation:win-breathe 2.3s ease-in-out infinite"/>`, sash);
+    const lampRef = G.svg(`<g style="mix-blend-mode:screen">
+      <circle class="win-lampdot" cx="${c.cx - 118 * S}" cy="${c.cy + 112 * S}" r="${9 * S}" fill="url(#win-flame)" style="animation:win-breathe 2.3s ease-in-out infinite"/>
+      <circle cx="${c.cx - 118 * S}" cy="${c.cy + 112 * S}" r="${1.6 * S}" fill="#fff1c1" opacity=".85"/>
+      <path d="M${c.cx - 150 * S} ${c.cy + 96 * S}q${14 * S} ${-6 * S} ${26 * S} ${-4 * S}" stroke="#ffcf7a" stroke-opacity=".35" stroke-width="${1.4 * S}" fill="none" stroke-linecap="round"/></g>`, sash);
     lampRef.setAttribute('clip-path', `url(#win-glass-${id})`);
     G.svg(mullions(c), sash).setAttribute('transform', tr);
-    const shade = G.el('circle', { cx: c.cx, cy: c.cy, r: rO + 2, fill: '#04080b', opacity: 0 }, sash);
+    const persp = buildPersp(sashWrap, c);
     // fixed frame + moulding
     G.svg(frameLocal(c), root).setAttribute('transform', tr);
     // latch (moves with sash, drawn above frame)
     const latchWrap = G.el('g', {}, root);
     const latch = G.el('g', { class: 'win-latch' }, latchWrap);
-    G.svg(latchLocal(c), latch).setAttribute('transform', tr);
+    const latchInner = G.svg(latchLocal(c), latch);
+    latchInner.setAttribute('transform', tr);
     // things once open: blowing rain, moonlight spill
     if (c.sill) G.svg(c.sill, root);
     const openFx = G.el('g', { class: 'win-openfx', opacity: 0, 'pointer-events': 'none' }, root);
@@ -539,7 +632,7 @@
     // cold air wash (animated during opening)
     const wash = G.el('rect', { x: 0, y: 0, width: 1600, height: 900, fill: '#cfe3ff', opacity: 0, 'pointer-events': 'none' }, root);
     const R = {
-      c, root, sky, sash, latch, latchWrap, shade, moths, lampRef, openFx, curt, wash,
+      c, tr, root, sky, sash, latch, latchWrap, latchInner, persp, moths, lampRef, openFx, curt, wash,
       flash: sky.querySelector('.win-flash'), halo2: sky.querySelector('.win-halo2'),
       lever: latch.querySelector('.win-lever'), key: latch.querySelector('.win-key'), keyrot: latch.querySelector('.win-keyrot'),
       animating: false, timer: null, active: false,
@@ -548,12 +641,19 @@
   }
 
   function setOpen(R, t) {
-    const c = R.c, hx = c.cx - R_SASH * c.s, k = 1 - 0.86 * t, sy = 1 - 0.05 * t;
-    const tr = t ? `translate(${f(hx)} ${c.cy}) scale(${f(k)} ${f(sy)}) translate(${f(-hx)} ${-c.cy})` : '';
-    R.sash.setAttribute('transform', tr);
-    R.latch.setAttribute('transform', tr);
-    if (t > 0) R.latchWrap.setAttribute('clip-path', `url(#win-open-${c.id})`); else R.latchWrap.removeAttribute('clip-path');
-    R.shade.setAttribute('opacity', f(0.62 * t));
+    const c = R.c;
+    if (t <= 0) {
+      R.sash.style.opacity = 1;
+      R.persp.g.style.display = 'none';
+      R.latchInner.setAttribute('transform', R.tr);
+      R.latchWrap.removeAttribute('clip-path');
+    } else {
+      R.sash.style.opacity = f(Math.max(0, 1 - t * 7));
+      R.persp.g.style.display = '';
+      R.persp.g.style.opacity = f(Math.min(1, t * 7));
+      drawPersp(R, t * OPEN_ANG);
+      R.latchWrap.setAttribute('clip-path', `url(#win-open-${c.id})`);
+    }
     R.openFx.setAttribute('opacity', f(t));
     R.halo2.setAttribute('opacity', f(0.9 * t));
   }
@@ -598,7 +698,7 @@
 
   // ---------- configs ----------
   const WEST = {
-    id: 'w', cx: 800, cy: 360, s: 1, k: 1, seed: 11,
+    id: 'w', cx: 800, cy: 360, s: 1, k: 1, seed: 11, eyeY: 0,
     moon: { x: 889, y: 225, r: 29 }, horizon: 512, spire: [0.72, 1], stars: 40, clouds: 9, cloudW: 760, cloudDur: 150,
     streaks: 70, drops: 90, dropR: [0.9, 2.4], rivs: 16, trail: 26,
     moths: [[742, 318, 1.05, 8.5], [868, 420, 0.85, 11]],
@@ -612,7 +712,7 @@
   WEST.openExtra = `<ellipse cx="800" cy="604" rx="170" ry="7" fill="#cfe3ff" opacity=".35"/>`;
 
   const CLOSE = {
-    id: 'c', cx: 800, cy: -50, s: 3, k: 2.4, seed: 23,
+    id: 'c', cx: 800, cy: -50, s: 3, k: 2.4, seed: 23, eyeY: 70,
     moon: { x: 1212, y: 226, r: 64 }, horizon: 470, spire: [0.26, 1.9], stars: 70, clouds: 12, cloudW: 1560, cloudDur: 260,
     streaks: 150, drops: 190, dropR: [2.2, 6.5], rivs: 26, trail: 80,
     moths: [[560, 300, 2.1, 9], [1010, 400, 1.7, 12]],
