@@ -9,7 +9,7 @@
   const NO_HINT = 'Nothing more to find here… or is there?';
   const MUTE_KEY = 'mothkeeper.muted';
   const TIME_KEY = 'mothkeeper.elapsed';
-  const SLOTS = 6;
+  const SLOTS = 5;
   const reduced = () => window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   let overlay, wrap;
@@ -42,9 +42,9 @@
 
   // ---------------------------------------------------------------- art snippets
   // hand-inked chevron: main stroke + a faint second pass slightly offset (like a quill retrace)
-  const CHEV_L = '<svg viewBox="0 0 34 84" aria-hidden="true"><path d="M27 5 C 21 22, 13 34, 7 42 C 13 51, 21 63, 27 79" stroke-width="2.4"/><path class="s2" d="M29 9 C 23 24, 16 35, 10 42.5 C 16 51, 23 61, 28.5 75" stroke-width="1"/></svg>';
-  const CHEV_R = '<svg viewBox="0 0 34 84" aria-hidden="true"><path d="M7 5 C 13 22, 21 34, 27 42 C 21 51, 13 63, 7 79" stroke-width="2.4"/><path class="s2" d="M5 9 C 11 24, 18 35, 24 42.5 C 18 51, 11 61, 5.5 75" stroke-width="1"/></svg>';
-  const CHEV_D = '<svg viewBox="0 0 84 34" aria-hidden="true"><path d="M5 7 C 22 13, 34 21, 42 27 C 51 21, 63 13, 79 7" stroke-width="2.4"/><path class="s2" d="M9 5 C 24 11, 35 18, 42.5 24 C 51 18, 61 11, 75 5.5" stroke-width="1"/></svg>';
+  const CHEV_L = '<svg viewBox="0 0 34 84" aria-hidden="true"><path d="M27 5 C 21 22, 13 34, 7 42 C 13 51, 21 63, 27 79" stroke-width="3"/><path class="s2" d="M29 9 C 23 24, 16 35, 10 42.5 C 16 51, 23 61, 28.5 75" stroke-width="1.3"/></svg>';
+  const CHEV_R = '<svg viewBox="0 0 34 84" aria-hidden="true"><path d="M7 5 C 13 22, 21 34, 27 42 C 21 51, 13 63, 7 79" stroke-width="3"/><path class="s2" d="M5 9 C 11 24, 18 35, 24 42.5 C 18 51, 11 61, 5.5 75" stroke-width="1"/></svg>';
+  const CHEV_D = '<svg viewBox="0 0 84 34" aria-hidden="true"><path d="M5 7 C 22 13, 34 21, 42 27 C 51 21, 63 13, 79 7" stroke-width="3"/><path class="s2" d="M9 5 C 24 11, 35 18, 42.5 24 C 51 18, 61 11, 75 5.5" stroke-width="1"/></svg>';
 
   // small moth used in the hint button
   const HINT_ICON = `<svg viewBox="0 0 100 100" aria-hidden="true">
@@ -144,7 +144,7 @@
       return { x: R(-100, 1700), y: init ? R(-100, 900) : R(-160, -20), len: R(18, 46), sp: R(950, 1350), a: R(.05, .16), w: R(.6, 1.2) };
     }
     function seed() {
-      moths = Array.from({ length: mode === 'end' ? 18 : 9 }, () => newMoth(true));
+      moths = Array.from({ length: mode === 'end' ? 12 : 9 }, () => newMoth(true));
       drops = mode === 'title' ? Array.from({ length: 130 }, () => newDrop(true)) : [];
     }
     function drawMoth(m, t) {
@@ -232,8 +232,8 @@
     E.caption = h('div', { id: 'ui-caption', class: 'ui-hud', role: 'status', 'aria-live': 'polite' }, '<span></span>', overlay);
 
     // inventory
-    E.inv = h('div', { id: 'ui-inv', class: 'ui-hud', role: 'toolbar', 'aria-label': 'Inventory', 'aria-orientation': 'vertical' }, null, overlay);
-    const col = h('div', { class: 'ui-slots' }, null, E.inv);
+    E.inv = h('div', { id: 'ui-inv', class: 'ui-hud', 'aria-hidden': 'true' }, null, overlay); // walnut frame strip (decor)
+    const col = E.slotCol = h('div', { class: 'ui-slots ui-hud', role: 'toolbar', 'aria-label': 'Inventory' }, null, overlay);
     E.slots = [];
     for (let i = 0; i < SLOTS; i++) {
       const s = h('div', { class: 'ui-slot', role: 'button', tabindex: '-1', 'aria-label': 'Empty slot', 'aria-pressed': 'false' }, '<div class="ico"></div>', col);
@@ -287,12 +287,12 @@
 
   // ---------------------------------------------------------------- inventory
   function renderInv(force) {
-    const inv = G.state.inv || [];
+    const inv = (G.state.inv || []).filter(id => item(id));
     const sig = inv.join(',');
     if (!force && sig === S.lastSig) { markSel(); return; }
     S.lastSig = sig;
     E.slots.forEach((s, i) => {
-      const id = inv[i];
+      const id = inv[i] && item(inv[i]) ? inv[i] : undefined; // unregistered ids are not shown
       s.classList.remove('arriving', 'leaving');
       if (s.dataset.item !== (id || '')) {
         s.dataset.item = id || '';
@@ -359,7 +359,8 @@
       E.held.classList.add('on');
       if (s) showLabel(id, s, 2600);
     } else {
-      E.held.classList.remove('on');
+      E.held.classList.remove('on', 'over');
+      S.over = false;
     }
   }
   function moveHeld(x, y) { S.px = x; S.py = y; E.held.style.transform = `translate(${x}px, ${y}px)`; }
@@ -465,7 +466,7 @@
       txt.textContent = confirm ? 'The next note gives the answer away entirely. Are you certain?' : s.text;
       txt.classList.toggle('answer', !!s.isAnswer && !confirm);
       act.innerHTML = '';
-      const btn = (label, fn, aria) => { const b = h('button', { 'aria-label': aria || label, text: label }, null, act); b.addEventListener('click', fn); return b; };
+      const btn = (label, fn, aria) => { const b = h('button', { 'aria-label': aria || label }, null, act); h('span', { text: label }, null, b); b.addEventListener('click', fn); return b; };
       let first = null;
       if (confirm) {
         btn('Not yet', () => renderHint(s));
@@ -513,12 +514,12 @@
   function buildTitle() {
     const t = E.title = h('div', { id: 'ui-title', role: 'dialog', 'aria-label': 'The Moth Keeper' }, null, overlay);
     const cv = h('canvas', { 'aria-hidden': 'true' }, null, t);
-    h('div', { class: 't-halo rv', 'aria-hidden': 'true' }, null, t);
-    h('div', { class: 't-emblem rv', 'aria-hidden': 'true' }, EMBLEM, t);
-    h('h1', { class: 't-name rv d1' }, '<span class="the">The</span>Moth Keeper', t);
-    h('div', { class: 't-rule rv d2', 'aria-hidden': 'true' }, RULE, t);
-    h('p', { class: 't-sub rv d2' }, 'an attic, a lamp, a letter unread', t);
-    const b = h('div', { class: 't-buttons rv d3' }, null, t);
+    const st = h('div', { class: 't-stack' }, null, t);
+    h('div', { class: 't-emblem-wrap rv', 'aria-hidden': 'true' }, '<div class="t-halo"></div><div class="t-emblem">' + EMBLEM + '</div>', st);
+    h('h1', { class: 't-name rv d1' }, '<span class="the">The</span>Moth Keeper', st);
+    h('div', { class: 't-rule rv d2', 'aria-hidden': 'true' }, RULE, st);
+    h('p', { class: 't-sub rv d2' }, 'an attic, a lamp, a letter unread', st);
+    const b = h('div', { class: 't-buttons rv d3' }, null, st);
     E.begin = h('button', { class: 't-btn', 'aria-label': 'Begin a new game', text: 'Begin' }, null, b);
     E.cont = h('button', { class: 't-btn secondary', 'aria-label': 'Continue saved game', text: 'Continue' }, null, b);
     h('div', { class: 't-foot rv d4', 'aria-hidden': 'true', text: 'best played with sound, in a dark room' }, null, t);
@@ -579,17 +580,14 @@
 
     const e = E.ending = h('div', { id: 'ui-ending', role: 'dialog', 'aria-label': 'The end', 'aria-live': 'polite' }, null, overlay);
     const cv = h('canvas', { 'aria-hidden': 'true' }, null, e);
-    h('div', { class: 'e-moon', 'aria-hidden': 'true' }, null, e);
-    const lines = h('div', { class: 'e-lines' }, null, e);
-    const l1 = h('p', { class: 'e-line fx', text: 'She never left.' }, null, lines);
-    const l2 = h('p', { class: 'e-line l2 fx', text: 'She was only waiting for someone to light the lamp.' }, null, lines);
-    const meta = h('div', { class: 'e-meta' }, null, e);
+    h('div', { class: 'e-band', 'aria-hidden': 'true' }, null, e);
+    const meta = h('div', { class: 'e-body' }, null, e);
+    const l1 = h('p', { class: 'e-line fx', text: 'She never left.' }, null, meta);
+    const l2 = h('p', { class: 'e-line l2 fx', text: 'She was only waiting for someone to light the lamp.' }, null, meta);
     const m1 = h('div', { class: 'e-title fx', text: 'The Moth Keeper' }, null, meta);
     const m2 = h('div', { class: 'e-stats fx', text: `${fmtTime(time)}  ·  ${hints === 0 ? 'no hints' : hints === 1 ? '1 hint' : hints + ' hints'}` }, null, meta);
     const again = h('button', { class: 't-btn e-again fx', text: 'Play again', 'aria-label': 'Play again' }, null, meta);
     again.addEventListener('click', () => { safe(() => G.resetSave()); try { localStorage.removeItem(TIME_KEY); } catch (err) { } location.reload(); });
-    const gr = h('div', { class: 'ui-grain', 'aria-hidden': 'true' }, null, e); gr.style.backgroundImage = GRAIN;
-    h('div', { class: 'ui-vig', 'aria-hidden': 'true' }, null, e);
     E.endAmb = Ambient(cv, 'end');
     requestAnimationFrame(() => requestAnimationFrame(() => { e.classList.add('show'); E.endAmb.start(); }));
     const r = reduced() ? .3 : 1;
@@ -621,6 +619,10 @@
       if (ev.pointerType === 'touch' && !G.selected()) return;
       const r = stageRect();
       moveHeld(ev.clientX - r.left, ev.clientY - r.top);
+      if (G.selected()) {
+        const t = ev.target, over = !!(t && t.closest && t.closest('#stage .hot'));
+        if (over !== S.over) { S.over = over; E.held.classList.toggle('over', over); }
+      }
     }, { passive: true });
     wrap.addEventListener('pointerleave', () => { if (G.selected()) E.held.classList.remove('on'); });
     wrap.addEventListener('pointerenter', () => { if (G.selected()) E.held.classList.add('on'); });

@@ -154,9 +154,11 @@
     o.frequency.setValueAtTime(p.f, p.t);
     if (p.f1) o.frequency.exponentialRampToValueAtTime(p.f1, p.t + (p.glide || p.d));
     if (p.detune) o.detune.value = p.detune;
-    if (p.wow && K.wow) K.wow.connect(o.detune);
+    const w = p.wow && K.wow;
+    if (w) K.wow.connect(o.detune);
     env(g.gain, p.t, a, p.g, p.d, p.hold);
     o.connect(g); g.connect(dest);
+    o.onended = () => { try { if (w) w.disconnect(o.detune); o.disconnect(); g.disconnect(); } catch (e) { } };
     o.start(p.t); o.stop(end + 0.05);
     return g;
   }
@@ -181,6 +183,7 @@
     const g = c.createGain();
     if (p.flat) g.gain.value = p.g; else env(g.gain, p.t, a, p.g, p.d, p.hold);
     n.connect(g); g.connect(dest);
+    s.onended = () => { try { s.disconnect(); g.disconnect(); } catch (e) { } };
     s.start(p.t, custom ? 0 : R() * (s.buffer.duration - dur - 0.1 > 0 ? s.buffer.duration - dur - 0.1 : 0));
     s.stop(p.t + dur + 0.05);
     return g;
@@ -196,6 +199,7 @@
       s.connect(b); b.connect(bg); bg.connect(out);
     });
     out.connect(dest);
+    s.onended = () => { try { s.disconnect(); out.disconnect(); } catch (e) { } };
     s.start(t); s.stop(t + buf.duration / (rate || 1) + 0.05);
   }
   function creak(K, dest, t, p) {
@@ -247,26 +251,57 @@
     if (f * 8.9 < 15000) tone(K, dest, { f: f * 8.9, t, a: 0.001, d: 0.05, g: v * 0.03 });
     noise(K, dest, { t, a: 0.0005, d: 0.012, g: v * 0.1, filters: [{ type: 'highpass', f: 3500 }] });
   }
-  function padNote(K, dest, t, f, dur, v, bright, atk, rel) {
-    const c = K.c, lp = c.createBiquadFilter(), g = c.createGain();
-    atk = atk || 1.2; rel = rel || 2.5;
-    lp.type = 'lowpass'; lp.Q.value = 0.6;
-    lp.frequency.setValueAtTime(bright ? 1500 : 700, t);
-    lp.frequency.linearRampToValueAtTime(bright ? 2400 : 900, t + atk);
-    lp.frequency.linearRampToValueAtTime(bright ? 1200 : 500, t + dur + rel);
-    g.gain.setValueAtTime(0, t);
-    g.gain.linearRampToValueAtTime(v, t + atk);
-    g.gain.setValueAtTime(v, t + Math.max(atk, dur));
-    g.gain.exponentialRampToValueAtTime(0.0001, t + Math.max(atk, dur) + rel);
-    lp.connect(g); g.connect(dest);
-    const end = t + Math.max(atk, dur) + rel + 0.1;
-    [['sawtooth', 1, -7, 0.35], ['sawtooth', 1, 7, 0.35], ['triangle', 0.5, 0, 0.5], ['sine', 2, 3, 0.12]].forEach(([ty, m, dt, gg]) => {
-      const o = c.createOscillator(), og = c.createGain();
-      o.type = ty; o.frequency.value = f * m; o.detune.value = dt + (R() - 0.5) * 4; og.gain.value = gg;
-      if (K.wow) K.wow.connect(o.detune);
-      o.connect(og); og.connect(lp); o.start(t); o.stop(end);
-    });
+  // Bowed-string bed: band-limited pulse (bow/string), delayed vibrato, bow-hair noise, wooden body formants.
+  const pwCache = new WeakMap();
+  function bowWave(c) {
+    let w = pwCache.get(c);
+    if (w) return w;
+    const N = 48, re = new Float32Array(N + 1), im = new Float32Array(N + 1);
+    for (let n = 1; n <= N; n++) im[n] = Math.sin(Math.PI * n * 0.19) / n * Math.exp(-n / 26);
+    w = c.createPeriodicWave(re, im);
+    pwCache.set(c, w);
+    return w;
   }
+  function padNote(K, dest, t, f, dur, v, bright, atk, rel) {
+    const c = K.c, g = c.createGain();
+    atk = atk || 1.2; rel = rel || 2.5;
+    const hold = Math.max(atk, dur), end = t + hold + rel + 0.1;
+    // body: highpass, two body resonances, bridge hill, soft (muted) top
+    const hp = filt(K, g, t, { type: 'highpass', f: 70 });
+    const b1 = filt(K, hp, t, { type: 'peaking', f: rr(260, 300), q: 1.4, gain: 5 });
+    const b2 = filt(K, b1, t, { type: 'peaking', f: rr(480, 560), q: 1.8, gain: 3 });
+    const b3 = filt(K, b2, t, { type: 'peaking', f: 2400, q: 0.9, gain: bright ? 3 : -2 });
+    const lp = filt(K, b3, t, { type: 'lowpass', f: bright ? 2600 : 1500, q: 0.5 });
+    lp.connect(dest);
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(v * 0.7, t + atk * 0.6);
+    g.gain.linearRampToValueAtTime(v, t + atk);
+    g.gain.setValueAtTime(v, t + hold);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + hold + rel);
+    const vib = c.createOscillator(), vg = c.createGain();
+    vib.frequency.value = rr(4.6, 5.6);
+    vg.gain.setValueAtTime(0, t); vg.gain.linearRampToValueAtTime(rr(5, 9), t + atk * 1.3);
+    vib.connect(vg); vib.start(t); vib.stop(end);
+    const srcs = [vib];
+    [[-5, 0.5], [6, 0.5]].forEach(([dt, gg]) => {
+      const o = c.createOscillator(), og = c.createGain();
+      o.setPeriodicWave(bowWave(c)); o.frequency.value = f; o.detune.value = dt + (R() - 0.5) * 3; og.gain.value = gg;
+      vg.connect(o.detune);
+      o.connect(og); og.connect(g); o.start(t); o.stop(end);
+      srcs.push(o);
+    });
+    // bow noise (rosin hiss) riding the same envelope
+    const ns = c.createBufferSource(); ns.buffer = K.nb.pink; ns.loop = true;
+    const nf = filt(K, ns, t, { type: 'bandpass', f: Math.min(6000, f * 3.2), q: 1.2 });
+    const ng = c.createGain(); ng.gain.value = 0.3; nf.connect(ng); ng.connect(g);
+    ns.start(t, R() * 3); ns.stop(end);
+    srcs.push(ns);
+    ns.onended = () => { try { srcs.forEach(n => n.disconnect()); vg.disconnect(); g.disconnect(); lp.disconnect(); } catch (e) { } };
+  }
+
+  const boost = (o, k) => Object.assign({}, o, { vol: (o.vol == null ? 1 : o.vol) * k });
+  // scale degree (0 = D5) -> midi in the current mode (minor until the moth hatches, then major)
+  const km = d => degMidi(d, M.stage >= 2 ? 'major' : 'minor');
 
   /* =====================================================================================
    *  SFX
@@ -299,9 +334,9 @@
       noise(K, v, { t, a: 0.03, d: 0.12, g: 0.12, filters: [{ type: 'bandpass', f: 2200, q: 0.7, pts: [[0.15, 1400]] }] });
       noise(K, v, { t, buf: crackleBuf(K.c, 0.14, () => 300, 1.5), flat: true, g: 0.25, filters: [{ type: 'highpass', f: 1800 }] });
       woodKnock(K, v, t + 0.02, rr(280, 330), 0.18, 0.07);
-      const n = pick([86, 93, 89]);
-      mbNote(K, v, t + 0.08, mtof(n), 0.28, { decay: 2 });
-      mbNote(K, v, t + 0.17, mtof(n + 7), 0.11, { decay: 1.6 });
+      const d = pick([7, 11, 9]);
+      mbNote(K, v, t + 0.08, mtof(km(d)), 0.28, { decay: 2 });
+      mbNote(K, v, t + 0.17, mtof(km(d === 11 ? 14 : d + 4)), 0.11, { decay: 1.6 });
     },
     tick(K, t, o) {
       const v = voice(K, o, 0.15);
@@ -314,7 +349,7 @@
       // gear run ("warning") before the strike
       for (let i = 0; i < 10; i++) metalTick(K, v, t + i * rr(0.045, 0.06), 0.08 * (1 - i / 14), 0.7);
       thud(K, v, t + 0.55, 180, 0.12, 0.06);
-      [69, 65, 62].forEach((m, i) => bell(K, v, t + 0.7 + i * rr(1.25, 1.4), mtof(m), 0.3, 5.5));
+      [-3, -5, -7].forEach((d, i) => bell(K, v, t + 0.7 + i * rr(1.25, 1.4), mtof(km(d)), 0.3, 5.5));
     },
     clockOpen(K, t, o) {
       const v = voice(K, o, 0.3);
@@ -390,7 +425,7 @@
       noise(K, v, { t, a: 1.2, hold: 0.2, d: 1.7, g: 0.2, filters: [{ type: 'bandpass', f: w0, q: 18, pts: [[1.0, w0 * 1.35], [1.8, w0 * 1.15], [3.1, w0 * 1.25]] }] });
     },
     paper(K, t, o) {
-      const v = voice(K, o, 0.2), d = rr(0.25, 0.38);
+      const v = voice(K, boost(o, 2), 0.2), d = rr(0.25, 0.38);
       noise(K, v, { t, buf: crackleBuf(K.c, d, x => 500 * Math.sin(Math.PI * x) + 40, 1.2), flat: true, g: 0.6, filters: [{ type: 'bandpass', f: 2800, q: 0.7 }] });
       noise(K, v, { t, a: 0.05, d: d, g: 0.1, filters: [{ type: 'bandpass', f: 1800, q: 0.8, pts: [[d, 2600]] }] });
     },
@@ -409,7 +444,7 @@
       woodKnock(K, v, t + 0.65, rr(210, 230), 0.1, 0.06);
     },
     cocoonCrack(K, t, o) {
-      const v = voice(K, o, 0.3);
+      const v = voice(K, boost(o, 2), 0.3);
       const bump = (x, c, w) => Math.exp(-Math.pow((x - c) / w, 2));
       noise(K, v, { t, buf: crackleBuf(K.c, 1.3, x => 260 * (bump(x, 0.1, 0.07) + bump(x, 0.5, 0.1) + bump(x, 0.9, 0.08)) + 10, 0.7, 2), flat: true, g: 1.1, filters: [{ type: 'bandpass', f: 4000, q: 0.8 }] });
       [0.12, 0.55, rr(0.85, 0.95)].forEach(dt => {
@@ -430,7 +465,7 @@
     },
     magic(K, t, o) {
       const v = voice(K, o, 0.55);
-      [74, 81, 86, 88, 90, 93, 98].forEach((m, i) => mbNote(K, v, t + i * rr(0.075, 0.095), mtof(m), 0.26 * (1 - i * 0.07), { decay: 3 }));
+      [0, 4, 7, 8, 9, 11, 14].forEach((d, i) => mbNote(K, v, t + i * rr(0.075, 0.095), mtof(km(d)), 0.26 * (1 - i * 0.07), { decay: 3 }));
       noise(K, v, { t, a: 0.4, d: 1.6, g: 0.05, filters: [{ type: 'bandpass', f: 8000, q: 0.6 }] });
       tone(K, v, { f: mtof(86), t, a: 0.5, d: 2, g: 0.04 });
       tone(K, v, { f: mtof(93), t: t + 0.2, a: 0.5, d: 2, g: 0.03 });
@@ -449,7 +484,7 @@
       noise(K, v, { t: tb - 0.18, a: 0.15, d: 0.08, g: 0.25, filters: [{ type: 'bandpass', f: 800, q: 0.8, pts: [[0.23, 300]] }] });
       thud(K, v, tb, 55, 0.7, 0.3);
       metalTick(K, v, tb, 0.45, 0.7);
-      bell(K, v, tb, 160, 0.06, 1.6);
+      bell(K, v, tb, 146.83, 0.06, 1.6);
     },
     doorOpen(K, t, o) {
       const v = voice(K, o, 0.4);
@@ -460,16 +495,16 @@
     },
     success(K, t, o) {
       const v = voice(K, o, 0.5);
-      [50, 57, 62].forEach(m => padNote(K, v, t, mtof(m), 1.8, 0.05, false, 0.35, 2.2));
-      padNote(K, v, t, mtof(67), 0.6, 0.04, false, 0.3, 0.6);        // suspension G
-      padNote(K, v, t + 0.7, mtof(66), 1.2, 0.04, false, 0.3, 2.2);  // resolves to F#
-      mbNote(K, v, t + 0.03, mtof(81), 0.26);
-      mbNote(K, v, t + 0.72, mtof(86), 0.24);
-      mbNote(K, v, t + 0.74, mtof(78), 0.12);
+      [-14, -10, -7].forEach(d => padNote(K, v, t, mtof(km(d)), 1.8, 0.05, false, 0.35, 2.2));
+      padNote(K, v, t, mtof(km(-4)), 0.6, 0.04, false, 0.3, 0.6);        // suspension G
+      padNote(K, v, t + 0.7, mtof(km(-5)), 1.2, 0.04, false, 0.3, 2.2);  // resolves to the third
+      mbNote(K, v, t + 0.03, mtof(km(4)), 0.26);
+      mbNote(K, v, t + 0.72, mtof(km(7)), 0.24);
+      mbNote(K, v, t + 0.74, mtof(km(2)), 0.12);
     },
     hint(K, t, o) {
       const v = voice(K, o, 0.6);
-      mbNote(K, v, t, mtof(pick([81, 86, 77, 84])), 0.3, { decay: 3 });
+      mbNote(K, v, t, mtof(km(pick([4, 7, 2, 6]))), 0.3, { decay: 3 });
     },
   };
 
@@ -530,7 +565,8 @@
       const now = ctx.currentTime;
       if (lastPlay[name] && now - lastPlay[name] < 0.03) return;
       lastPlay[name] = now;
-      o = o || {};
+      o = Object.assign({}, o || {});
+      if (o.vol == null && o.volume != null) o.vol = o.volume;
       fn(KS, now + 0.01 + (o.delay || 0), o);
       if (name === 'cocoonCrack') A.cracked = true;
       if (name === 'mothFlutter' && A.cracked) setMusicStage(Math.max(M.stage, 2));
