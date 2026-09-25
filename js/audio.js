@@ -660,7 +660,7 @@
     while (dropDebt >= 1) {
       dropDebt -= 1 + (R() - 0.5) * 0.5;
       const t = t0 + R() * 0.06, o = { pan: rr(-0.9, 0.9) };
-      const v = voice(L.KD, o, 0.2);
+      const v = voice(L.KD, o, 0);
       if (R() < 0.72) noise(L.KD, v, { t, a: 0.0004, d: rr(0.002, 0.007), g: Math.pow(R(), 2) * 0.35 + 0.02, filters: [{ type: 'bandpass', f: rr(1800, 6500), q: 1.3 }] });
       else tone(L.KD, v, { f: rr(1800, 4200), f1: rr(1100, 1600), glide: 0.012, t, d: rr(0.01, 0.02), g: rr(0.015, 0.05) });
     }

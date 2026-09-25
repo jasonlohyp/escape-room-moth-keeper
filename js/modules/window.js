@@ -87,8 +87,8 @@
     <stop offset="1" stop-color="#cfe3ff" stop-opacity="0"/></radialGradient>
   <radialGradient id="win-moon" cx=".42" cy=".4" r=".62"><stop offset="0" stop-color="#fbf8ea"/>
     <stop offset=".7" stop-color="#e6e6d4"/><stop offset="1" stop-color="#b9c3c0"/></radialGradient>
-  <radialGradient id="win-cloud"><stop offset="0" stop-color="#1a2833" stop-opacity=".92"/>
-    <stop offset=".55" stop-color="#1c2c38" stop-opacity=".7"/><stop offset="1" stop-color="#1c2c38" stop-opacity="0"/></radialGradient>
+  <radialGradient id="win-cloud"><stop offset="0" stop-color="#1a2833" stop-opacity=".7"/>
+    <stop offset=".55" stop-color="#1c2c38" stop-opacity=".45"/><stop offset="1" stop-color="#1c2c38" stop-opacity="0"/></radialGradient>
   <radialGradient id="win-cloudlit"><stop offset="0" stop-color="#8fa9c2" stop-opacity=".55"/>
     <stop offset=".6" stop-color="#6d88a3" stop-opacity=".22"/><stop offset="1" stop-color="#6d88a3" stop-opacity="0"/></radialGradient>
   <linearGradient id="win-haze" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#46657a" stop-opacity="0"/>
@@ -143,27 +143,29 @@
   }
 
   // ---------- sky (screen coords) ----------
-  function skyline(x0, x1, base, k, r, yb) {
-    // far wooded hills
-    let far = `M${x0} ${yb}L${x0} ${base - 26 * k}`;
-    for (let x = x0; x <= x1 + 20; x += 16 * k) {
-      const y = base - (22 + 14 * Math.sin(x * 0.011) + r() * 10) * k;
-      far += `Q${f(x + 8 * k)} ${f(y - (6 + r() * 8) * k)} ${f(x + 16 * k)} ${f(y)}`;
+  function skyline(x0, x1, base, k, r, yb, spireF, spireK) {
+    // far wooded hills: a gentle rolling line crowned with tree canopies
+    const hill = x => base - (16 + 10 * Math.sin((x - x0) * 0.006 / k + 1.3) + 5 * Math.sin((x - x0) * 0.017 / k)) * k;
+    let far = `M${x0 - 20} ${yb}L${x0 - 20} ${f(hill(x0 - 20))}`;
+    for (let x = x0 - 20; x <= x1 + 20;) {
+      const rr = (5 + r() * 9) * k, nx = x + rr * 2;
+      far += `A${f(rr)} ${f(rr * (0.8 + r() * 0.4))} 0 0 1 ${f(nx)} ${f(hill(nx))}`;
+      x = nx;
     }
-    far += `L${x1 + 20} ${yb}Z`;
+    far += `L${x1 + 40} ${yb}Z`;
     // near village roofline
     let near = `M${x0} ${yb}L${x0} ${base}`;
     const lights = [];
     let x = x0 - 10 * k, i = 0;
-    const spireAt = x0 + (x1 - x0) * 0.63;
+    const spireAt = x0 + (x1 - x0) * spireF;
     let spireDone = false;
     while (x < x1 + 10) {
       i++;
       if (!spireDone && x > spireAt) {
         spireDone = true;
-        const w = 26 * k, h = 58 * k, sh = 72 * k;
+        const w = 26 * spireK, h = 58 * spireK, sh = 72 * spireK;
         near += `L${f(x)} ${f(base - 6 * k)}L${f(x)} ${f(base - h)}L${f(x + w * .5)} ${f(base - h - sh)}L${f(x + w)} ${f(base - h)}L${f(x + w)} ${f(base - 6 * k)}`;
-        lights.push([x + w * .5 - 2.2 * k, base - h + 10 * k, 4.4 * k, 7 * k, .55]);
+        lights.push([x + w * .5 - 2.2 * spireK, base - h + 10 * spireK, 4.4 * spireK, 7 * spireK, .55]);
         x += w; continue;
       }
       const w = (34 + r() * 46) * k, h = (8 + r() * 26) * k, pitch = (14 + r() * 16) * k;
@@ -234,7 +236,7 @@
     // lightning flash (below silhouettes)
     s += `<rect class="win-flash" x="${x0}" y="${y0}" width="${x1 - x0}" height="${y1 - y0}" fill="#dbe8ff" opacity="0"/>`;
     // silhouettes
-    const sk = skyline(x0, x1, c.horizon, k, r, y1);
+    const sk = skyline(x0, x1, c.horizon, k, r, y1, c.spire[0], c.spire[1]);
     s += `<path d="${sk.far}" fill="#0d1a22"/>`;
     s += `<g fill="#070e13">${sk.trees}</g>`;
     s += `<path d="${sk.near}" fill="#060b0f"/>`;
@@ -375,32 +377,32 @@
     const S = c.s, ink = f(1.8 / Math.sqrt(S)), thin = f(0.9 / Math.sqrt(S));
     return `
     <g class="win-plate">
-      <path d="M-19 190Q-19 185 -14 185L14 185Q19 185 19 190L19 206Q19 212 13 213L-13 213Q-19 212 -19 206Z" fill="url(#win-brass)" stroke="${INK}" stroke-width="${ink}"/>
-      <path d="M-16 190Q-16 188 -13 188L13 188Q16 188 16 190L16 205Q16 210 12 210L-12 210Q-16 210 -16 205Z" fill="none" stroke="#fff3c8" stroke-opacity=".35" stroke-width="${thin}"/>
+      <path d="M-19 183Q-19 178 -14 178L14 178Q19 178 19 183L19 200Q19 206 13 207L-13 207Q-19 206 -19 200Z" fill="url(#win-brass)" stroke="${INK}" stroke-width="${ink}"/>
+      <path d="M-16 183Q-16 181 -13 181L13 181Q16 181 16 183L16 199Q16 204 12 204L-12 204Q-16 204 -16 199Z" fill="none" stroke="#fff3c8" stroke-opacity=".35" stroke-width="${thin}"/>
       <g fill="#6e4d1c" stroke="${INK}" stroke-width="${f(0.6 / Math.sqrt(S))}">
-        <circle cx="-14" cy="190" r="1.7"/><circle cx="14" cy="190" r="1.7"/><circle cx="14" cy="208" r="1.7"/>
+        <circle cx="-14.5" cy="183" r="1.7"/><circle cx="14.5" cy="183" r="1.7"/><circle cx="-14.5" cy="202" r="1.7"/><circle cx="14.5" cy="202" r="1.7"/>
       </g>
-      <g stroke="#2a1d0c" stroke-width="${f(0.5 / Math.sqrt(S))}"><path d="M-15.1 189.2l2.2 1.6M12.9 190.8l2.2-1.6M12.9 207.2l2.2 1.6"/></g>
-      <ellipse cx="0" cy="196.5" rx="4.6" ry="5.2" fill="#6e4d1c" opacity=".7"/>
-      <path d="M0 193.4a2.6 2.6 0 1 1 -0.01 0Z M-1.1 197.5L1.1 197.5L1.9 203.2L-1.9 203.2Z" fill="#0b0705"/>
-      <circle cx="0" cy="196.5" r="4.8" fill="none" stroke="#f3d995" stroke-opacity=".5" stroke-width="${thin}"/>
+      <g stroke="#2a1d0c" stroke-width="${f(0.5 / Math.sqrt(S))}"><path d="M-15.6 182.2l2.2 1.6M13.4 183.8l2.2-1.6M13.4 201.2l2.2 1.6M-15.6 202.8l2.2-1.6"/></g>
+      <ellipse cx="0" cy="190.5" rx="5" ry="7.5" fill="#6e4d1c" opacity=".55"/>
+      <path d="M0 185.4a2.7 2.7 0 1 1 -0.01 0Z M-1.1 189.5L1.1 189.5L1.9 195.4L-1.9 195.4Z" fill="#0b0705"/>
+      <path d="M-5 190.5a5 7.5 0 0 1 10 0" fill="none" stroke="#f3d995" stroke-opacity=".55" stroke-width="${thin}"/>
     </g>
     <g class="win-key" opacity="0">
       <g class="win-keyrot">
-        <rect x="-1.5" y="182" width="3" height="15" rx="1" fill="url(#win-brass2)" stroke="${INK}" stroke-width="${thin}"/>
-        <path d="M0 162c5.5 0 7.5 5 7.5 10s-3 9-7.5 9-7.5-4-7.5-9 2-10 7.5-10z" fill="url(#win-brass)" stroke="${INK}" stroke-width="${ink}"/>
-        <path d="M0 166.5c2.4 0 3.2 2.4 3.2 5s-1.4 4.6-3.2 4.6-3.2-2-3.2-4.6 .8-5 3.2-5z" fill="#0b0705"/>
-        <circle cx="0" cy="196.5" r="2.6" fill="url(#win-brass2)" stroke="${INK}" stroke-width="${thin}"/>
+        <rect x="-1.5" y="174" width="3" height="15" rx="1" fill="url(#win-brass2)" stroke="${INK}" stroke-width="${thin}"/>
+        <path d="M0 154c5.5 0 7.5 5 7.5 10s-3 9-7.5 9-7.5-4-7.5-9 2-10 7.5-10z" fill="url(#win-brass)" stroke="${INK}" stroke-width="${ink}"/>
+        <path d="M0 158.5c2.4 0 3.2 2.4 3.2 5s-1.4 4.6-3.2 4.6-3.2-2-3.2-4.6 .8-5 3.2-5z" fill="#0b0705"/>
+        <circle cx="0" cy="188.5" r="2.6" fill="url(#win-brass2)" stroke="${INK}" stroke-width="${thin}"/>
       </g>
     </g>
-    <g class="win-lever" transform="rotate(0 -9 206)">
-      <path d="M-18 203.5L-9 202.8L17.5 215.5Q22.5 218 21.5 222.5L20.2 227.5Q19.4 229.5 17.4 228.6L16.2 227.8Q15.2 227 15.8 225.5L17 221.5Q17 219.8 15 219L-9 209.2L-18 208.5Q-21 206 -18 203.5Z"
+    <g class="win-lever" transform="rotate(0 -10 210.3)">
+      <path d="M-18 208L-10 207.5L17 214.5Q22 216 21.5 220.5L20.5 226Q19.8 228.5 17.6 227.6L16.6 227Q15.6 226.2 16 224.8L17 220.5Q17 218.8 15 218.2L-10 213L-18 212.5Q-20.5 210.2 -18 208Z"
         fill="url(#win-brass)" stroke="${INK}" stroke-width="${ink}" stroke-linejoin="round"/>
-      <path d="M-8 204.6L16 216.3" stroke="#fff3c8" stroke-opacity=".5" stroke-width="${thin}"/>
-      <circle cx="-20" cy="206" r="3.6" fill="url(#win-brass)" stroke="${INK}" stroke-width="${ink}"/>
-      <circle cx="-21" cy="205" r="1.1" fill="#fff6d6" opacity=".7"/>
-      <circle cx="-9" cy="206" r="2.6" fill="#8a6224" stroke="${INK}" stroke-width="${thin}"/>
-      <circle cx="-9.6" cy="205.4" r=".8" fill="#fff3c8" opacity=".6"/>
+      <path d="M-9 209.3L15.5 215.6" stroke="#fff3c8" stroke-opacity=".5" stroke-width="${thin}"/>
+      <circle cx="-20.5" cy="210.3" r="3.6" fill="url(#win-brass)" stroke="${INK}" stroke-width="${ink}"/>
+      <circle cx="-21.5" cy="209.3" r="1.1" fill="#fff6d6" opacity=".7"/>
+      <circle cx="-10" cy="210.3" r="2.6" fill="#8a6224" stroke="${INK}" stroke-width="${thin}"/>
+      <circle cx="-10.6" cy="209.7" r=".8" fill="#fff3c8" opacity=".6"/>
     </g>`;
   }
 
@@ -431,7 +433,7 @@
     }
     s += `<path d="${grain}" fill="none" stroke="#1d120a" stroke-opacity=".35" stroke-width="${lw(.8)}"/>`;
     // carved keystone blocks at top, left and right
-    for (const ang of [-90, 180, 0]) {
+    for (const ang of [-90]) {
       const a0 = (ang - 6) * D, a1 = (ang + 6) * D;
       const d = `M${pt(R_REVEAL - 1, a0)}L${pt(R_MOULD + 16, a0 - 1.5 * D)}L${pt(R_MOULD + 16, a1 + 1.5 * D)}L${pt(R_REVEAL - 1, a1)}Z`;
       s += `<path d="${d}" fill="url(#win-mould2)" stroke="${INK}" stroke-width="${ink}" stroke-linejoin="round"/>`;
@@ -506,8 +508,8 @@
     const moths = G.svg(c.moths.map((m, i) => `<g transform="translate(${m[0]} ${m[1]})"><g class="win-anim" style="--k:${m[2]};animation:win-moth${i % 2 ? 'B' : 'A'} ${m[3]}s ease-in-out ${-i * 2.3}s infinite">${mothMarkup(m[2], '#e6dbbd')}</g></g>`).join(''), sky);
     moths.setAttribute('class', 'win-moths');
     // sash (moves)
-    const sash = G.el('g', { class: 'win-sash' }, root);
-    sash.setAttribute('clip-path', `url(#win-open-${id})`);
+    const sashWrap = G.el('g', { 'clip-path': `url(#win-open-${id})` }, root);
+    const sash = G.el('g', { class: 'win-sash' }, sashWrap);
     G.svg(sashLocal(c, r), sash).setAttribute('transform', tr);
     G.svg(glassRain(c, r), sash).setAttribute('clip-path', `url(#win-glass-${id})`);
     const lampRef = G.svg(`<circle cx="${c.cx}" cy="${c.cy}" r="${R_GLASS * S}" fill="url(#win-lampref)"/>
@@ -518,7 +520,8 @@
     // fixed frame + moulding
     G.svg(frameLocal(c), root).setAttribute('transform', tr);
     // latch (moves with sash, drawn above frame)
-    const latch = G.el('g', { class: 'win-latch' }, root);
+    const latchWrap = G.el('g', {}, root);
+    const latch = G.el('g', { class: 'win-latch' }, latchWrap);
     G.svg(latchLocal(c), latch).setAttribute('transform', tr);
     // things once open: blowing rain, moonlight spill
     const openFx = G.el('g', { class: 'win-openfx', opacity: 0, 'pointer-events': 'none' }, root);
@@ -530,7 +533,7 @@
     // cold air wash (animated during opening)
     const wash = G.el('rect', { x: 0, y: 0, width: 1600, height: 900, fill: '#cfe3ff', opacity: 0, 'pointer-events': 'none' }, root);
     const R = {
-      c, root, sky, sash, latch, shade, moths, lampRef, openFx, curt, wash,
+      c, root, sky, sash, latch, latchWrap, shade, moths, lampRef, openFx, curt, wash,
       flash: sky.querySelector('.win-flash'), halo2: sky.querySelector('.win-halo2'),
       lever: latch.querySelector('.win-lever'), key: latch.querySelector('.win-key'), keyrot: latch.querySelector('.win-keyrot'),
       animating: false, timer: null, active: false,
@@ -543,15 +546,15 @@
     const tr = t ? `translate(${f(hx)} ${c.cy}) scale(${f(k)} ${f(sy)}) translate(${f(-hx)} ${-c.cy})` : '';
     R.sash.setAttribute('transform', tr);
     R.latch.setAttribute('transform', tr);
-    if (t > 0) R.latch.setAttribute('clip-path', `url(#win-open-${c.id})`); else R.latch.removeAttribute('clip-path');
+    if (t > 0) R.latchWrap.setAttribute('clip-path', `url(#win-open-${c.id})`); else R.latchWrap.removeAttribute('clip-path');
     R.shade.setAttribute('opacity', f(0.62 * t));
     R.openFx.setAttribute('opacity', f(t));
     R.halo2.setAttribute('opacity', f(0.9 * t));
   }
-  function setLever(R, t) { R.lever.setAttribute('transform', `rotate(${f(-34 * t)} -9 206)`); }
+  function setLever(R, t) { R.lever.setAttribute('transform', `rotate(${f(-34 * t)} -10 210.3)`); }
   function setKey(R, vis, rot, sc) {
     R.key.setAttribute('opacity', vis);
-    R.keyrot.setAttribute('transform', `translate(0 196.5) rotate(${f(rot)}) scale(${f(sc)}) translate(0 -196.5)`);
+    R.keyrot.setAttribute('transform', `translate(0 188.5) rotate(${f(rot)}) scale(${f(sc)}) translate(0 -188.5)`);
   }
 
   function applyState(R) {
@@ -590,7 +593,7 @@
   // ---------- configs ----------
   const WEST = {
     id: 'w', cx: 800, cy: 360, s: 1, k: 1, seed: 11,
-    moon: { x: 889, y: 225, r: 29 }, horizon: 512, stars: 40, clouds: 9, cloudW: 760, cloudDur: 150,
+    moon: { x: 889, y: 225, r: 29 }, horizon: 512, spire: [0.72, 1], stars: 40, clouds: 9, cloudW: 760, cloudDur: 150,
     streaks: 70, drops: 90, dropR: [0.9, 2.4], rivs: 16, trail: 26,
     moths: [[742, 318, 1.05, 8.5], [868, 420, 0.85, 11]],
   };
@@ -604,7 +607,7 @@
 
   const CLOSE = {
     id: 'c', cx: 800, cy: -50, s: 3, k: 2.4, seed: 23,
-    moon: { x: 1212, y: 226, r: 64 }, horizon: 470, stars: 70, clouds: 12, cloudW: 1560, cloudDur: 260,
+    moon: { x: 1212, y: 226, r: 64 }, horizon: 470, spire: [0.26, 1.9], stars: 70, clouds: 12, cloudW: 1560, cloudDur: 260,
     streaks: 150, drops: 190, dropR: [2.2, 6.5], rivs: 26, trail: 80,
     moths: [[560, 300, 2.6, 9], [1010, 400, 2.1, 12]],
   };
@@ -719,7 +722,6 @@
       await G.wait(380);
       // the sash swings outward
       G.sfx('windowCreak');
-      R.latch.setAttribute('clip-path', `url(#win-open-${R.c.id})`);
       await G.tween(2100, e => setOpen(R, e), t => (t < .12 ? 0.5 * t * t / .12 * 0.4 : G.ease.inOut(t)));
       G.sfx('wind');
       R.root.classList.add('win-open');
