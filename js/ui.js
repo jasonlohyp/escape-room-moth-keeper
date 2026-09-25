@@ -356,7 +356,7 @@
       E.held.innerHTML = iconSvg(id);
       const s = slotFor(id);
       if (S.px == null && s) { const wr = stageRect(), r = s.getBoundingClientRect(); moveHeld(r.left - wr.left - r.width * .7, r.top - wr.top + r.height / 2); }
-      E.held.classList.add('on');
+      if (!G.isBusy()) E.held.classList.add('on');
       if (s) showLabel(id, s, 2600);
     } else {
       E.held.classList.remove('on', 'over');
@@ -402,6 +402,7 @@
     setTimeout(() => { if (fly.isConnected) done(); }, 2500);
   }
   function onTake(id) {
+    if (!G.selected() || G.selected() === id) { E.held.classList.remove('on', 'over'); S.over = false; }
     const slot = E.slots.find(s => s.dataset.item === id);
     if (!slot) { renderInv(true); return; }
     slot.classList.add('leaving');
@@ -619,13 +620,14 @@
       if (ev.pointerType === 'touch' && !G.selected()) return;
       const r = stageRect();
       moveHeld(ev.clientX - r.left, ev.clientY - r.top);
+      S.inside = true;
       if (G.selected()) {
         const t = ev.target, over = !!(t && t.closest && t.closest('#stage .hot'));
         if (over !== S.over) { S.over = over; E.held.classList.toggle('over', over); }
       }
     }, { passive: true });
-    wrap.addEventListener('pointerleave', () => { if (G.selected()) E.held.classList.remove('on'); });
-    wrap.addEventListener('pointerenter', () => { if (G.selected()) E.held.classList.add('on'); });
+    wrap.addEventListener('pointerleave', () => { S.inside = false; E.held.classList.remove('on'); });
+    wrap.addEventListener('pointerenter', () => { S.inside = true; if (G.selected() && !G.isBusy()) E.held.classList.add('on'); });
     // any click dismisses the caption (captions are click-through)
     wrap.addEventListener('pointerdown', ev => {
       if (E.caption.classList.contains('show') && !E.hint.contains(ev.target)) hideCaption();
@@ -652,7 +654,12 @@
     G.on('take', id => onTake(id));
     G.on('select', id => onSelect(id));
     G.on('say', (text, opts) => say(text, opts));
-    G.on('busy', b => { if (b) { hideLabel(0); } updateHUD(); });
+    G.on('busy', b => {
+      // the held ghost must never float over a use-animation
+      if (b) { hideLabel(0); E.held.classList.remove('on', 'over'); S.over = false; }
+      else if (G.selected() && S.inside) E.held.classList.add('on');
+      updateHUD();
+    });
     G.on('start', () => onStart(!!(G.state.flags && Object.keys(G.state.flags).length)));
     G.on('refresh', () => renderInv(false));
     G.on('hint', () => { S.hintEvents++; });
