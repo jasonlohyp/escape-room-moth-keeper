@@ -347,8 +347,17 @@ body.ending #stage { filter: blur(.8px) brightness(.86) saturate(.92); }
 @media (max-aspect-ratio: 1/1) {
   #app { align-items: flex-start; }
   #stage-wrap { width: 100vw; height: 100vh; height: 100dvh; aspect-ratio: auto; container-type: size; }
-  #stage, #fade { bottom: auto; height: 56.25cqw; }
-  #overlay { --bt: 56.25cqw; --band: calc(100cqh - 56.25cqw); --slot: min(16cqw, calc(var(--band) * .26)); }
+  #stage, #fade { bottom: auto; left: -8.03cqw; width: 116.79cqw; height: 65.69cqw; }
+  #overlay {
+    --bt: 65.69cqw; --band: calc(100cqh - 65.69cqw);
+    --slot: min(17.4cqw, calc(var(--band) * .26));
+    --capH: max(15cqw, 64px);                                   /* caption sits directly under the picture */
+    --ctl: max(calc(var(--slot) * .8), 48px);
+    --grp: calc(var(--slot) + 7cqw + var(--ctl));               /* slots + controls row */
+    --gtop: calc(var(--bt) + var(--capH) + (var(--band) - var(--capH) - var(--grp)) / 2);
+  }
+  .ui-arrow { top: calc(var(--bt) / 2); transform: translateY(-50%); }
+  .ui-back { top: calc(var(--bt) - max(calc(var(--u) * 88), 36px) - 4px); }
   #ui-inv {
     left: 0; top: var(--bt); width: 100%; height: var(--band);
     background:
@@ -360,15 +369,15 @@ body.ending #stage { filter: blur(.8px) brightness(.86) saturate(.92); }
     background: linear-gradient(to bottom, #1a0f07 0%, #6e4d1c 18%, #e7c476 38%, #b8893a 55%, #6e4d1c 75%, #140b05 100%); }
   #ui-inv::after { left: 12px; right: 12px; top: 11px; bottom: auto; width: auto; height: 1px;
     background: linear-gradient(to right, rgba(231, 196, 118, 0), rgba(231, 196, 118, .35) 8%, rgba(231, 196, 118, .35) 92%, rgba(231, 196, 118, 0)); }
-  .ui-slots { flex-direction: row; left: 50%; transform: translateX(-50%); top: calc(var(--bt) + var(--band) * .4); gap: calc(var(--slot) * .18); }
+  .ui-slots { flex-direction: row; left: 50%; transform: translateX(-50%); top: var(--gtop); gap: calc(var(--slot) * .16); }
   .ui-slot { width: var(--slot); height: var(--slot); }
   .ui-mag { width: max(calc(var(--slot) * .3), 22px); height: max(calc(var(--slot) * .3), 22px); }
-  .ui-hintbtn { left: 78%; top: calc(var(--bt) + var(--band) * .84); width: max(calc(var(--slot) * .95), 48px); height: max(calc(var(--slot) * .95), 48px); }
-  .ui-mute { left: 22%; top: calc(var(--bt) + var(--band) * .84); width: max(calc(var(--slot) * .7), 44px); height: max(calc(var(--slot) * .7), 44px); }
+  .ui-hintbtn { left: 70%; top: calc(var(--gtop) + var(--slot) + 7cqw + var(--ctl) / 2); width: var(--ctl); height: var(--ctl); }
+  .ui-mute { left: 30%; top: calc(var(--gtop) + var(--slot) + 7cqw + var(--ctl) / 2); width: max(calc(var(--ctl) * .8), 44px); height: max(calc(var(--ctl) * .8), 44px); }
   .ui-mute svg { width: 70%; height: 70%; }
-  #ui-caption { left: 4%; width: 92%; top: calc(var(--bt) + var(--band) * .05); height: calc(var(--band) * .3); align-items: center; }
+  #ui-caption { left: 4%; width: 92% !important; top: calc(var(--bt) + 6px); height: var(--capH); align-items: center; }
   #ui-caption span { font-size: max(4.4cqw, 16px); padding: 6px 12px; max-width: 100%; background: none; text-shadow: 0 1px 3px #000; }
-  #ui-label { right: 6%; left: 6%; top: calc(var(--bt) + var(--band) * .4 + var(--slot) + 10px); max-width: none; text-align: center; background: none; border: 0; box-shadow: none; padding: 0; transform: none; }
+  #ui-label { right: 6%; left: 6%; top: calc(var(--gtop) + var(--slot) + 6px); max-width: none; text-align: center; background: none; border: 0; box-shadow: none; padding: 0; transform: none; }
   #ui-label.show { transform: none; }
   #ui-label .n { font-size: max(3.6cqw, 14px); }
   #ui-label .d { font-size: max(3.2cqw, 13px); }

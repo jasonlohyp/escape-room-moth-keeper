@@ -847,6 +847,23 @@
     const MY = 356, RR = 50, XS = [912, 1040, 1168, 1296];
     const half = (x, sweep) => `M${x} ${MY - RR} A${RR} ${RR} 0 0 ${sweep} ${x} ${MY + RR} Z`;
     const disc = x => `M${x} ${MY - RR} A${RR} ${RR} 0 0 1 ${x} ${MY + RR} A${RR} ${RR} 0 0 1 ${x} ${MY - RR} Z`;
+    refs.XS = XS; refs.MY = MY; refs.RR = RR;
+    refs.wipes = []; refs.halos = [];
+    defs.innerHTML = `
+      <linearGradient id="dkInkBeam" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#eaf2ff" stop-opacity="0"/><stop offset="0.35" stop-color="#eaf2ff" stop-opacity="0.55"/>
+        <stop offset="0.6" stop-color="#dbe8ff" stop-opacity="0.35"/><stop offset="1" stop-color="#dbe8ff" stop-opacity="0"/>
+      </linearGradient>
+      <radialGradient id="dkInkHalo" cx="50%" cy="50%" r="50%">
+        <stop offset="0.55" stop-color="#e8f0ff" stop-opacity="0.55"/><stop offset="0.75" stop-color="#cfe0ff" stop-opacity="0.22"/><stop offset="1" stop-color="#cfe0ff" stop-opacity="0"/>
+      </radialGradient>`;
+    // the page catching the moonbeam
+    refs.beam = G.el('path', { d: 'M820 96 L1150 96 L1398 560 L1398 786 L1200 786 Z', fill: 'url(#dkInkBeam)', style: 'mix-blend-mode:screen', opacity: 0.5 }, refs.ink);
+    // soft glow behind the moons + words (persists faintly as an afterglow, breathing)
+    refs.glowG = G.el('g', {}, refs.ink);
+    XS.forEach(x => refs.halos.push(G.el('circle', { cx: x, cy: MY, r: RR * 1.65, fill: 'url(#dkInkHalo)' }, refs.glowG)));
+    refs.halos.push(G.el('ellipse', { cx: 1104, cy: 522, rx: 170, ry: 46, fill: 'url(#dkInkHalo)', opacity: 0.7 }, refs.glowG));
+    G.el('animate', { attributeName: 'opacity', values: '0.75;1;0.75', dur: '4s', repeatCount: 'indefinite' }, refs.glowG);
     XS.forEach((x, i) => {
       // i: 0 new, 1 first quarter (right lit), 2 full, 3 last quarter (left lit)
       const litD = [null, half(x, 1), disc(x), half(x, 0)][i];
@@ -854,7 +871,12 @@
       const mg = G.el('g', {}, refs.ink);
       // slate under-stroke separates the moon from the page
       G.el('circle', { cx: x, cy: MY, r: RR, fill: 'none', stroke: '#1a2230', 'stroke-width': 5, opacity: 0.45 }, mg);
-      const dg = G.el('g', {}, mg), lg = G.el('g', {}, mg);
+      // diagonal wipe: the hatching is drawn in stroke by stroke
+      const wc = G.el('clipPath', { id: 'dkMW' + i }, defs);
+      const wr = G.el('rect', { x: x - 75, y: MY - 75, width: 150, height: 150, transform: `rotate(-28 ${x} ${MY})` }, wc);
+      refs.wipes.push(wr);
+      const wg = G.el('g', { 'clip-path': `url(#dkMW${i})` }, mg);
+      const dg = G.el('g', {}, wg), lg = G.el('g', {}, wg);
       if (darkD) {
         const cp = G.el('clipPath', { id: 'dkMD' + i }, defs); G.el('path', { d: darkD }, cp);
         G.el('path', { d: darkD, fill: '#18202d', opacity: 0.85 }, dg);
@@ -873,6 +895,9 @@
       const ol = G.el('circle', { cx: x, cy: MY, r: RR, fill: 'none', stroke: '#eef4ff', 'stroke-width': 2.4, filter: 'url(#moonglow)' }, mg);
       refs.outlines.push(ol); refs.darks.push(dg); refs.lits.push(lg);
     });
+    // the 'pen tip' — a bright glint that travels with the ink as it draws itself
+    refs.pen = G.svg(`<g filter="url(#moonglow)"><circle r="9" fill="#eaf2ff" opacity="0.35"/><path d="M0 -11 L2 -2 L11 0 L2 2 L0 11 L-2 2 L-11 0 L-2 -2 Z" fill="#ffffff"/></g>`, refs.ink);
+    refs.pen.setAttribute('opacity', 0);
     // twinkles
     G.svg(`<g fill="#ffffff" filter="url(#moonglow)">
       <path d="M1046 300 l1.5 -6 l1.5 6 l6 1.5 l-6 1.5 l-1.5 6 l-1.5 -6 l-6 -1.5 Z"><animate attributeName="opacity" values="0;1;0;0" dur="3.1s" repeatCount="indefinite"/></path>
@@ -893,6 +918,10 @@
   }
   function inkFull(r) {
     const C = 2 * Math.PI * 50;
+    r.wipes.forEach(w => w.setAttribute('width', 150));
+    r.halos.forEach(h => h.setAttribute('opacity', h.tagName === 'ellipse' ? 0.7 : 1));
+    r.beam.setAttribute('opacity', 0.5);
+    r.pen.setAttribute('opacity', 0);
     r.outlines.forEach(o => { o.setAttribute('stroke-dasharray', C); o.setAttribute('stroke-dashoffset', 0); });
     r.darks.concat(r.lits).forEach(f => f.setAttribute('opacity', 1));
     r.flour.setAttribute('opacity', 0.85);
@@ -1138,34 +1167,72 @@
   }
 
   async function maybeReveal() {
-    if (J.spread !== 2 || !G.get('windowOpen') || G.get('inkSeen') || J.revealing) return;
+    if (J.spread !== 2 || !G.get('windowOpen') || J.revealing) return;
+    if (G.get('inkSeen')) { glint(); return; }
     J.revealing = true;
     const r = J.inkRefs;
-    const C = 2 * Math.PI * 50;
+    const C = 2 * Math.PI * r.RR;
+    const penAt = (x, y, o) => { r.pen.setAttribute('transform', `translate(${x.toFixed(1)} ${y.toFixed(1)})`); r.pen.setAttribute('opacity', o); };
     r.outlines.forEach(o => { o.setAttribute('stroke-dasharray', C); o.setAttribute('stroke-dashoffset', C); });
-    r.darks.concat(r.lits).forEach(f => f.setAttribute('opacity', 0));
+    r.wipes.forEach(w => w.setAttribute('width', 0));
+    r.darks.concat(r.lits).forEach(f => f.setAttribute('opacity', 1));
+    r.halos.forEach(h => h.setAttribute('opacity', 0));
     r.flour.setAttribute('opacity', 0);
     r.wordsClipRect.setAttribute('width', 0);
+    r.beam.setAttribute('opacity', 0);
+    penAt(0, 0, 0);
     J.inkLayer.style.display = '';
     G.busy(true);
-    await G.wait(450);
+    // 1. the blank page catches the moonbeam
     G.sfx('magic');
-    await G.tween(1500, t => {
-      r.outlines.forEach((o, i) => {
-        const u = Math.max(0, Math.min(1, (t - i * 0.14) / 0.58));
-        o.setAttribute('stroke-dashoffset', C * (1 - G.ease.inOut(u)));
+    await G.tween(900, t => r.beam.setAttribute('opacity', (1.3 * Math.sin(t * Math.PI * 0.75)).toFixed(3)), 'out');
+    // 2. each moon's outline draws itself, a glint riding the nib; its glow wakes as it closes
+    for (let i = 0; i < 4; i++) {
+      const o = r.outlines[i], x = r.XS[i];
+      await G.tween(420, t => {
+        o.setAttribute('stroke-dashoffset', C * (1 - t));
+        const a = t * Math.PI * 2;  // a circle's stroke starts at 3 o'clock, clockwise
+        penAt(x + Math.cos(a) * r.RR, r.MY + Math.sin(a) * r.RR, 1);
+        r.halos[i].setAttribute('opacity', (t * 0.6).toFixed(3));
+      }, 'inOut');
+    }
+    // 3. the hatching sweeps in stroke by stroke (diagonal wipe), moons brighten to full glow
+    await G.tween(1300, t => {
+      r.wipes.forEach((w, i) => {
+        const u = Math.max(0, Math.min(1, (t - i * 0.12) / 0.64));
+        w.setAttribute('width', (150 * G.ease.inOut(u)).toFixed(1));
+        r.halos[i].setAttribute('opacity', (0.6 + 0.4 * u).toFixed(3));
+        if (u > 0 && u < 1) penAt(r.XS[i] - 60 + 120 * u, r.MY + 40 - 80 * u, 1);
       });
     }, 'linear');
-    await G.tween(1000, t => {
-      r.darks.forEach((f, i) => f.setAttribute('opacity', Math.max(0, Math.min(1, t * 1.6 - i * 0.2))));
-      r.lits.forEach((f, i) => f.setAttribute('opacity', Math.max(0, Math.min(1, t * 1.6 - i * 0.2))));
-      r.flour.setAttribute('opacity', 0.85 * t);
+    // 4. the flourish and the words are written out, left to right
+    await G.tween(1400, t => {
+      r.flour.setAttribute('opacity', (0.85 * Math.min(1, t * 2)).toFixed(3));
+      r.wordsClipRect.setAttribute('width', (500 * t).toFixed(1));
+      r.halos[4].setAttribute('opacity', (0.7 * t).toFixed(3));
+      penAt(880 + 450 * t, 520 + 8 * Math.sin(t * 18), 1);
     }, 'inOut');
-    await G.tween(1100, t => r.wordsClipRect.setAttribute('width', 500 * t), 'inOut');
+    await G.tween(500, t => { r.pen.setAttribute('opacity', (1 - t).toFixed(3)); r.beam.setAttribute('opacity', (0.5 * t).toFixed(3)); }, 'out');
     J.revealing = false;
     G.busy(false);
     G.set('inkSeen');
     G.say('Silver ink, woken by the moonlight: four moons, in a row.', { dur: 4000 });
+  }
+  // revisiting the moonlit page: a quick re-glint so the silver ink always reads as ink, not print
+  let glinting = false;
+  async function glint() {
+    if (glinting) return;
+    glinting = true;
+    const r = J.inkRefs;
+    inkFull(r);
+    await G.tween(1400, t => {
+      r.beam.setAttribute('opacity', (0.5 + 0.6 * Math.sin(t * Math.PI)).toFixed(3));
+      r.pen.setAttribute('transform', `translate(${(860 + 480 * t).toFixed(1)} ${(356 + 170 * t).toFixed(1)})`);
+      r.pen.setAttribute('opacity', Math.sin(t * Math.PI).toFixed(3));
+      r.halos.forEach((h, i) => h.setAttribute('opacity', ((i === 4 ? 0.7 : 1) * (1 + 0.4 * Math.sin(Math.max(0, t * 1.4 - i * 0.1) * Math.PI))).toFixed(3)));
+    }, 'inOut');
+    inkFull(r);
+    glinting = false;
   }
 
   // ================================================================== hints & debug steps
