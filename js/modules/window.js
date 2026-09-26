@@ -1175,7 +1175,7 @@
     id: 'window', order: 40,
     when: () => G.get('gotKey') && !G.get('windowOpen'),
     lines: ['Something in this room is fastened with a very small lock.',
-      'Look closely at the round window\'s latch.',
+      'Look closely at the round window’s latch.',
       'Fit the brass key into the latch of the round window, and turn it.'],
   });
   G.registerStep(40, 'window', () => { G.take('key'); G.set('windowOpen'); });

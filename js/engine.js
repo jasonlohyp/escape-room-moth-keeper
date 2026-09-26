@@ -204,10 +204,13 @@
   function show(id) {
     Object.values(views).forEach(v => { if (v.g) v.g.style.display = v.id === id ? '' : 'none'; });
   }
-  let navigating = false;
+  // a nav request that arrives mid-transition is queued (never silently dropped) and replaces
+  // any earlier queued request, so back-to-back clicks land on the last-intended view.
+  let navigating = false, queuedGo = null;
   async function go(id, opts) {
     opts = opts || {};
-    if (!views[id] || navigating) return;
+    if (!views[id]) return;
+    if (navigating) { queuedGo = [id, opts]; return; }
     const prev = state.view;
     if (prev === id) return;
     navigating = true;
@@ -223,6 +226,7 @@
     save();
     if (dur && fade) { fade.style.opacity = 0; await wait(dur); }
     navigating = false;
+    if (queuedGo) { const [qid, qopts] = queuedGo; queuedGo = null; go(qid, qopts); }
   }
   function back() { const v = views[state.view]; if (v && v.parent) { sfx('back'); go(v.parent); } }
   function turn(dir) {

@@ -799,7 +799,7 @@
       BX.lidHot = G.el('rect', { x: 330, y: 250, width: 940, height: 250, fill: 'transparent' }, g);
       G.hotspot(BX.lidHot, {
         cursor: 'look',
-        click() { G.say(G.get('inkSeen') ? 'Moths in mother-of-pearl, and four little moons below. The journal\'s silver moons were drawn for this.' : 'Rosewood, inlaid with pearl moths. It is locked by four little moon dials.'); },
+        click() { G.say(G.get('inkSeen') ? 'Moths in mother-of-pearl, and four little moons below. The journal’s silver moons were drawn for this.' : 'Rosewood, inlaid with pearl moths. It is locked by four little moon dials.'); },
       });
       BX.lid.appendChild(BX.lidHot); // covers the inlay only (dials sit below y 500)
       // hinged perspective swing: the lid is re-drawn as 16 thin strips, each an affine slice of a true projection
@@ -997,7 +997,7 @@
 
   // ================================================================== ITEMS
   G.registerItem('letter', {
-    name: 'Edith\'s letter',
+    name: 'Edith’s letter',
     desc: 'Folded in three, sealed with a moth in red wax. Her hand — hurried, tender.',
     icon: `<g transform="rotate(-8 50 50)">
       <rect x="12" y="24" width="76" height="52" rx="2" fill="#e8dcc0" stroke="${INK}" stroke-width="3"/>
@@ -1719,7 +1719,7 @@
   G.registerHint({
     id: 'hatch', order: 70,
     when: () => G.get('boxOpen') && !G.get('hatched'),
-    lines: ['Read Edith\'s letter again. What did she ask of you?',
+    lines: ['Read Edith’s letter again. What did she ask of you?',
       '"They always wake to warmth." What is the warmest thing in the room?',
       'Hold the cocoon close to the lit lamp. Let it warm.'],
   });

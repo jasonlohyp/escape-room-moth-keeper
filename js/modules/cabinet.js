@@ -224,7 +224,7 @@
   const MOTHS = {
     atlas: {
       label: 'Attacus atlas', loc: 'Ceylon — 3.iii.1891', no: 'No. 7',
-      say: 'Attacus atlas. The atlas moth — its wingtips curl like a snake\'s head.',
+      say: 'Attacus atlas. The atlas moth — its wingtips curl like a snake’s head.',
       fw: 'M7,-24 C46,-54 104,-76 150,-84 C166,-88 180,-98 188,-110 C198,-114 206,-102 200,-88 C194,-76 184,-66 174,-60 C160,-52 146,-30 144,-12 C142,2 138,10 132,16 C96,18 52,12 9,2 Z',
       hw: 'M7,0 C52,4 116,10 150,34 C166,58 150,96 118,122 C92,142 56,146 34,124 C16,104 8,64 6,20 Z',
       fwGrad: { r: 190, stops: [[0, '#4a1a0e'], [0.25, '#8a3a1c'], [0.62, '#b4562a'], [0.85, '#c9803e'], [1, '#d8a060']] },
@@ -770,7 +770,7 @@
     },
     update() { if (cab.tint) setTint(cab.tint); },
     enter() {
-      if (!cab.seen) { cab.seen = true; setTimeout(() => G.say('Edith\'s specimens — six moths, each pinned and labelled in her hand.'), 250); }
+      if (!cab.seen) { cab.seen = true; setTimeout(() => G.say('Edith’s specimens — six moths, each pinned and labelled in her hand.'), 250); }
     },
   });
   function setTint(el) {
@@ -910,7 +910,7 @@
         cursor: 'use',
         click: () => {
           if (G.get('drawerOpen')) return;
-          G.sfx('lockFail'); G.say('Locked fast. The drawer won\'t budge.');
+          G.sfx('lockFail'); G.say('Locked fast. The drawer won’t budge.');
           rattle(3);
         },
       }));
