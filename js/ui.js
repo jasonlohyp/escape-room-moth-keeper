@@ -5,8 +5,11 @@
 (function () {
   'use strict';
 
-  const OPENING = "You wake on the floorboards of an attic that isn't yours. Rain on a round window. The door has no handle, only a brass plate shaped like a moth.";
-  const OPENING2 = "Someone's journal lies open on the desk. It might say how to get out.";
+  const INTRO = [
+    'You wake on the floorboards of an attic that isn’t yours. Rain taps against a round window.',
+    'The door has no handle. Only a brass plate shaped like a moth, its wings hollow.',
+    'Someone’s journal lies open on the desk. Perhaps it can tell you how to get out.',
+  ];
   const NO_HINT = 'Nothing more to find here… or is there?';
   const MUTE_KEY = 'mothkeeper.muted';
   const TIME_KEY = 'mothkeeper.elapsed';
@@ -278,7 +281,7 @@
   }
 
   // ---------------------------------------------------------------- navigation / HUD state
-  function canAct() { return !S.title && !S.ending && !G.isBusy(); }
+  function canAct() { return !S.title && !S.ending && !S.intro && !G.isBusy(); }
   function nav(which) {
     if (!canAct()) return;
     const v = G.views[G.view()] || {};
@@ -287,7 +290,7 @@
     else if (which === 'back' && v.parent) G.back();
   }
   function updateHUD() {
-    const v = G.views[G.view()] || {};
+    const v = S.intro ? {} : (G.views[G.view()] || {});
     E.left.classList.toggle('on', !!v.wall);
     E.right.classList.toggle('on', !!v.wall);
     E.back.classList.toggle('on', !!v.parent);
@@ -438,6 +441,47 @@
     setTimeout(() => renderInv(true), reduced() ? 100 : 480);
   }
 
+  // ---------------------------------------------------------------- intro (player-paced)
+  function buildIntro() {
+    E.intro = h('div', { id: 'ui-intro', role: 'dialog', 'aria-label': 'Introduction', 'aria-live': 'polite' },
+      '<div class="in-box"><p class="in-line"></p><div class="in-next"><span class="in-dots"></span><span class="in-cue"></span></div></div>', overlay);
+    E.intro.addEventListener('pointerdown', ev => { ev.preventDefault(); ev.stopPropagation(); advanceIntro(); });
+  }
+  function showIntroLine() {
+    const line = E.intro.querySelector('.in-line');
+    const last = S.introIdx === INTRO.length - 1;
+    line.classList.remove('in'); void line.offsetWidth;
+    line.textContent = INTRO[S.introIdx];
+    line.classList.add('in');
+    E.intro.querySelector('.in-dots').innerHTML = INTRO.map((_, i) => `<i class="${i === S.introIdx ? 'on' : ''}"></i>`).join('');
+    E.intro.querySelector('.in-cue').textContent = last ? 'click to begin' : 'click to continue';
+    S.introLock = true;
+    clearTimeout(S.introLockT);
+    S.introLockT = setTimeout(() => { S.introLock = false; }, 450);
+  }
+  function playIntro() {
+    S.intro = true; S.introIdx = 0;
+    updateHUD();
+    setTimeout(() => {
+      if (!S.intro) return;
+      E.intro.classList.add('on');
+      showIntroLine();
+    }, 1400);
+  }
+  function advanceIntro() {
+    if (!S.intro || S.introLock || !E.intro.classList.contains('on')) return;
+    G.sfx('click', { vol: 0.35 });
+    if (S.introIdx >= INTRO.length - 1) { endIntro(); return; }
+    S.introIdx++;
+    showIntroLine();
+  }
+  function endIntro() {
+    if (!S.intro) return;
+    S.intro = false;
+    E.intro.classList.remove('on');
+    updateHUD();
+  }
+
   // ---------------------------------------------------------------- captions
   function say(text, opts) {
     opts = opts || {};
@@ -582,10 +626,7 @@
     G.sfx('click');
     G.start({ continue: !!cont });
     hideTitle(false);
-    if (!cont) {
-      setTimeout(() => G.say(OPENING, { dur: 4600 }), 1900);
-      setTimeout(() => G.say(OPENING2, { dur: 4600 }), 6700);
-    }
+    if (!cont) playIntro();
   }
   function hideTitle(instant) {
     S.title = false;
@@ -637,6 +678,11 @@
   function onKey(ev) {
     if (ev.ctrlKey || ev.metaKey || ev.altKey) return;
     const k = ev.key;
+    if (S.intro) {
+      if (k === ' ' || k === 'Enter' || k === 'ArrowRight') { advanceIntro(); ev.preventDefault(); }
+      else if (k === 'Escape') { endIntro(); ev.preventDefault(); }
+      return;
+    }
     if (S.title || S.ending) return;
     const tag = (ev.target && ev.target.tagName) || '';
     if (tag === 'INPUT' || tag === 'TEXTAREA') return;
@@ -683,6 +729,7 @@
     injectCursors();
     buildHUD();
     buildTitle();
+    buildIntro();
     bindInput();
     try { S.muted = localStorage.getItem(MUTE_KEY) === '1'; } catch (e) { }
     setMuted(S.muted);
