@@ -110,7 +110,7 @@
       </filter>
       <filter id="fnFuzz" x="-10%" y="-20%" width="120%" height="140%">
         <feTurbulence type="fractalNoise" baseFrequency="0.55" numOctaves="2" seed="4" result="n"/>
-        <feDisplacementMap in="SourceGraphic" in2="n" scale="7" xChannelSelector="R" yChannelSelector="G" result="d"/>
+        <feDisplacementMap in="SourceGraphic" in2="n" scale="4" xChannelSelector="R" yChannelSelector="G" result="d"/>
         <feGaussianBlur in="d" stdDeviation=".6"/>
       </filter>
       <radialGradient id="fnTear" cx="50%" cy="65%" r="70%">
@@ -253,7 +253,7 @@
       wings: q('.m-wings'), fw: q('.m-fw'), hw: q('.m-hw'), glowEl: q('.m-glow'), disp: q('.m-disp'),
       apply() {
         g.setAttribute('transform', `translate(${m.x.toFixed(2)} ${m.y.toFixed(2)}) rotate(${m.rot.toFixed(2)}) scale(${m.s.toFixed(4)})`);
-        const fo = 0.1 + 0.9 * clamp(m.open, 0, 1), ho = 0.1 + 0.9 * clamp(m.hopen, 0, 1);
+        const fo = 0.3 + 0.7 * clamp(m.open, 0, 1), ho = 0.3 + 0.7 * clamp(m.hopen, 0, 1);
         m.fw.setAttribute('transform', `scale(${fo.toFixed(4)} ${(1 - 0.07 * (1 - fo)).toFixed(4)})`);
         m.hw.setAttribute('transform', `scale(${ho.toFixed(4)} ${(1 - 0.05 * (1 - ho)).toFixed(4)})`);
         m.wings.setAttribute('transform', m.grow === 1 ? '' : `translate(0 ${(-(1 - m.grow) * 8).toFixed(2)}) scale(${m.grow.toFixed(4)} ${(m.grow * (0.8 + 0.2 * m.grow)).toFixed(4)})`);
@@ -316,7 +316,7 @@
         <path d="M-104,14 C-60,40 50,42 104,10 L110,60 L-110,60 Z" fill="#8f7c5c" opacity=".38" filter="url(#fnBlur3)"/>
         <path d="M-74,-22 C-40,-36 30,-36 70,-22" stroke="#ffffff" stroke-width="6" fill="none" opacity=".4" filter="url(#fnBlur3)"/>
       </g>
-      <path d="${COC}" fill="none" stroke="#fffaf0" stroke-width="7" opacity=".55" filter="url(#fnFuzz)"/>
+      <path d="${COC}" fill="none" stroke="#fffaf0" stroke-width="4" opacity=".5" filter="url(#fnFuzz)"/>
       <path d="${COC}" fill="none" stroke="#7d6d50" stroke-width="1.2" opacity=".55"/>`;
   }
   function tearPath(p) { // jagged lens opening along the dorsal ridge, p 0..1
@@ -638,7 +638,14 @@
           <ellipse cx="930" cy="610" rx="120" ry="40" fill="#8a6a55" opacity=".18" filter="url(#blur6)"/>
           <rect x="360" y="280" width="880" height="40" fill="#1a0806" opacity=".55" filter="url(#blur6)"/>
           <rect x="360" y="280" width="26" height="432" fill="#1a0806" opacity=".35" filter="url(#blur6)"/>
-          <ellipse cx="630" cy="512" rx="170" ry="66" fill="#5a3a34" opacity=".5" filter="url(#blur6)"/>
+          <ellipse class="bx-cshadow" cx="636" cy="540" rx="140" ry="22" fill="#4a2a26" opacity=".45" filter="url(#blur6)"/>
+          <g class="bx-imp" transform="translate(630 508) rotate(-7) scale(1.35)">
+            <path d="${COC}" fill="#8a655b" opacity=".22" filter="url(#fnBlur3)" transform="scale(.96 .9)"/>
+            <path d="${COC}" fill="none" stroke="#6a463f" stroke-width="5" opacity=".22" filter="url(#fnBlur3)" transform="translate(0 -3) scale(.94 .86)"/>
+            <path d="${COC}" fill="none" stroke="#f3e2d6" stroke-width="4" opacity=".45" filter="url(#fnBlur3)" transform="translate(0 4) scale(1.02 .98)"/>
+            <path d="M-60,-6 C-20,-10 30,-8 70,-2 M-50,8 C-10,12 30,10 64,6" stroke="#a88074" stroke-width="1.4" fill="none" opacity=".3" filter="url(#fnBlur3)"/>
+            <path d="M-100,4 C-118,12 -126,24 -130,38 M96,4 C112,14 120,26 128,36 M20,-30 C30,-44 44,-50 60,-48" stroke="#fbf4e8" stroke-width=".8" fill="none" opacity=".55"/>
+          </g>
           <text x="800" y="690" text-anchor="middle" font-family="${FELL}" font-style="italic" font-size="30" fill="#7a5048" opacity=".7" letter-spacing="6">E . V .</text>
           <ellipse class="bx-cocglow" cx="630" cy="505" rx="300" ry="170" fill="url(#fnWarmPool)" opacity=".9"/>
         </g>
@@ -774,6 +781,8 @@
       BX.cocoonG.style.display = got ? 'none' : '';
       BX.cocHot.style.display = got || !open ? 'none' : '';
       BX.interior.querySelector('.bx-cocglow').style.display = got ? 'none' : '';
+      BX.interior.querySelector('.bx-cshadow').style.display = got ? 'none' : '';
+      BX.interior.querySelector('.bx-imp').style.display = got ? '' : 'none';
       BX.letterG.style.display = G.get('letterRead') ? 'none' : '';
       BX.letterG.style.pointerEvents = open ? '' : 'none';
       BX.interior.parentNode.querySelector('.bx-warm').setAttribute('opacity', G.get('lampLit') ? .8 : 0);
@@ -1348,47 +1357,50 @@
     await G.wait(260);
     tremble = 0.4;
     await G.wait(200);
-    // --- the split: a seam of light, then the upper shell lifts away
+    // --- the silk tears open along the top, fibres trailing
     G.sfx('cocoonCrack');
-    tremble = 2.2;
-    await G.tween(260, t => c.seam.setAttribute('opacity', t.toFixed(3)), 'out');
+    tremble = 1.2;
+    await G.tween(420, t => c.setTear(t * 0.35), 'out');
+    tremble = 0.5;
     alive = false;
-    const flash = G.el('circle', { cx: CX, cy: CY - 4, r: 70, fill: 'url(#fnWhitePool)', opacity: 0 }, layer);
-    c.inside.setAttribute('opacity', 1);
-    // (from here the cocoon is still; the moth takes over)
-    const m = makeMoth(layer);
-    // lift the upper shell into its own group above the moth (so she emerges from between the halves)
     c.breathe.querySelectorAll('animateTransform').forEach(a => a.remove());
-    const upWrap = G.el('g', { transform: c.outer.getAttribute('transform') }, layer);
-    upWrap.appendChild(c.up);
-    upWrap.appendChild(c.seam);
-    Object.assign(m, { x: CX - 4, y: CY + 4, rot: -78, s: 0.26, open: 0.05, hopen: 0.05, grow: 0.3, glow: 0, alpha: 0 });
-    m.crumple(22); m.apply();
-    await G.tween(700, t => {
-      flash.setAttribute('opacity', (Math.sin(t * Math.PI) * 0.9).toFixed(3));
-      flash.setAttribute('r', (60 + 90 * t).toFixed(1));
-      c.up.setAttribute('transform', `translate(${-60 * t} ${-26 * t}) rotate(${-34 * t} -100 0)`);
-      c.up.setAttribute('opacity', (1 - 0.35 * t).toFixed(3));
-      c.seam.setAttribute('opacity', (1 - t).toFixed(3));
-      m.alpha = Math.min(1, t * 2); m.apply();
+    c.outer.setAttribute('transform', `translate(${CX} ${CY}) rotate(-6) scale(.5)`);
+    // the moth emerges through the tear: clip her to everything above the tear's lower lip
+    const lipPts = tearPath(1).lo.map(([x, y]) => c.toStage(x, y + 2));
+    const clipId = 'fnEmerge' + (uid++);
+    const cp = G.el('clipPath', { id: clipId }, layer);
+    const L0 = lipPts[0], L1 = lipPts[lipPts.length - 1];
+    G.el('polygon', { points: [[L0[0] - 30, L0[1] + 1], ...lipPts, [L1[0] + 30, L1[1] + 1], [L1[0] + 200, CY - 300], [L0[0] - 200, CY - 300]].map(q => q.join(',')).join(' ') }, cp);
+    const mw = G.el('g', { 'clip-path': `url(#${clipId})` }, layer);
+    const m = makeMoth(mw);
+    const [ex, ey] = c.toStage(-6, -28);
+    Object.assign(m, { x: ex, y: ey + 16, rot: -8, s: 0.34, open: 0, hopen: 0, grow: 0.5, glow: 0, alpha: 1 });
+    m.crumple(20); m.apply();
+    G.sfx('cocoonCrack');
+    const flash = G.el('ellipse', { cx: ex, cy: ey - 4, rx: 60, ry: 30, fill: 'url(#fnWhitePool)', opacity: 0 }, layer);
+    await G.tween(650, t => {
+      c.setTear(lerp(0.35, 1, t));
+      flash.setAttribute('opacity', (Math.sin(t * Math.PI) * 0.85).toFixed(3));
+      m.y = ey + 16 - 6 * t; m.apply();
     }, 'out');
     flash.remove();
-    // --- she crawls out, crumpled wings still wet
-    await G.tween(1100, t => {
-      m.x = lerp(CX - 4, CX + 6, t); m.y = lerp(CY + 4, CY - 30, t);
-      m.rot = lerp(-78, -6, t); m.s = lerp(0.26, 0.62, t);
-      m.grow = lerp(0.3, 0.42, t); m.open = 0.2 + 0.1 * Math.sin(t * 9); m.hopen = m.open;
-      m.glow = 0.25 * t;
+    // --- she crawls out: head first, wings still crumpled and wet
+    await G.tween(1300, t => {
+      m.y = lerp(ey + 10, ey - 26, t); m.x = lerp(ex, ex + 4, t);
+      m.s = lerp(0.34, 0.62, t); m.rot = lerp(-8, -3, t);
+      m.grow = lerp(0.5, 0.56, t); m.open = 0.1 + 0.08 * Math.sin(t * 9); m.hopen = m.open;
+      m.glow = 0.3 * t;
       m.apply();
     }, 'inOut');
+    mw.removeAttribute('clip-path'); cp.remove();
     // --- wings unfurl: pumped full, crumples smoothing out
     await G.tween(1700, (t, raw) => {
       const pump = Math.sin(raw * Math.PI * 5) * (1 - raw) * 0.06;
-      m.grow = clamp(lerp(0.42, 1, t) + pump, 0, 1.02);
-      m.crumple(lerp(22, 0, smooth(raw)));
-      m.open = 0.55 + 0.4 * t + Math.sin(raw * 11) * 0.05 * (1 - raw); m.hopen = m.open - 0.05 * (1 - raw);
+      m.grow = clamp(lerp(0.56, 1, t) + pump, 0, 1.02);
+      m.crumple(lerp(20, 0, smooth(raw)));
+      m.open = 0.55 + 0.45 * t + Math.sin(raw * 11) * 0.05 * (1 - raw); m.hopen = m.open - 0.05 * (1 - raw);
       m.s = lerp(0.62, 0.7, t);
-      m.glow = lerp(0.25, 0.55, t);
+      m.glow = lerp(0.3, 0.6, t);
       m.apply();
     }, 'out');
     m.crumple(0); m.grow = 1;
@@ -1396,6 +1408,8 @@
     await hover(m, 1300, { hz: 1.5, amp: t => 0.85 * Math.sin(Math.PI * Math.min(1, t * 1.02)) });
     // --- first flight: up to the flame, twice around the lamp, then away left
     G.sfx('mothFlutter');
+    const mshadow = G.el('ellipse', { cx: m.x, cy: 576, rx: 30, ry: 4, fill: '#2a1206', opacity: 0, filter: 'url(#fnBlur3)' }, layer);
+    layer.insertBefore(mshadow, c.outer.nextSibling);
     const ox = FL.x, oy = FL.y - 18, rx = 150, ry = 58;
     const pts = [[m.x, m.y], [m.x + 6, m.y - 40], [ox - 60, oy + 50]];
     const a0 = Math.atan2((oy + 50 - oy) / ry, (ox - 60 - ox) / rx);
@@ -1416,11 +1430,15 @@
         return (0.7 + 0.08 * dep * orbit) * (t > 0.86 ? lerp(1, 0.85, (t - 0.86) / 0.14) : 1);
       },
       onFrame(t) {
+        const h = clamp((575 - m.y) / 220, 0, 1);
+        mshadow.setAttribute('cx', m.x.toFixed(1));
+        mshadow.setAttribute('rx', (46 * m.s * (1 + h)).toFixed(1));
+        mshadow.setAttribute('opacity', (0.32 * (1 - h * 0.7) * (m.x > 700 && m.x < 1100 ? 1 : 0.4)).toFixed(3));
         pool.setAttribute('opacity', (0.9 - 0.4 * t).toFixed(3));
         if (t > 0.82 && !camOut.started) { camOut.started = true; cam('south', { s: 1.5, x: 760, y: 440 }, 900, 'inOut'); }
       },
     });
-    m.remove();
+    m.remove(); mshadow.remove();
     // leave the empty shell by the lamp
     c.cores.forEach(e => e.setAttribute('opacity', 0.15));
     c.warms.forEach(e => e.setAttribute('opacity', 0.25));

@@ -319,7 +319,7 @@
   // ================================================================== SOUTH
   function portrait() {
     // painting coordinates: 0,0 = centre of canvas (1365, 290)
-    return `<g id="edithPortrait">
+    return `<g id="edithPortrait" transform="translate(-90,0)">
     <defs>
       ${rad('pBg', -30, -60, 170, [[0, '#56502f'], [0.45, '#2f2b19'], [1, '#110f08']])}
       ${rad('pSkin', -8, -32, 42, [[0, '#f3e7d4'], [0.55, '#e2cdb2'], [0.85, '#c8a98c'], [1, '#a88870']])}
@@ -490,7 +490,7 @@
   }
 
   function southDecor() {
-    let s = '';
+    let s = '<g transform="translate(18,0)">';
     // peg rail with shawl & bonnet
     s += `<rect x="96" y="${DADO - 250}" width="220" height="16" fill="url(#gBeam)" ${K} stroke-width="2"/>`;
     const py = DADO - 242;
@@ -517,6 +517,7 @@
       <path d="M300,${py + 18} c6,-8 14,-6 12,2 c-3,6 -10,4 -12,-2 Z M300,${py + 18} c-2,-9 -10,-10 -12,-3 c0,6 8,7 12,3 Z" fill="#7a2e2c" ${K} stroke-width="1"/>
       <path d="M268,${py - 2} C276,${py - 8} 288,${py - 8} 296,${py - 4}" stroke="#e8d4a0" stroke-width="2" fill="none" opacity="0.5"/>
     </g>`;
+    s += '</g>';
     // pinned sketches
     s += papers(300, 196, 110, 138, -4, `
       <g transform="translate(0,-8) scale(1.9)" fill="none" stroke="#3a2a1c" stroke-width="0.7" stroke-linecap="round">
@@ -533,7 +534,7 @@
         <circle cx="4" cy="-10" r="6"/><circle cx="4" cy="-10" r="2.5"/>
       </g>
       <path d="M-30,38 q12,-4 24,0 t20,0" stroke="#3a2a1c" stroke-width="1" fill="none" opacity="0.7"/>`);
-    s += papers(372, 418, 78, 92, 3, `
+    s += papers(410, 418, 78, 92, 3, `
       <g fill="none" stroke="#3a2a1c" stroke-width="1" stroke-linecap="round">
         <path d="M0,-30 L0,-22 M0,-22 C-10,-18 -12,4 -6,18 C-3,24 3,24 6,18 C12,4 10,-18 0,-22 Z"/>
         <path d="M-8,-10 C-3,-8 3,-8 8,-10 M-10,0 C-4,2 4,2 10,0 M-8,10 C-3,12 3,12 8,10"/>
@@ -541,7 +542,7 @@
       </g>
       <path d="M-24,32 q10,-3 18,0 t18,0" stroke="#3a2a1c" stroke-width="1" fill="none" opacity="0.7"/>`);
     // pressed flower frame under the portrait
-    s += `<g>${frameRect(1300, 470, 130, 92, 9)}
+    s += `<g transform="translate(-64,-26)">${frameRect(1300, 470, 130, 92, 9)}
       <rect x="1309" y="479" width="112" height="74" fill="#e2d8bd"/>
       <path d="M1340,540 C1350,520 1360,505 1372,492" stroke="#6b7a4a" stroke-width="1.6" fill="none"/>
       <path d="M1352,520 C1340,512 1334,516 1332,524 C1340,526 1346,524 1352,520 Z M1358,510 C1368,506 1376,510 1378,516 C1370,518 1362,516 1358,510Z" fill="#7d8a55"/>
@@ -662,8 +663,8 @@
       else bars += `<path d="M${r1(x)},300 V430" stroke="#b8893a" stroke-width="1.6"/>`;
       bars += `<path d="M${r1(x)},300 Q${r1(1460 + (x - 1460) * 0.9)},246 1460,244" stroke="#b8893a" stroke-width="1.4" fill="none"/>`;
     }
-    s += `<g transform="translate(-58,0)"><ellipse cx="1462" cy="797" rx="30" ry="4" fill="url(#gShadow)"/>
-      <path d="M1450,794 C1460,786 1474,784 1482,790 C1472,792 1460,794 1450,794 Z" fill="#e9e0c4" opacity="0.8"/>
+    s += `<g transform="translate(-130,-100)"><ellipse cx="1462" cy="897" rx="30" ry="4" fill="url(#gShadow)"/>
+      <path d="M1450,894 C1460,886 1474,884 1482,890 C1472,892 1460,894 1450,894 Z" fill="#e9e0c4" opacity="0.8"/>
       <g class="rl-sway" style="transform-origin:1460px 42px">
       <path d="M1460,42 V236" stroke="#2a1d15" stroke-width="2" stroke-dasharray="5 3"/>
       <circle cx="1460" cy="240" r="6" fill="none" stroke="#b8893a" stroke-width="2.4"/>
@@ -737,11 +738,11 @@
       ${content}
       <path d="M${x + 10},${y + 10} L${x + 50},${y + 10} L${x + 10},${y + 50}Z M${x + 70},${y + 10} L${x + 90},${y + 10} L${x + 10},${y + 90} L${x + 10},${y + 70}Z" fill="#fff" opacity="0.12"/>
       <rect x="${x + 10}" y="${y + 10}" width="${w - 20}" height="${h - 20}" fill="none" stroke="#000" stroke-width="3" opacity="0.2"/></g>`;
-    s += specBox(1180, 214, 206, 144,
-      [[1230, 270, '#8a6a4a', 1], [1283, 262, '#a8b8a0', 1.15], [1336, 272, '#6a4a3a', 0.95], [1256, 322, '#c9b890', 0.8], [1312, 322, '#7a5a5a', 0.85]]
+    s += specBox(1170, 214, 206, 144,
+      [[1220, 270, '#8a6a4a', 1], [1273, 262, '#a8b8a0', 1.15], [1326, 272, '#6a4a3a', 0.95], [1246, 322, '#c9b890', 0.8], [1302, 322, '#7a5a5a', 0.85]]
         .map(([x, y, c, k]) => `<g transform="translate(${x},${y}) scale(${k})"><line x1="0" y1="-10" x2="0" y2="4" stroke="#6e4d1c" stroke-width="1"/>${mothShape(c, '#2a1d15')}</g><rect x="${x - 10}" y="${y + 20 * k}" width="20" height="5" fill="#fff" stroke="#8a7a5a" stroke-width="0.4"/>`).join(''));
-    s += specBox(1300, 392, 170, 124,
-      [[1340, 432], [1375, 432], [1410, 432], [1440, 432], [1340, 474], [1375, 474], [1410, 474], [1440, 474]]
+    s += specBox(1190, 392, 170, 124,
+      [[1230, 432], [1265, 432], [1300, 432], [1330, 432], [1230, 474], [1265, 474], [1300, 474], [1330, 474]]
         .map(([x, y], i) => `<ellipse cx="${x}" cy="${y}" rx="${5 + (i % 3)}" ry="${8 + (i % 2) * 2}" fill="${['#1f2b1f', '#2a1d15', '#3a4a2a', '#4a2a1a'][i % 4]}" stroke="${INK}" stroke-width="0.8"/><ellipse cx="${x - 1.5}" cy="${y - 3}" rx="1.5" ry="3" fill="#cfe3ff" opacity="0.5"/><path d="M${x - 5},${y - 3} l-4,-3 M${x + 5},${y - 3} l4,-3 M${x - 5},${y + 2} l-4,1 M${x + 5},${y + 2} l4,1" stroke="${INK}" stroke-width="0.7"/>`).join(''));
     // stacked specimen cases on the floor
     s += cshadow(1310, 797, 130, 12);
@@ -860,9 +861,9 @@
       <rect x="${x - 2}" y="${330 - h - 10}" width="${w + 4}" height="11" rx="2" fill="#a8845a" ${K} stroke-width="1.2"/>
       <path d="M${x + 5},${330 - h + 6} V${324}" stroke="#fff" stroke-width="3" opacity="0.22" stroke-linecap="round"/></g>`;
     s += `<g>
-      <path d="M1170,340 l0,26 l18,-26 Z M1400,340 l0,26 l-18,-26 Z" fill="#3a2418" ${K} stroke-width="1.6"/>
-      <rect x="1150" y="330" width="270" height="12" fill="url(#gBeam)" ${K} stroke-width="2"/>
-      <rect x="1150" y="342" width="270" height="12" fill="url(#gRailShadow)"/>
+      <path d="M1170,340 l0,26 l18,-26 Z M1360,340 l0,26 l-18,-26 Z" fill="#3a2418" ${K} stroke-width="1.6"/>
+      <rect x="1150" y="330" width="224" height="12" fill="url(#gBeam)" ${K} stroke-width="2"/>
+      <rect x="1150" y="342" width="224" height="12" fill="url(#gRailShadow)"/>
       ${jar(1168, 48, 76, '#8fb3d9', `<path d="M1192,300 C1180,306 1182,322 1192,326 C1202,322 1204,306 1192,300 Z" fill="#b5a888" stroke="#6a5a3a" stroke-width="0.8"/><path d="M1186,308 H1198 M1185,314 H1199 M1186,320 H1198" stroke="#6a5a3a" stroke-width="0.6"/><path d="M1192,300 V284" stroke="#6a5a3a" stroke-width="0.8"/>`)}
       ${jar(1228, 40, 56, '#a8d8b0', `<path d="M1234,326 C1240,310 1256,314 1262,326 Z" fill="#6a5a3a" opacity="0.8"/>`)}
       ${jar(1280, 56, 90, '#cfe3ff', `<path d="M1296,326 l6,-20 l4,20 M1310,326 l3,-30 l5,30 M1322,326 l4,-16 l2,16" stroke="#8a7a5a" stroke-width="1.6" fill="none"/>`)}
@@ -945,6 +946,9 @@
              ${rad('lg2_s', 900, 580, 420, [[0, '#ffcf7a', 0.35], [1, '#ffcf7a', 0]], 'gradientTransform="translate(900 580) scale(1 0.2) translate(-900 -580)"')}`,
       glowShapes: `<rect x="620" y="110" width="560" height="560" fill="url(#lg_s)"/><rect x="480" y="500" width="840" height="160" fill="url(#lg2_s)"/>`,
       // the moonbeam itself is drawn by window.js; here only a faint cool ambient from the right
+      lampMask: 'lampMask_s',
+      lampDefs: `<mask id="lampMask_s" maskUnits="userSpaceOnUse" x="0" y="0" width="1600" height="900"><rect width="1600" height="900" fill="url(#lampMaskG_s)"/></mask>
+        ${rad('lampMaskG_s', 900, 465, 170, [[0.35, '#2a2a2a'], [1, '#fff']], 'gradientTransform="translate(900 465) scale(0.62 1) translate(-900 -465)"')}`,
       moon: rad('lm2_s', 1700, 250, 900, [[0, '#8fb3d9', 0.16], [1, '#8fb3d9', 0]]),
       moonShapes: `<rect width="1600" height="900" fill="url(#lm2_s)"/>`,
       motesW: [31, 30, [620, 180, 560, 440], 'gMoteW'],
@@ -1012,11 +1016,12 @@
   function lightingMarkup(w) {
     const c = LIGHT[w], id = w[0];
     const m = c.mask ? ` mask="url(#${c.mask})"` : '';
-    return `<defs>${c.cold}${c.warm}${c.soft}${c.glow}${c.moonBase || ''}${c.moon}</defs>
+    const lm = c.lampMask ? ` mask="url(#${c.lampMask})"` : m;
+    return `<defs>${c.lampDefs || ''}${c.cold}${c.warm}${c.soft}${c.glow}${c.moonBase || ''}${c.moon}</defs>
       <g class="rl-cold rl-fade" style="mix-blend-mode:multiply"><rect width="1600" height="900" fill="url(#lc_${id})"${m}/></g>
       <g class="rl-warm rl-fade" style="mix-blend-mode:multiply;opacity:0"><rect width="1600" height="900" fill="url(#lw_${id})"${m}/></g>
-      <g class="rl-soft rl-fade" style="mix-blend-mode:soft-light;opacity:0"><g${m}><rect width="1600" height="900" fill="url(#ls_${id})"/></g></g>
-      <g class="rl-glow rl-fade" style="mix-blend-mode:screen;opacity:0"><g class="${c.noFlick ? '' : 'rl-flick2'}"${m}>${c.glowShapes}</g></g>
+      <g class="rl-soft rl-fade" style="mix-blend-mode:soft-light;opacity:0"><g${lm}><rect width="1600" height="900" fill="url(#ls_${id})"/></g></g>
+      <g class="rl-glow rl-fade" style="mix-blend-mode:screen;opacity:0"><g class="${c.noFlick ? '' : 'rl-flick2'}"${lm}>${c.glowShapes}</g></g>
       ${c.moonBaseShapes ? `<g class="rl-moonbase rl-fade" style="mix-blend-mode:screen"><g${m}>${c.moonBaseShapes}</g></g>` : ''}
       <g class="rl-moon rl-fade" style="mix-blend-mode:screen;opacity:0"><g${m}>${c.moonShapes}</g></g>
       <g class="rl-motesC rl-fade" style="opacity:0.5">${motes(c.motesC[0], c.motesC[1], c.motesC[2], c.motesC[3])}</g>
@@ -1068,7 +1073,7 @@
     eyeHandler = (e) => {
       if (G.view() !== 'south') return;
       const p = G.toStage(e);
-      const dx = p.x - 1365, dy = p.y - 275, d = Math.hypot(dx, dy) || 1;
+      const dx = p.x - 1275, dy = p.y - 275, d = Math.hypot(dx, dy) || 1;
       const k = Math.min(1, d / 260);
       const tx = r1(dx / d * 1.5 * k), ty = r1(dy / d * 0.9 * k);
       L_.setAttribute('transform', `translate(${tx},${ty})`);
