@@ -1142,9 +1142,12 @@
     J.gutter.setAttribute('opacity', (0.75 * lift).toFixed(3));
   }
 
-  async function turn(dir) {
+  // clicks that arrive mid-flip are queued (never dropped); queued flips run faster
+  J.queue = [];
+  async function turn(dir, fast) {
+    if (J.turning) { J.queue.push(dir); return; }
     const to = J.spread + dir;
-    if (J.turning || to < 0 || to >= PAGES.length) return;
+    if (to < 0 || to >= PAGES.length) { if (J.queue.length) turn(J.queue.shift(), true); return; }
     J.turning = true;
     G.sfx('pageTurn');
     const from = J.spread, S = J.static;
@@ -1158,7 +1161,7 @@
     leafFrame(0, dir);
     J.turnG.style.display = '';
     let swapped = false;
-    await G.tween(920, (e) => {
+    await G.tween(fast ? 520 : 920, (e) => {
       if (!swapped && e >= 0.5) { swapped = true; leafContent(to, secondSide); }
       leafFrame(e, dir);
     }, 'inOut');
@@ -1166,6 +1169,7 @@
     J.leafContent.innerHTML = '';
     J.turning = false;
     showSpread(to);
+    if (J.queue.length) { turn(J.queue.shift(), true); return; }
     maybeReveal();
   }
 
