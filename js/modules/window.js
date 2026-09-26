@@ -1066,16 +1066,16 @@
     R.animating = true;
     try {
       // key goes in
-      await G.tween(420, e => setKey(R, e, 0, 1.35 - 0.35 * e), 'out');
-      await G.wait(150);
+      await G.tween(350, e => setKey(R, e, 0, 1.35 - 0.35 * e), 'out');
+      await G.wait(100);
       G.sfx('keyTurn');
-      await G.tween(560, e => setKey(R, 1, 90 * e, 1), 'inOut');
+      await G.tween(450, e => setKey(R, 1, 90 * e, 1), 'inOut');
       G.sfx('lockClick');
-      await G.tween(420, e => setLever(R, e), 'outBack');
-      await G.wait(380);
+      await G.tween(320, e => setLever(R, e), 'outBack');
+      await G.wait(150);
       // the sash swings outward
       G.sfx('windowCreak');
-      await G.tween(2100, e => setOpen(R, e), t => (t < .12 ? 0.5 * t * t / .12 * 0.4 : G.ease.inOut(t)));
+      await G.tween(1300, e => setOpen(R, e), 'inOut');
       G.sfx('wind');
       R.root.classList.add('win-open');
       await G.tween(900, (e, t) => R.wash.setAttribute('opacity', f(Math.sin(t * Math.PI) * 0.16)), 'linear');

@@ -555,7 +555,7 @@
   });
 
   // ================================================================== BOX close-up
-  const BX = { dials: [4, 4, 4, 4], rot: [0, 0, 0, 0], turning: [false, false, false, false] };
+  const BX = { dials: [4, 4, 4, 4], rot: [0, 0, 0, 0], turning: [false, false, false, false], queued: [0, 0, 0, 0] };
   const DIAL_X = [530, 710, 890, 1070], DIAL_Y = 604;
   const LID_N = 40, LID_D = 2400, LID_OPEN = 100 * Math.PI / 180;
   function pearlMoth(x, y, s, r, op) {
@@ -871,7 +871,8 @@
     }), 'out').then(() => gp.remove());
   }
   function turnDial(i) {
-    if (BX.turning[i] || G.get('boxOpen') || BX.opening) return;
+    if (G.get('boxOpen') || BX.opening) return;
+    if (BX.turning[i]) { BX.queued[i]++; return; }   // never drop a click: it turns once the current turn ends
     BX.turning[i] = true;
     G.sfx('dial');
     const d = BX.dialEls[i];
@@ -890,6 +891,8 @@
     }, 'outBack').then(() => {
       moon.removeAttribute('transform'); moon.setAttribute('opacity', 1);
       BX.turning[i] = false;
+      if (BX.queued[i] > 0) { BX.queued[i]--; turnDial(i); return; }
+      if (BX.queued.some(Boolean)) return;
       if (BX.dials.every((v, k) => v === SOLUTION[k]) && !BX.turning.some(Boolean)) openBox();
     });
   }
