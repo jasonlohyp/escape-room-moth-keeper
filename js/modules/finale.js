@@ -1718,7 +1718,7 @@
     when: () => G.get('boxOpen') && !G.get('hatched'),
     lines: ['Read Edith\'s letter again. What did she ask of you?',
       '"They always wake to warmth." What is the warmest thing in the room?',
-      'Select the cocoon and click the lit lamp.'],
+      'Hold the cocoon close to the lit lamp. Let it warm.'],
   });
   G.registerStep(60, 'box', () => {
     G.set('boxOpen'); G.give('letter'); G.set('letterRead'); G.give('cocoon'); G.set('gotCocoon');

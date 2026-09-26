@@ -1169,9 +1169,9 @@
   }
 
   // ================================================================== hints & debug steps
-  G.registerHint({ id: 'journal', order: 5, when: () => !G.get('journalRead'), lines: ['There is a journal lying on the desk.', 'Edith\'s journal is on the desk, by the lamp. Read it.', 'Turn around to the desk and click the journal.'] });
-  G.registerHint({ id: 'lamp', order: 20, when: () => G.get('gotMatches') && !G.get('lampLit'), lines: ['It is so dark in here. Something on the desk could give light.', 'The oil lamp on the desk has a dry wick — and you have matches.', 'Select the matches in your inventory, then click the lamp.'] });
-  G.registerHint({ id: 'ink', order: 50, when: () => G.get('windowOpen') && !G.get('inkSeen'), lines: ['The moonlight is falling across the desk now.', 'One of the journal\'s pages was blank. "Some words I write only for the moon."', 'Open the journal to its third spread — the moonlight reveals four moons.'] });
+  G.registerHint({ id: 'journal', order: 5, when: () => !G.get('journalRead'), lines: ['There is a journal lying on the desk.', 'Edith\'s journal is on the desk, by the lamp. Read it.', 'Edith’s journal lies on the writing desk. Open it and read.'] });
+  G.registerHint({ id: 'lamp', order: 20, when: () => G.get('gotMatches') && !G.get('lampLit'), lines: ['It is so dark in here. Something on the desk could give light.', 'The oil lamp on the desk has a dry wick — and you have matches.', 'Take up the matches and bring a flame to the lamp’s wick.'] });
+  G.registerHint({ id: 'ink', order: 50, when: () => G.get('windowOpen') && !G.get('inkSeen'), lines: ['The moonlight is falling across the desk now.', 'One of the journal\'s pages was blank. "Some words I write only for the moon."', 'Open the journal to its third spread. In the moonlight, four moons appear.'] });
   G.registerStep(5, 'journal', () => G.set('journalRead'));
   G.registerStep(20, 'lamp', () => { G.take('matches'); G.set('lampLit'); });
   G.registerStep(50, 'ink', () => { G.set('journalRead'); G.set('inkSeen'); });
