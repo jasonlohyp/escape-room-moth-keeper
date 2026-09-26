@@ -223,8 +223,8 @@
    * Eyes listed per RIGHT wing; totals are doubled by mirroring. */
   const MOTHS = {
     atlas: {
-      label: 'Attacus atlas', loc: 'Ceylon — 3.iii.1891', no: 'No. 7',
-      say: 'Attacus atlas. The atlas moth — its wingtips curl like a snake’s head.',
+      label: 'Attacus atlas', loc: 'Ceylon · 3.iii.1891', no: 'No. 7',
+      say: 'Attacus atlas. The atlas moth, its wingtips curling like a snake’s head.',
       fw: 'M7,-24 C46,-54 104,-76 150,-84 C166,-88 180,-98 188,-110 C198,-114 206,-102 200,-88 C194,-76 184,-66 174,-60 C160,-52 146,-30 144,-12 C142,2 138,10 132,16 C96,18 52,12 9,2 Z',
       hw: 'M7,0 C52,4 116,10 150,34 C166,58 150,96 118,122 C92,142 56,146 34,124 C16,104 8,64 6,20 Z',
       fwGrad: { r: 190, stops: [[0, '#4a1a0e'], [0.25, '#8a3a1c'], [0.62, '#b4562a'], [0.85, '#c9803e'], [1, '#d8a060']] },
@@ -250,7 +250,7 @@
       top: -118, bottom: 146, span: 206,
     },
     luna: {
-      label: 'Actias luna', loc: 'Vermont — 12.vi.1894', no: 'No. 3',
+      label: 'Actias luna', loc: 'Vermont · 12.vi.1894', no: 'No. 3',
       say: 'Actias luna. The moon moth, trailing its long pale tails.',
       fw: 'M6,-22 C38,-50 96,-80 136,-86 C150,-88 156,-78 150,-64 C138,-38 124,-12 108,10 C74,14 40,8 8,2 Z',
       hw: 'M7,2 C50,6 96,14 114,34 C124,54 106,80 86,96 C74,122 70,168 74,198 C86,204 88,224 72,232 C58,236 50,222 56,206 C46,176 46,132 42,108 C24,90 12,60 6,20 Z',
@@ -273,8 +273,8 @@
       top: -100, bottom: 240, span: 158,
     },
     hawk: {
-      label: 'Sphinx ligustri', loc: 'Kent — 22.vii.1896', no: 'No. 11',
-      say: 'Sphinx ligustri. The privet hawk-moth — built for speed.',
+      label: 'Sphinx ligustri', loc: 'Kent · 22.vii.1896', no: 'No. 11',
+      say: 'Sphinx ligustri. The privet hawk-moth, built for speed.',
       fw: 'M8,-26 C62,-34 132,-18 186,16 C197,23 195,31 182,30 C150,26 118,24 88,27 C56,27 30,16 9,0 Z',
       hw: 'M8,4 C44,8 88,24 110,42 C118,60 100,78 72,82 C46,86 22,68 8,34 Z',
       fwGrad: { r: 200, stops: [[0, '#4a3424'], [0.3, '#7a6048'], [0.7, '#9a8062'], [1, '#b09878']] },
@@ -299,8 +299,8 @@
       top: -70, bottom: 120, span: 200,
     },
     emperor: {
-      label: 'Saturnia pavonia', loc: 'Yorkshire moor — 9.iv.1897', no: 'No. 19',
-      say: 'Saturnia pavonia. The emperor — broad round fans with scalloped edges.',
+      label: 'Saturnia pavonia', loc: 'Yorkshire moor · 9.iv.1897', no: 'No. 19',
+      say: 'Saturnia pavonia. The emperor moth, broad round fans with scalloped edges.',
       fw: 'M8,-22 C36,-64 96,-90 148,-86 L154,-80' + scallop([[154, -80], [160, -62], [160, -44], [156, -26], [150, -8], [138, 14]], [60, -30], 9) + ' C110,22 50,14 8,2 Z',
       hw: 'M8,4 C54,6 110,12 138,34' + scallop([[138, 34], [152, 56], [154, 80], [144, 102], [124, 120], [100, 130], [74, 132], [50, 122], [34, 106]], [60, 60], 9) + ' C16,90 8,50 6,10 Z',
       fwGrad: { r: 170, stops: [[0, '#4a3a3e'], [0.3, '#7a6a70'], [0.65, '#a8969a'], [0.85, '#c8a8a0'], [1, '#d8a07c']] },
@@ -324,8 +324,8 @@
       top: -104, bottom: 136, span: 166,
     },
     io: {
-      label: 'Automeris io', loc: 'Ohio — 30.vi.1893', no: 'No. 5',
-      say: 'Automeris io. Small, with swept-back wings — and two great eyes to frighten birds.',
+      label: 'Automeris io', loc: 'Ohio · 30.vi.1893', no: 'No. 5',
+      say: 'Automeris io. Small, with swept-back wings and two great eyes to frighten birds.',
       scale: 0.8,
       fw: 'M8,-20 C48,-42 108,-60 156,-64 C150,-52 128,-30 108,-10 C98,0 88,4 76,6 C52,8 28,6 8,2 Z',
       hw: 'M8,4 C30,4 62,14 80,36 C96,60 92,96 68,110 C46,122 22,106 16,82 C10,60 6,30 6,10 Z',
@@ -347,7 +347,7 @@
       top: -80, bottom: 118, span: 158,
     },
     plume: {
-      label: 'Pterophorus pentadactyla', loc: 'The garden — 14.viii.1898', no: 'No. 23',
+      label: 'Pterophorus pentadactyla', loc: 'The garden · 14.viii.1898', no: 'No. 23',
       say: 'A plume moth. Hardly more than feathers.',
       plume: true,
       body: { th: [5, 9], abd: [96, 4.5], eyeCol: '#9a8a68', thc: '#d8ccb0', abc: '#e4dac0', hair: '#fffaf0', seg: '#b4a684' },
@@ -755,7 +755,7 @@
             <rect x="-104" y="-18" width="208" height="46" fill="#efe5cc"/><rect x="-104" y="-18" width="208" height="46" fill="url(#cabPPaper)"/>
             <rect x="-100" y="-14" width="200" height="38" fill="none" stroke="#6a5a40" stroke-width="0.8" opacity="0.6"/>
             <text x="0" y="3" text-anchor="middle" font-family="'IM Fell English', Georgia, serif" font-style="italic" font-size="${M.label.length > 20 ? 17 : 20}" fill="#2a1c10">${M.label}</text>
-            <text x="0" y="20" text-anchor="middle" font-family="'Patrick Hand', 'IM Fell English', cursive" font-size="9.5" fill="#4a3624" opacity="0.9">${M.loc}</text>
+            <text x="0" y="20" text-anchor="middle" font-family="'Caveat', 'IM Fell English', cursive" font-weight="600" font-size="11" fill="#4a3624" opacity="0.9">${M.loc}</text>
             <text x="-94" y="-4" font-family="'IM Fell English', Georgia, serif" font-size="9" fill="#6a5a40">${M.no}</text>
             <path d="M92,-12 L96,-4" stroke="#5a5650" stroke-width="1" opacity="0.8"/><circle cx="92" cy="-12" r="2.6" fill="#8a8680" stroke="${INK}" stroke-width="0.8"/>
           </g>`, host);
@@ -770,7 +770,7 @@
     },
     update() { if (cab.tint) setTint(cab.tint); },
     enter() {
-      if (!cab.seen) { cab.seen = true; setTimeout(() => G.say('Edith’s specimens — six moths, each pinned and labelled in her hand.'), 250); }
+      if (!cab.seen) { cab.seen = true; setTimeout(() => G.say('Edith’s specimens. Six moths, each pinned and labelled in her hand.'), 250); }
     },
   });
   function setTint(el) {
@@ -1101,7 +1101,7 @@
     id: 'drawer', order: 30,
     when: () => G.get('lampLit') && !G.get('gotKey'),
     lines: [
-      'The lamp shows more than light. Look at the wall behind it — then at the cabinet.',
+      'The lamp shows more than light. Look at the wall behind it, then at the cabinet.',
       'Each of the four shapes on the wall has a twin in the cabinet. Edith counted their eyes, left to right.',
       'Atlas 8, Luna 4, Hawk-moth 2, Emperor 6. The drawer code is 8426.',
     ],

@@ -164,7 +164,7 @@
   function isBusy() { return busyCount > 0; }
 
   // ---------- hotspots ----------
-  const FAILS = ["That doesn't fit there.", "Nothing happens.", "That won't help here.", "No — not like that."];
+  const FAILS = ["That doesn't fit there.", "Nothing happens.", "That won't help here.", "No, not like that."];
   function hotspot(target, opts) {
     target.classList.add('hot', 'cur-' + (opts.cursor || 'use'));
     target.addEventListener('click', ev => {

@@ -9,7 +9,7 @@
   'use strict';
 
   const INK = '#1c140f';
-  const HAND = `'Patrick Hand', 'IM Fell English', cursive`;
+  const HAND = `'Caveat', 'IM Fell English', cursive`;
   const FELL = `'IM Fell English', 'Cormorant Garamond', Georgia, serif`;
   const SOLUTION = [0, 2, 4, 6];             // new, first quarter, full, last quarter
   const PHASE_NAMES = ['new moon', 'waxing crescent', 'first quarter', 'waxing gibbous', 'full moon', 'waning gibbous', 'last quarter', 'waning crescent'];
@@ -673,7 +673,7 @@
         click() {
           G.give('cocoon', BX.cocoonG);
           G.set('gotCocoon');
-          G.say('It is warm in my hands — faintly, like a sleeping thing.');
+          G.say('It is warm in my hands, faintly, like a sleeping thing.');
         },
       });
       // letter
@@ -684,7 +684,7 @@
           <path d="M-160,-100 L0,8 L160,-100" fill="none" stroke="#9c8762" stroke-width="2"/>
           <path d="M-160,100 L-40,10 M160,100 L40,10" fill="none" stroke="#b8a47e" stroke-width="1.2" opacity=".7"/>
           <path d="M-150,-92 L0,6 L150,-92" fill="none" stroke="#fff8e6" stroke-width="1" opacity=".5"/>
-          <text x="-120" y="70" font-family="${HAND}" font-size="17" fill="#3a281c" opacity=".75" transform="rotate(-3)">for whoever wakes her</text>
+          <text x="-120" y="70" font-family="${HAND}" font-weight="600" font-size="17" fill="#3a281c" opacity=".75" transform="rotate(-3)">for whoever wakes her</text>
           <g class="bx-seal" transform="translate(0 8)">
             <path d="M-26,-4 C-30,-22 -12,-32 2,-30 C20,-30 32,-16 28,2 C26,20 10,30 -6,28 C-22,26 -28,12 -26,-4 Z" fill="url(#fnWax)" stroke="#2a0808" stroke-width="1.6"/>
             <path d="M-20,20 C-26,28 -30,34 -26,40 M18,22 C22,30 26,32 30,30" stroke="#6e1f1f" stroke-width="5" stroke-linecap="round" fill="none"/>
@@ -931,7 +931,7 @@
       BX.inShade.setAttribute('opacity', 0);
       BX.opening = false;
       G.set('boxOpen');
-      G.say('Inside, on faded silk: a cocoon — and a letter sealed with a moth.');
+      G.say('Inside, on faded silk: a cocoon, and a letter sealed with a moth.');
     } finally {
       BX.opening = false;
       G.busy(false);
@@ -941,15 +941,15 @@
 
   // ================================================================== LETTER view
   const LETTER = [
-    ['Dearest —', 0],
-    ['If you are reading this, I have gone', 1],
-    ['where the lamps are.', 0],
-    ['I could not take her with me.', 1],
-    ['She is not ready yet.', 0],
-    ['Keep her warm — they always wake', 1],
-    ['to warmth.', 0],
-    ['And then, please, let her show you', 1],
-    ['the way out.', 0],
+    ['To whoever finds this,', 0],
+    ['I am already gone, or nearly.', 1],
+    ['I meant to take all of myself,', 0],
+    ['but part of me stayed behind,', 1],
+    ['asleep, not ready to leave yet.', 0],
+    ['Keep her warm. They always wake', 1],
+    ['to warmth, every one of them.', 0],
+    ['When she wakes, follow her out,', 1],
+    ['she knows the way better than I did.', 0],
   ];
   G.registerView('letter', {
     parent: 'box',
@@ -958,7 +958,7 @@
       let y = 188;
       const lines = LETTER.map(([t, gap], i) => {
         y += (i === 0 ? 0 : 53) + (gap ? 20 : 0);
-        return `<text x="${i === 0 ? 470 : 486}" y="${y}" font-family="${HAND}" font-size="${i === 0 ? 31 : 27}" fill="#2b1d14" opacity=".92">${t.replace(/&/g, '&amp;')}</text>`;
+        return `<text x="${i === 0 ? 470 : 486}" y="${y}" font-family="${HAND}" font-weight="600" font-size="${i === 0 ? 31 : 27}" fill="#2b1d14" opacity=".92">${t.replace(/&/g, '&amp;')}</text>`;
       }).join('');
       G.svg(`
         <rect width="1600" height="900" fill="#120c08"/>
@@ -976,7 +976,7 @@
           <ellipse cx="470" cy="130" rx="50" ry="26" fill="#a48458" opacity=".14" filter="url(#blur6)"/>
           <text x="1150" y="120" text-anchor="end" font-family="${FELL}" font-style="italic" font-size="20" fill="#5a4630" opacity=".75">the attic, October</text>
           ${lines}
-          <text x="1060" y="${y + 84}" font-family="${HAND}" font-size="32" fill="#2b1d14" opacity=".92">— E.</text>
+          <text x="1060" y="${y + 84}" font-family="${HAND}" font-weight="600" font-size="32" fill="#2b1d14" opacity=".92">E.</text>
           <g transform="translate(1106 ${y + 60}) rotate(-14) scale(.26)" opacity=".55" fill="none" stroke="#2b1d14" stroke-width="4">
             <path d="${FW}"/><path d="${HW}"/><g transform="scale(-1 1)"><path d="${FW}"/><path d="${HW}"/></g><ellipse cy="6" rx="5" ry="16"/>
           </g>
@@ -987,7 +987,7 @@
         </g>
       `, g);
       const hot = G.el('rect', { x: 390, y: 58, width: 822, height: 756, fill: 'transparent' }, g);
-      G.hotspot(hot, { cursor: 'look', click() { G.say('"Keep her warm — they always wake to warmth."'); } });
+      G.hotspot(hot, { cursor: 'look', click() { G.say('"Keep her warm. They always wake to warmth."'); } });
     },
     enter() { G.sfx('paper'); },
   });
@@ -998,7 +998,7 @@
   // ================================================================== ITEMS
   G.registerItem('letter', {
     name: 'Edith’s letter',
-    desc: 'Folded in three, sealed with a moth in red wax. Her hand — hurried, tender.',
+    desc: 'Folded in three, sealed with a moth in red wax. Her handwriting looks rushed.',
     icon: `<g transform="rotate(-8 50 50)">
       <rect x="12" y="24" width="76" height="52" rx="2" fill="#e8dcc0" stroke="${INK}" stroke-width="3"/>
       <path d="M12,26 L50,56 L88,26" fill="none" stroke="#8a7456" stroke-width="2.4"/>
@@ -1401,7 +1401,7 @@
       const hot = G.el('rect', { x: 500, y: 190, width: 600, height: 590, fill: 'transparent' }, g);
       G.hotspot(hot, {
         cursor: 'look',
-        click() { G.say('The door has no handle — only this brass moth. Its wings are hollow, as if waiting for something to fill them.'); },
+        click() { G.say('The door has no handle. Only this brass moth, its wings hollow, as if waiting for something to fill them.'); },
         use(item) {
           if (item === 'cocoon') { G.say('Not yet. It is sleeping.'); G.select(null); return true; }
           if (item === 'key') { G.say('There is no keyhole. Not anywhere.'); G.select(null); return true; }

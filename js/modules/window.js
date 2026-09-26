@@ -991,7 +991,7 @@
           if (id === 'key') { openSequence(); return true; }
           return false;
         },
-        fail: 'It needs a key — a very small one.',
+        fail: 'It needs a key, a very small one.',
       });
     },
     update() {
@@ -1087,7 +1087,7 @@
       G.set('windowOpen');
       G.busy(false);
     }
-    G.say('The window swings out into the rain. Moonlight spills across the room — over the desk.');
+    G.say('The window swings out into the rain. Moonlight spills across the room, over the desk.');
     scheduleLanding(2400);
   }
 

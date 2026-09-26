@@ -346,10 +346,18 @@ body.ending #stage { filter: blur(.8px) brightness(.86) saturate(.92); }
 /* ---------- phone / portrait: the HUD moves into a walnut band beneath the picture ---------- */
 @media (max-aspect-ratio: 1/1) {
   #app { align-items: flex-start; }
-  #stage-wrap { width: 100vw; height: 100vh; height: 100dvh; aspect-ratio: auto; container-type: size; }
-  #stage, #fade { bottom: auto; left: -8.03cqw; width: 116.79cqw; height: 65.69cqw; }
+  #stage-wrap {
+    width: 100vw; height: 100vh; height: 100dvh; aspect-ratio: auto; container-type: size;
+    /* the picture wants to be tall (28% of screen height reserved for the band below it), but on a
+       narrow phone that would crop the 16:9 scene down to a sliver; cap how far it can widen past the
+       screen (180cqw, i.e. showing >= 840 of the 1600-wide scene) and give the band the rest instead,
+       so every portrait aspect keeps both a sane band and the full width of the desk/cabinet/window in view. */
+    --bt: min(calc(100cqh - max(28cqh, 150px)), 101.25cqw);
+    --band: calc(100cqh - var(--bt));
+    --stagew: calc(var(--bt) * 16 / 9);
+  }
+  #stage, #fade { bottom: auto; left: calc((100cqw - var(--stagew)) / 2); width: var(--stagew); height: var(--bt); }
   #overlay {
-    --bt: 65.69cqw; --band: calc(100cqh - 65.69cqw);
     --slot: min(16.4cqw, calc(var(--band) * .26)); --rows: 1;
     --capH: max(15cqw, 64px);                                   /* caption sits directly under the picture */
     --ctl: max(calc(var(--slot) * .8), 48px);
