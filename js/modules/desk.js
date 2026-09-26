@@ -762,23 +762,23 @@
       pageBase(g, 'L');
       handText(g, 262, 176, '', { lines: ['14th October.'], size: 26, maxw: 470 });
       G.el('path', { d: 'M262 196 C330 190 420 194 470 190', stroke: '#3a2a1e', 'stroke-width': 1.3, fill: 'none', opacity: 0.6 }, g);
-      handText(g, 262, 262, 'They came for Father this morning, two men and a cart, quite polite about it. I have wound his clocks every week since, all but the tall one. That one stopped itself in August, the night she first landed on the sill: hour hand on the crescent moon, minute hand on the candle.', { chars: 33, maxw: 480 });
+      handText(g, 262, 262, 'They took Father to the asylum this morning, and the house has gone very quiet. I wind his clocks each Sunday, all save the tall one. It stopped of its own accord the night she first came to my window: the short hand upon the crescent moon, the long hand upon the candle.', { chars: 33, maxw: 480 });
       G.svg(mothSketch('luna', 660, 700, 0.28, -14), g);
       pageNum(g, 'L', 1);
     }, g => {
       pageBase(g, 'R');
       G.svg(clockSketch(1100, 340, 150), g);
       G.svg(crescentDoodle(866, 150, 1.0) + candleDoodle(868, 240, 0.95), g);
-      const cap = handText(g, 1100, 598, '', { lines: ['Father’s tall clock.', 'No numbers on the face,', 'only things to hold onto.'], size: 18, lh: 38, maxw: 330, opacity: 0.8 });
+      const cap = handText(g, 1100, 598, '', { lines: ['Father’s tall clock.', 'Pictures instead of numbers,', 'so a child might read it.'], size: 18, lh: 38, maxw: 330, opacity: 0.8 });
       cap.setAttribute('text-anchor', 'middle'); cap.querySelectorAll('tspan').forEach(t => t.setAttribute('x', 1100));
       pageNum(g, 'R', 2);
     }],
     // spread 2
     [g => {
       pageBase(g, 'L');
-      handText(g, 262, 180, 'Father cut my lampshade by hand, so the lamp throws my four dearest onto the wall. When I count them, I count their eyes, every eye, on every wing.', { chars: 33, maxw: 480 });
+      handText(g, 262, 180, 'Father cut this lampshade by hand, so that my four dearest fly upon the wall whenever it is lit. I count them each night, the way other girls say their prayers: every eye, upon every wing.', { chars: 33, maxw: 480 });
       G.svg(eyeSketch(380, 500, 1.3), g);
-      handText(g, 440, 500, '', { lines: ['a moth’s eye,', 'ring within ring'], size: 16, lh: 34, maxw: 260, opacity: 0.75 });
+      handText(g, 440, 500, '', { lines: ['an eye,', 'ring within ring'], size: 16, lh: 34, maxw: 260, opacity: 0.75 });
       pageNum(g, 'L', 3);
     }, g => {
       pageBase(g, 'R');
@@ -791,7 +791,7 @@
       pageBase(g, 'L');
       G.svg(mothSketch('luna', 500, 300, 1.35, -6), g);
       G.svg(`<path d="M430 424 C470 470 520 480 560 470" fill="none" stroke="#3a2a1e" stroke-width="1" stroke-dasharray="3 4" opacity="0.5"/>`, g);
-      handText(g, 262, 540, 'Actias luna, the moon moth. She does not eat; she lives but a week, and spends it looking for the light.', { chars: 30, maxw: 480, size: 20 });
+      handText(g, 262, 520, 'Actias luna, the moon moth. She has no mouth and cannot eat. She lives but a week, and spends it searching for the light.', { chars: 34, maxw: 480, size: 20 });
       pageNum(g, 'L', 5);
     }, g => {
       pageBase(g, 'R');
@@ -814,7 +814,7 @@
     // spread 4
     [g => {
       pageBase(g, 'L');
-      handText(g, 262, 200, 'They come to the glass again most nights now. I no longer count how many. Tonight I mean to answer them.', { chars: 30, maxw: 480, size: 23 });
+      handText(g, 262, 200, 'They come to the glass every night now, more of them each time, softly tapping. Tonight I think I shall answer.', { chars: 30, maxw: 480, size: 23 });
       handText(g, 560, 420, '', { lines: ['E.'], size: 26 });
       G.svg(`<g filter="url(#ink)" stroke="#3a2a1e" stroke-linecap="round" stroke-linejoin="round">
         <path d="M330 500 C400 492 470 496 540 490" fill="none" stroke-width="1.8"/>
@@ -1066,36 +1066,38 @@
       J.inkLayer = G.el('g', { style: 'display:none', 'pointer-events': 'none' }, g);
       J.inkRefs = buildInk(J.inkLayer);
       G.el('rect', { width: 1600, height: 900, fill: 'url(#dkVig)', 'pointer-events': 'none' }, g);
-      // page-turn controls: dog-ear curls in the corners, each with a soft glow pill
-      // (always faintly visible so the affordance reads at rest, brightening on hover) and a bold chevron.
+      // page-turn controls: a dog-eared corner folded flush into each outer page corner. The folded
+      // flap shows the paper's back and reveals the page beneath; on hover it lifts a little further.
       G.svg(`
-        <radialGradient id="dkTurnGlow" cx="50%" cy="50%" r="50%">
-          <stop offset="0" stop-color="#ffcf7a" stop-opacity="0.55"/><stop offset="0.6" stop-color="#c99a45" stop-opacity="0.18"/><stop offset="1" stop-color="#c99a45" stop-opacity="0"/>
-        </radialGradient>`, g);
-      J.nextGlow = G.el('circle', { cx: 1368, cy: 755, r: 56, fill: 'url(#dkTurnGlow)', opacity: 0.28, 'pointer-events': 'none', style: 'transition: opacity .25s ease' }, g);
-      J.prevGlow = G.el('circle', { cx: 232, cy: 755, r: 56, fill: 'url(#dkTurnGlow)', opacity: 0.28, 'pointer-events': 'none', style: 'transition: opacity .25s ease' }, g);
-      J.nextCurl = G.svg(`
-        <path d="M1398 784 L1398 724 C1376 740 1352 764 1338 786 Z" fill="#d8c8a4" stroke="${INK}" stroke-width="1.4"/>
-        <path d="M1398 724 C1380 748 1362 770 1338 786 L1398 784 Z" fill="#000" opacity="0.1"/>
-        <path d="M1352 754 l22 -5 l-12 20" fill="none" stroke="#5a4430" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.92"/>`, g);
-      J.prevCurl = G.svg(`
-        <path d="M202 784 L202 724 C224 740 248 764 262 786 Z" fill="#d8c8a4" stroke="${INK}" stroke-width="1.4"/>
-        <path d="M202 724 C220 748 238 770 262 786 L202 784 Z" fill="#000" opacity="0.1"/>
-        <path d="M248 754 l-22 -5 l12 20" fill="none" stroke="#5a4430" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.92"/>`, g);
-      J.nextCurl.setAttribute('pointer-events', 'none'); J.prevCurl.setAttribute('pointer-events', 'none');
-      [J.nextCurl, J.prevCurl].forEach((c, i) => {
-        c.style.transition = 'transform .25s ease-out';
-        c.style.transformOrigin = i === 0 ? '1398px 784px' : '202px 784px';
-        c.style.transformBox = 'fill-box';
+        <linearGradient id="dkFlapR" x1="1" y1="1" x2="0.2" y2="0.2"><stop offset="0" stop-color="#b9a67e"/><stop offset="0.55" stop-color="#e3d6b4"/><stop offset="1" stop-color="#f1e7cc"/></linearGradient>
+        <linearGradient id="dkFlapL" x1="0" y1="1" x2="0.8" y2="0.2"><stop offset="0" stop-color="#b9a67e"/><stop offset="0.55" stop-color="#e3d6b4"/><stop offset="1" stop-color="#f1e7cc"/></linearGradient>`, g);
+      const earR = (k) => `
+        <path d="M${1398 - 54 * k} 784 L1398 784 L1398 ${784 - 54 * k} Z" fill="#b8a47c"/>
+        <path d="M${1398 - 54 * k} 784 L1398 ${784 - 54 * k}" stroke="#6b5434" stroke-width="1" opacity="0.5"/>
+        <path d="M${1398 - 54 * k} 784 L1398 ${784 - 54 * k} Q${1362 - 4 * k} ${738 - 8 * k} ${1346 - 6 * k} ${731 - 6 * k} Q${1349 - 6 * k} ${760} ${1398 - 54 * k} 784 Z" transform="translate(-3 -3)" fill="#000" opacity="0.22" filter="url(#blur2)"/>
+        <path d="M${1398 - 54 * k} 784 L1398 ${784 - 54 * k} Q${1362 - 4 * k} ${738 - 8 * k} ${1346 - 6 * k} ${731 - 6 * k} Q${1349 - 6 * k} ${760} ${1398 - 54 * k} 784 Z" fill="url(#dkFlapR)" stroke="${INK}" stroke-width="1.1" stroke-linejoin="round"/>`;
+      J.nextCurl = G.svg(earR(1), g);
+      J.prevCurl = G.svg(earR(1), g);
+      J.prevCurl.setAttribute('transform', 'translate(1600 0) scale(-1 1)');
+      J.prevCurl.querySelectorAll('path').forEach(p => { if (p.getAttribute('fill') === 'url(#dkFlapR)') p.setAttribute('fill', 'url(#dkFlapL)'); });
+      [J.nextCurl, J.prevCurl].forEach(c => {
+        c.setAttribute('pointer-events', 'none');
+        const inner = G.el('g', {}, c);
+        while (c.firstChild !== inner) inner.appendChild(c.firstChild);
+        inner.style.transformBox = 'view-box';
+        inner.style.transformOrigin = '1398px 784px';
+        inner.style.transition = 'transform .35s cubic-bezier(.3,1.4,.5,1)';
+        c.inner = inner;
       });
       J.hotNext = G.el('path', { d: RIGHT_PAGE_D, fill: 'transparent' }, g);
       J.hotPrev = G.el('path', { d: LEFT_PAGE_D, fill: 'transparent' }, g);
       G.hotspot(J.hotNext, { cursor: 'go', click() { turn(1); } });
       G.hotspot(J.hotPrev, { cursor: 'go', click() { turn(-1); } });
-      J.hotNext.addEventListener('mouseenter', () => { if (J.spread < PAGES.length - 1) { J.nextCurl.style.transform = 'scale(1.07)'; J.nextGlow.setAttribute('opacity', 0.7); } });
-      J.hotNext.addEventListener('mouseleave', () => { J.nextCurl.style.transform = ''; J.nextGlow.setAttribute('opacity', 0.28); });
-      J.hotPrev.addEventListener('mouseenter', () => { if (J.spread > 0) { J.prevCurl.style.transform = 'scale(1.07)'; J.prevGlow.setAttribute('opacity', 0.7); } });
-      J.hotPrev.addEventListener('mouseleave', () => { J.prevCurl.style.transform = ''; J.prevGlow.setAttribute('opacity', 0.28); });
+      const lift = (c, on) => { c.inner.style.transform = on ? 'scale(1.45)' : ''; };
+      J.hotNext.addEventListener('mouseenter', () => { if (J.spread < PAGES.length - 1) lift(J.nextCurl, true); });
+      J.hotNext.addEventListener('mouseleave', () => lift(J.nextCurl, false));
+      J.hotPrev.addEventListener('mouseenter', () => { if (J.spread > 0) lift(J.prevCurl, true); });
+      J.hotPrev.addEventListener('mouseleave', () => lift(J.prevCurl, false));
       // "Page X of Y" indicator, set above the book like a running header
       J.pageInd = G.el('text', {
         x: 800, y: 58, 'text-anchor': 'middle', 'font-family': FELL, 'font-size': 19,
@@ -1114,8 +1116,6 @@
       const hasNext = J.spread < PAGES.length - 1, hasPrev = J.spread > 0;
       J.nextCurl.style.display = hasNext ? '' : 'none';
       J.prevCurl.style.display = hasPrev ? '' : 'none';
-      J.nextGlow.style.display = hasNext ? '' : 'none';
-      J.prevGlow.style.display = hasPrev ? '' : 'none';
       J.hotNext.style.cursor = hasNext ? '' : 'default';
       J.hotPrev.style.cursor = hasPrev ? '' : 'default';
       if (J.pageInd) J.pageInd.textContent = `Page ${J.spread * 2 + 1}–${J.spread * 2 + 2} of ${PAGES.length * 2}`;

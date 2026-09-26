@@ -948,8 +948,8 @@
     ['asleep, not ready to leave yet.', 0],
     ['Keep her warm. They always wake', 1],
     ['to warmth, every one of them.', 0],
-    ['When she wakes, follow her out,', 1],
-    ['she knows the way better than I did.', 0],
+    ['When she wakes, follow her out.', 1],
+    ['She knows the way better than I did.', 0],
   ];
   G.registerView('letter', {
     parent: 'box',
