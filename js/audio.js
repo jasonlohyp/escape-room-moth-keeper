@@ -851,62 +851,104 @@
    *  Music: music-box motif in D minor (major at the finale) + drone pad
    * ===================================================================================== */
   const MIN = [0, 2, 3, 5, 7, 8, 10], MAJ = [0, 2, 4, 5, 7, 9, 11];
-  // n: [scale degree (0 = D5) | null rest, beats, accidental (minor only)]
-  // ch: [beat offset, root degree, 'M' = force major triad]   (3/4 time)
+  /* THE MOTH THEME (phrase A, D minor, 3/4):
+   *   | A4  F5--   | F5 E5 F5 G5 F5 (wing-beat turn) | D5-- C#5 | C5-- Bb4 | A4--- |
+   *   a rising minor 6th, a fluttering neighbour-note turn, then a chromatic lament D-C#-C-Bb-A.
+   *   Harmony: i  bVI  i-V  III(F)  V  - the lament passes through the "wrong" C natural over F major.
+   * The other phrases develop it (sequence up a 4th, inversion as a falling 6th, Neapolitan lament,
+   * Dorian B-natural answer, turn chains); Z is the theme in MAJOR, resolving, for the finale.
+   * n: [scale degree (0 = D5) | null rest, beats, accidental (+1 minor only, -1 both modes)]
+   * ch: [beat offset, root degree, quality: 'M' major triad, 'N' Neapolitan (bII)]
+   */
   const PHR = {
-    A:  { n: [[4, 1], [7, 1], [6, 1], [5, 1.5], [4, 0.5], [3, 1], [4, 1], [2, 2], [1, 2], [null, 1]],
-          ch: [[0, 0], [3, 3], [6, 0], [9, 4, 'M']] },
-    B:  { n: [[2, 1], [4, 1], [7, 1], [9, 2], [8, 1], [7, 1], [6, 1], [4, 1], [5, 3]],
-          ch: [[0, 0], [3, 2], [6, 5], [9, 3]] },
-    A2: { n: [[4, 1], [7, 1], [6, 1], [5, 1], [4, 1], [3, 1], [2, 1], [1, 1], [0, 1], [-1, 1, 1], [0, 2], [null, 3]],
-          ch: [[0, 0], [3, 3], [6, 5], [9, 4, 'M'], [10, 0]], cad: true },
-    C:  { n: [[11, 2], [10, 1], [9, 1], [8, 1], [7, 1], [8, 2], [4, 1], [7, 3]],
-          ch: [[0, 0], [3, 5], [6, 4, 'M'], [9, 0]] },
-    D:  { n: [[0, 2], [2, 1], [1, 2], [-3, 1], [0, 3], [null, 3]],
-          ch: [[0, 0], [3, 4, 'M'], [6, 0]], cad: true },
-    E:  { n: [[7, 1.5], [6, 0.5], [5, 1], [4, 2], [null, 1], [5, 1], [4, 1], [3, 1], [2, 1], [1, 1], [4, 1], [0, 3]],
-          ch: [[0, 3], [3, 0], [6, 3], [9, 0], [10, 4, 'M'], [12, 0]], cad: true },
-    F:  { n: [[0, 1], [4, 1], [2, 1], [3, 2], [2, 1], [1, 1], [4, 1], [1, 1], [2, 3], [null, 3]],
-          ch: [[0, 0], [3, 3], [6, 4, 'M'], [9, 0], [12, 5]] },
+    A:  { n: [[-3, 1], [2, 2], [2, 0.5], [1, 0.5], [2, 0.5], [3, 0.5], [2, 1], [0, 2], [-1, 1, 1], [-1, 2], [-2, 1], [-3, 3]],
+          ch: [[0, 0], [3, 5], [6, 0], [8, 4, 'M'], [9, 2], [12, 4, 'M']] },
+    B:  { n: [[0, 1], [5, 2], [5, 0.5], [4, 0.5], [5, 0.5], [6, 0.5], [5, 1], [4, 1], [3, 1], [2, 1], [1, 2], [null, 1]],
+          ch: [[0, 3], [3, 5], [6, 0], [9, 4, 'M']] },
+    A2: { n: [[-3, 1], [2, 2], [2, 0.5], [1, 0.5], [2, 0.5], [3, 0.5], [2, 1], [0, 1], [-2, 1], [-3, 1], [1, 2], [-1, 1, 1], [0, 3]],
+          ch: [[0, 0], [3, 5], [6, 3], [9, 4, 'M'], [12, 0]], cad: true },
+    C:  { n: [[2, 2], [1, 1], [1, 2, -1], [0, 1], [-1, 3, 1], [0, 3]],
+          ch: [[0, 0], [3, 1, 'N'], [6, 4, 'M'], [9, 0]], cad: true },
+    D:  { n: [[2, 1], [-3, 2], [-2, 1], [-3, 1], [-4, 1], [-3, 2], [-5, 1], [-7, 3]],
+          ch: [[0, 0], [3, 5], [6, 0], [9, 0]], cad: true },
+    E:  { n: [[2, 0.5], [1, 0.5], [2, 0.5], [3, 0.5], [2, 1], [4, 0.5], [3, 0.5], [4, 0.5], [5, 0.5], [4, 1], [7, 2], [2, 1], [1, 2], [-1, 1, 1], [0, 3]],
+          ch: [[0, 0], [3, 2], [6, 3], [9, 4, 'M'], [12, 0]], cad: true },
+    F:  { n: [[0, 1], [2, 1], [4, 1], [5, 2, 1], [4, 1], [3, 1], [2, 1], [1, 1], [0, 3]],
+          ch: [[0, 0], [3, 3, 'M'], [6, 6], [9, 0]], cad: true },
+    Z:  { n: [[-3, 1], [2, 2], [2, 0.5], [1, 0.5], [2, 0.5], [3, 0.5], [2, 1], [4, 1.5], [3, 0.5], [1, 1], [0, 3]],
+          ch: [[0, 0], [3, 5], [6, 4], [9, 0]], cad: true, finale: true },
   };
   const PNAMES = Object.keys(PHR);
   const M = { stage: -1, timer: null, last: null, recent: [], voices: null, bass: null };
   function degMidi(d, mode, acc) {
     const sc = mode === 'major' ? MAJ : MIN, o = Math.floor(d / 7), s = ((d % 7) + 7) % 7;
-    return 74 + 12 * o + sc[s] + (mode === 'minor' && acc ? acc : 0);
+    return 74 + 12 * o + sc[s] + (acc < 0 || (acc > 0 && mode === 'minor') ? acc : 0);
   }
   // pitch classes of the triad (root, third, fifth)
   function chordPcs(r, q, mode) {
-    const m = [r, r + 2, r + 4].map(d => degMidi(d, mode));
+    let m = [r, r + 2, r + 4].map(d => degMidi(d, mode));
+    if (q === 'N') { const b = degMidi(r, mode) - 1; m = [b, b + 4, b + 7]; }
     if (q === 'M' && m[1] - m[0] === 3) m[1]++;
     return m.map(x => ((x % 12) + 12) % 12);
   }
-  // Nearest-voice voicing: 3 upper voices (D3..A#4) + bass (D2..D3); penalises parallel 5ths/8ves.
-  function voiceChord(pcs, st) {
+  // Melody note sounding at each chord onset (and the one before it), from a note list.
+  function melAt(notes, beatPos, mode, oct) {
+    let pos = 0, cur = null, prev = null;
+    for (const [d, l, acc] of notes) {
+      if (d != null) {
+        const m = degMidi(d, mode, acc) + 12 * (oct || 0);
+        if (pos === beatPos) { cur = m; break; }
+        if (pos < beatPos) prev = m;
+      }
+      if (pos > beatPos) break;
+      pos += l;
+    }
+    return { prev, cur };
+  }
+  const isPar = (a0, b0, a1, b1) => { // parallel perfect 5th/8ve between two moving parts
+    const pi = ((b0 - a0) % 12 + 12) % 12, ni = ((b1 - a1) % 12 + 12) % 12, ma = a1 - a0, mb = b1 - b0;
+    return (pi === 0 || pi === 7) && pi === ni && ma !== 0 && mb !== 0 && Math.sign(ma) === Math.sign(mb);
+  };
+  // Nearest-voice voicing: 3 upper voices (D3..A#4) + bass (D2..D3).
+  // Penalises parallel 5ths/8ves (between voices and against the melody) and pad doublings of the melody note.
+  function voiceChord(pcs, st, mel) {
     const inRange = (pc, lo, hi) => { const r = []; for (let m = lo; m <= hi; m++) if (m % 12 === pc) r.push(m); return r; };
     const prev = st.voices || [57, 62, 65], pb = st.bass == null ? 50 : st.bass;
-    const bassOpts = inRange(pcs[0], 38, 50).concat(R() < 0.25 ? inRange(pcs[1], 40, 50) : []);
-    let best = null;
-    const lists = pcs.map(pc => inRange(pc, 50, 70));
-    for (const x of lists[0]) for (const y of lists[1]) for (const z of lists[2]) {
-      const v = [x, y, z].sort((p, q) => p - q);
+    const mc = mel && mel.cur != null ? mel.cur : null, mp = mel && mel.prev != null ? mel.prev : st.mel;
+    const mpc = mc == null ? -1 : mc % 12;
+    // root position, or first inversion (cheap 25% of the time, otherwise a small cost)
+    const bassOpts = inRange(pcs[0], 38, 50).map(b => [b, 0]).concat(inRange(pcs[1], 40, 50).map(b => [b, R() < 0.25 ? 0 : 4]));
+    // pad voicings: any 3 distinct chord tones covering the chord, except the melody's pitch class (the tune supplies it)
+    const pool = []; for (let m = 50; m <= 70; m++) if (pcs.includes(m % 12)) pool.push(m);
+    const cands = [];
+    for (let i = 0; i < pool.length; i++) for (let j = i + 1; j < pool.length; j++) for (let k = j + 1; k < pool.length; k++) {
+      const v = [pool[i], pool[j], pool[k]];
       if (v[2] - v[0] > 14) continue;
-      for (const bs of bassOpts) {
-        if (v[0] - bs < 5) continue;
+      if (!pcs.every(pc => pc === mpc || v.some(x => x % 12 === pc))) continue;
+      cands.push(v);
+    }
+    let best = null;
+    for (const v of cands) {
+      for (const [bs, bc] of bassOpts) {
+        if (v[0] - bs < 3) continue;
         const all = [bs].concat(v), pall = [pb].concat(prev);
-        let cost = Math.abs(bs - pb) * 0.35;
+        let cost = Math.abs(bs - pb) * 0.35 + bc;
         for (let i = 0; i < 3; i++) cost += Math.abs(v[i] - prev[i]);
-        for (let i = 0; i < 4; i++) for (let j = i + 1; j < 4; j++) {
-          const pi = ((pall[j] - pall[i]) % 12 + 12) % 12, ni = ((all[j] - all[i]) % 12 + 12) % 12;
-          const mi = all[i] - pall[i], mj = all[j] - pall[j];
-          if ((pi === 0 || pi === 7) && pi === ni && mi !== 0 && Math.sign(mi) === Math.sign(mj)) cost += 25;
+        if (v[0] % 12 === v[2] % 12 || v[0] % 12 === v[1] % 12 || v[1] % 12 === v[2] % 12) cost += 6; // octave doublings invite parallels later
+        for (let i = 0; i < 4; i++) for (let j = i + 1; j < 4; j++) if (isPar(pall[i], pall[j], all[i], all[j])) cost += 40;
+        if (mc != null) {
+          for (const p of v) {
+            if (p % 12 === mc % 12) cost += (mc - p <= 24 ? 4 : 2); // doubling the melody's pitch class in the pad
+            if (p >= mc) cost += 12;                      // pad must stay under the tune
+          }
+          if (mp != null) for (let i = 0; i < 4; i++) if (isPar(pall[i], mp, all[i], mc)) cost += 40;
         }
         cost += R() * 1.5;
         if (!best || cost < best.cost) best = { cost, v, bs };
       }
     }
     if (!best) best = { v: prev, bs: pb };
-    st.voices = best.v; st.bass = best.bs;
+    st.voices = best.v; st.bass = best.bs; if (mc != null) st.mel = mc;
     return best;
   }
   // Rhythmic displacement: turns some even pairs into dotted pairs.
@@ -945,7 +987,7 @@
     chords.forEach((c, i) => {
       const tb = t0 + c[0] * beat, nextB = i + 1 < chords.length ? chords[i + 1][0] : Math.max(total, c[0] + 3);
       const len = (nextB - c[0]) * beat;
-      const vc = voiceChord(chordPcs(c[1], c[2], mode), st);
+      const vc = voiceChord(chordPcs(c[1], c[2], mode), st, melAt(notes, c[0], mode, oct));
       if (o.stage >= 1) {
         vc.v.forEach(m => padNote(K, dest, tb, mtof(m), len, o.stage >= 3 ? 0.032 : 0.024, o.stage >= 2, Math.min(0.9, len * 0.5), 2.4));
         padNote(K, dest, tb, mtof(vc.bs), len, 0.04, false, 0.35, 2);
@@ -956,9 +998,12 @@
     return t - t0;
   }
   function choosePhrase() {
-    if (!M.last) return pick(['A', 'D', 'F']);
-    const cand = PNAMES.filter(n => !M.recent.includes(n));
-    const w = cand.map(n => (n === 'A' || n === 'A2' ? 0.7 : 1));
+    if (!M.last) return 'A'; // the first music heard is the moth theme itself
+    const pool = M.stage >= 2 ? ['Z', 'A2', 'B', 'E', 'C'] : PNAMES.filter(n => !PHR[n].finale);
+    let cand = pool.filter(n => !M.recent.includes(n));
+    if (!cand.length) cand = pool;
+    // the theme (A) comes back often enough to be remembered, developments fill the rest
+    const w = cand.map(n => (n === 'A' || n === 'Z' ? 1.6 : n === 'A2' ? 0.8 : 1));
     let r = R() * w.reduce((a, b) => a + b, 0);
     for (let i = 0; i < cand.length; i++) { r -= w[i]; if (r <= 0) return cand[i]; }
     return cand[0];
@@ -970,7 +1015,7 @@
     }, extra || {});
     if (o.oct == null) {
       const hi = Math.max(...PHR[name].n.map(x => x[0] == null ? -99 : x[0]));
-      o.oct = M.stage < 3 && R() < 0.22 ? -1 : (hi <= 7 && R() < 0.12 ? 1 : 0);
+      o.oct = M.stage < 1 && R() < 0.22 ? -1 : (hi <= 5 && M.stage < 3 && R() < 0.12 ? 1 : 0);
     }
     if (o.oct === -1) o.vel = 1.25; else if (o.oct === 1) o.vel = 0.75;
     M.last = name;
@@ -1006,7 +1051,7 @@
       clearTimeout(M.timer);
       const t = now + 0.4;
       [50, 57, 62, 66, 69, 76].forEach(m => padNote(KM, KM.out, t, mtof(m), 7, 0.03, true, 3, 6));
-      const d = schedulePhrase('A2', t + 1.5, { stage: 3, beat: 1.15, displace: false, fragment: false, grace: false, oct: 0 });
+      const d = schedulePhrase('Z', t + 1.5, { stage: 3, beat: 1.15, displace: false, fragment: false, grace: false, oct: 0 });
       seqNext(d + 3);
     } else if (!initial && s === 2 && prev < 2) {
       clearTimeout(M.timer); seqNext(1.5);
@@ -1014,8 +1059,9 @@
   }
   function finalChord(K, dest, t) {
     [38, 45, 50, 54, 57, 64, 66, 69].forEach(m => padNote(K, dest, t, mtof(m), 5, m < 45 ? 0.06 : 0.04, true, 2.5, 9));
-    [74, 78, 81, 86, 90].forEach((m, i) => mbNote(K, dest, t + 0.4 + i * 0.32, mtof(m), 0.42 - i * 0.04, { decay: 4.5 }));
-    mbNote(K, dest, t + 2.6, mtof(98), 0.12, { decay: 5 });
+    // the moth theme's head, in major, over the final chord: A - F#... (turn) F# E F# G F# ... D
+    const q = [[69, 0.4, 0.4], [78, 1.1, 0.42], [78, 2.4, 0.3], [76, 2.62, 0.26], [78, 2.84, 0.28], [79, 3.06, 0.28], [78, 3.3, 0.34], [86, 4.6, 0.3], [81, 4.62, 0.16], [98, 6.4, 0.1]];
+    q.forEach(([m, dt, v]) => mbNote(K, dest, t + dt, mtof(m), v, { decay: 4.5 }));
     bell(K, dest, t, mtof(62), 0.08, 9);
   }
   function onFinish() {
@@ -1102,7 +1148,7 @@
         const ph = PHR[nm], st = {}, res = { chords: [], clashes: [], parallels: 0 };
         let prev = null;
         ph.ch.forEach(c => {
-          const pcs = chordPcs(c[1], c[2], mode), vc = voiceChord(pcs, st), all = [vc.bs].concat(vc.v);
+          const pcs = chordPcs(c[1], c[2], mode), vc = voiceChord(pcs, st, melAt(ph.n, c[0], mode, 0)), all = [vc.bs].concat(vc.v);
           res.chords.push(all.join('/'));
           if (prev) for (let i = 0; i < 4; i++) for (let j = i + 1; j < 4; j++) {
             const pi = ((prev[j] - prev[i]) % 12 + 12) % 12, ni = ((all[j] - all[i]) % 12 + 12) % 12, mi = all[i] - prev[i], mj = all[j] - prev[j];

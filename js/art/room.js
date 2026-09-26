@@ -310,7 +310,7 @@
   function papers(x, y, w, h, rot, body) {
     return `<g transform="translate(${x},${y}) rotate(${rot})">
       <rect x="${-w / 2 + 5}" y="${-h / 2 + 8}" width="${w}" height="${h}" fill="#000" opacity="0.3"/>
-      <rect x="${-w / 2}" y="${-h / 2}" width="${w}" height="${h}" fill="#dccfae" stroke="#8a7a5a" stroke-width="0.8"/>
+      <rect x="${-w / 2}" y="${-h / 2}" width="${w}" height="${h}" fill="#cdbf9d" stroke="#8a7a5a" stroke-width="0.8"/>
       <rect x="${-w / 2}" y="${-h / 2}" width="${w}" height="${h}" fill="url(#gPaperAge)"/>
       ${body}
       ${pin(0, -h / 2 + 8)}</g>`;
@@ -528,11 +528,20 @@
     s += '</g>';
     // pinned sketches
     s += papers(300, 196, 110, 138, -4, `
-      <g transform="translate(0,-8) scale(1.9)" fill="none" stroke="#3a2a1c" stroke-width="0.7" stroke-linecap="round">
+      <g class="sk-moth"><g transform="translate(0,-8) scale(1.9)" fill="none" stroke="#3a2a1c" stroke-width="0.7" stroke-linecap="round">
         <path d="M0,-2 C-6,-14 -20,-18 -24,-8 C-25,-1 -15,3 0,2 M0,-2 C6,-14 20,-18 24,-8 C25,-1 15,3 0,2 M0,1 C-6,4 -16,8 -14,16 C-11,20 -4,13 0,4 M0,1 C6,4 16,8 14,16 C11,20 4,13 0,4"/>
         <path d="M0,-6 L0,10 M-1,-6 C-4,-12 -6,-14 -9,-15 M1,-6 C4,-12 6,-14 9,-15"/>
         <circle cx="-14" cy="-7" r="3"/><circle cx="14" cy="-7" r="3"/><circle cx="-8" cy="11" r="2"/><circle cx="8" cy="11" r="2"/>
         <path d="M-20,-8 l3,2 M-18,-11 l3,2 M20,-8 l-3,2 M18,-11 l-3,2" opacity="0.7"/>
+      </g></g>
+      <g class="sk-gone" style="display:none">
+        <g transform="translate(0,-8) scale(1.9)" fill="none" stroke="#6a5a44" stroke-width="0.5" opacity="0.28" stroke-dasharray="1.2 1.6">
+          <path d="M0,-2 C-6,-14 -20,-18 -24,-8 C-25,-1 -15,3 0,2 M0,-2 C6,-14 20,-18 24,-8 C25,-1 15,3 0,2 M0,1 C-6,4 -16,8 -14,16 C-11,20 -4,13 0,4 M0,1 C6,4 16,8 14,16 C11,20 4,13 0,4"/>
+        </g>
+        <path d="M-3,-14 C-1,-8 2,-4 1,6" stroke="#8a7a5a" stroke-width="0.6" fill="none" opacity="0.5"/>
+        <line x1="0" y1="-12" x2="1.5" y2="4" stroke="#6e6a64" stroke-width="0.9"/>
+        <circle cx="0" cy="-12" r="1.8" fill="#1c140f"/><circle cx="-0.5" cy="-12.5" r="0.5" fill="#fff" opacity="0.7"/>
+        <ellipse cx="3" cy="-4" rx="3" ry="6" fill="#5a4a30" opacity="0.08"/>
       </g>
       <path d="M-38,48 q10,-4 20,0 t22,0 M-38,56 q14,-3 30,0" stroke="#3a2a1c" stroke-width="1" fill="none" opacity="0.7"/>`);
     s += papers(176, 200, 92, 112, 5, `
@@ -954,10 +963,13 @@
              ${rad('lg2_s', 900, 580, 420, [[0, '#ffcf7a', 0.35], [1, '#ffcf7a', 0]], 'gradientTransform="translate(900 580) scale(1 0.2) translate(-900 -580)"')}`,
       glowShapes: `<rect x="620" y="110" width="560" height="560" fill="url(#lg_s)"/><rect x="480" y="500" width="840" height="160" fill="url(#lg2_s)"/>`,
       // the moonbeam itself is drawn by window.js; here only a faint cool ambient from the right
+      coldExtra: `<rect x="60" y="100" width="440" height="420" fill="url(#lcx_s)" style="mix-blend-mode:multiply"/>`,
       lampMask: 'lampMask_s',
-      lampDefs: `<mask id="lampMask_s" maskUnits="userSpaceOnUse" x="0" y="0" width="1600" height="900"><rect width="1600" height="900" fill="url(#lampMaskG_s)"/></mask>
+      lampDefs: `${rad('lcx_s', 280, 300, 230, [[0, '#76828f'], [0.6, '#a4b0bb'], [1, '#fff']], 'gradientTransform="translate(280 300) scale(1 0.95) translate(-280 -300)"')}<mask id="lampMask_s" maskUnits="userSpaceOnUse" x="0" y="0" width="1600" height="900"><rect width="1600" height="900" fill="url(#lampMaskG_s)"/></mask>
         ${rad('lampMaskG_s', 900, 465, 170, [[0.35, '#2a2a2a'], [1, '#fff']], 'gradientTransform="translate(900 465) scale(0.62 1) translate(-900 -465)"')}`,
-      moon: rad('lm2_s', 1700, 250, 900, [[0, '#8fb3d9', 0.16], [1, '#8fb3d9', 0]]),
+      moonMask: 'projMask_s',
+      moon: `<mask id="projMask_s" maskUnits="userSpaceOnUse" x="0" y="0" width="1600" height="900"><rect width="1600" height="900" fill="url(#projMaskG_s)"/></mask>
+        ${rad('projMaskG_s', 800, 225, 470, [[0.8, '#000'], [1, '#fff']], 'gradientTransform="translate(800 225) scale(1 0.34) translate(-800 -225)"')}` + rad('lm2_s', 1700, 250, 900, [[0, '#8fb3d9', 0.16], [1, '#8fb3d9', 0]]),
       moonShapes: `<rect width="1600" height="900" fill="url(#lm2_s)"/>`,
       motesW: [31, 30, [620, 180, 560, 440], 'gMoteW'],
       motesC: [32, 18, [980, 200, 520, 380], 'gMoteC'],
@@ -982,29 +994,27 @@
     },
     east: {
       cold: rad('lc_e', 720, 330, 1300, [[0, '#b3c7d4'], [0.35, '#8aa1b2'], [1, '#43566a']]),
-      warm: rad('lw_e', 1800, 560, 1700, [[0, '#f8ddb4'], [0.3, '#d2b090'], [0.65, '#8a8288'], [1, '#4d5566']]),
-      soft: rad('ls_e', 1750, 560, 1000, [[0, '#ffa040', 0.9], [0.5, '#ff9a40', 0.35], [1, '#ff9a40', 0]]),
-      glow: rad('lg_e', 1750, 560, 600, [[0, '#ffcf7a', 0.3], [1, '#ffcf7a', 0]]),
+      warm: rad('lw_e', 1850, 600, 1750, [[0, '#e8cca8'], [0.25, '#c8aa8e'], [0.6, '#8a8288'], [1, '#4d5566']]),
+      soft: rad('ls_e', 1850, 600, 950, [[0, '#ff9a40', 0.65], [0.4, '#ff9a40', 0.3], [1, '#ff9a40', 0]]),
+      glow: rad('lg_e', 1800, 600, 540, [[0, '#ffcf7a', 0.18], [1, '#ffcf7a', 0]]),
       glowShapes: `<rect x="1150" y="0" width="450" height="900" fill="url(#lg_e)"/>`,
       // the round window's light falls across this wall & the cabinet
-      moonBase: rad('lp_e', 1300, 380, 190, [[0, '#cfe3ff', 0.22], [0.72, '#a8c6ea', 0.16], [1, '#8fb3d9', 0]], 'gradientTransform="translate(1300 380) rotate(-8) scale(0.86 1) translate(-1300 -380)"'),
-      moonBaseShapes: `<rect x="1080" y="160" width="440" height="440" fill="url(#lp_e)"/>
-             <g opacity="0.6">${wheel(1300, 380, 1.62, 1.88, -8, 4)}</g>
-             <clipPath id="lpc_e"><ellipse cx="1300" cy="380" rx="164" ry="190" transform="rotate(-8 1300 380)"/></clipPath>
-             <g clip-path="url(#lpc_e)">${rainStreaks(23, 1130, 170, 340, 420, 22, 0.45, 30)}${drips(24, 1150, 200, 300, 5)}</g>`,
-      moon: `${rad('lm2_e', 800, 900, 1200, [[0, '#8fb3d9', 0.14], [1, '#8fb3d9', 0]])}${rad('lm3_e', 1300, 380, 330, [[0, '#cfe3ff', 0.14], [1, '#cfe3ff', 0]])}`,
+      moonBase: rad('lp_e', 1200, 330, 180, [[0, '#cfe3ff', 0.22], [0.72, '#a8c6ea', 0.16], [1, '#8fb3d9', 0]], 'gradientTransform="translate(1200 330) rotate(-8) scale(0.84 1) translate(-1200 -330)"'),
+      moonBaseShapes: `<rect x="1000" y="130" width="400" height="400" fill="url(#lp_e)"/>
+             <clipPath id="lpc_e"><ellipse cx="1200" cy="330" rx="140" ry="165" transform="rotate(-8 1200 330)"/></clipPath>
+             <g clip-path="url(#lpc_e)">${rainStreaks(23, 1070, 160, 260, 360, 18, 0.35, 30)}${drips(24, 1090, 190, 220, 4)}</g>`,
+      moon: `${rad('lm2_e', 800, 900, 1200, [[0, '#8fb3d9', 0.14], [1, '#8fb3d9', 0]])}${rad('lm3_e', 1200, 330, 300, [[0, '#cfe3ff', 0.14], [1, '#cfe3ff', 0]])}`,
       moonShapes: `<rect width="1600" height="900" fill="url(#lm2_e)"/><rect width="1600" height="900" fill="url(#lm3_e)"/>
-             <rect x="1080" y="160" width="440" height="440" fill="url(#lp_e)"/>
-             <g clip-path="url(#lpc_e)">${rainStreaks(26, 1130, 170, 340, 420, 22, 0.4, 40)}</g>`,
+             <rect x="1000" y="130" width="400" height="400" fill="url(#lp_e)"/>`,
       motesW: [35, 14, [1150, 250, 400, 450], 'gMoteW'],
-      motesC: [36, 24, [1120, 180, 340, 420], 'gMoteC'],
+      motesC: [36, 22, [1070, 170, 260, 330], 'gMoteC'],
     },
     west: {
       mask: 'winMask_w',
       cold: WIN_MASK + rad('lc_w', 800, 360, 1000, [[0.2, '#e6eef4'], [0.3, '#bccbd6'], [0.55, '#8499aa'], [1, '#43566a']]),
-      warm: rad('lw_w', -200, 560, 1700, [[0, '#f8ddb4'], [0.3, '#d2b090'], [0.6, '#a0a2aa'], [1, '#56607a']]),
-      soft: rad('ls_w', -150, 560, 1000, [[0, '#ffa040', 0.9], [0.5, '#ff9a40', 0.35], [1, '#ff9a40', 0]]),
-      glow: rad('lg_w', -150, 560, 600, [[0, '#ffcf7a', 0.3], [1, '#ffcf7a', 0]]),
+      warm: rad('lw_w', -250, 600, 1750, [[0, '#dcc0a0'], [0.25, '#bfa48c'], [0.55, '#98989e'], [1, '#56607a']]),
+      soft: rad('ls_w', -250, 600, 900, [[0, '#ff9a40', 0.55], [0.4, '#ff9a40', 0.25], [1, '#ff9a40', 0]]),
+      glow: rad('lg_w', -200, 600, 520, [[0, '#ffcf7a', 0.14], [1, '#ffcf7a', 0]]),
       glowShapes: `<rect x="0" y="0" width="450" height="900" fill="url(#lg_w)"/>`,
       moonBase: rad('lp_w', 800, 360, 480, [[0.45, '#8fb3d9', 0.16], [1, '#8fb3d9', 0]]),
       moonBaseShapes: `<rect width="1600" height="900" fill="url(#lp_w)"/>`,
@@ -1026,12 +1036,12 @@
     const m = c.mask ? ` mask="url(#${c.mask})"` : '';
     const lm = c.lampMask ? ` mask="url(#${c.lampMask})"` : m;
     return `<defs>${c.lampDefs || ''}${c.cold}${c.warm}${c.soft}${c.glow}${c.moonBase || ''}${c.moon}</defs>
-      <g class="rl-cold rl-fade" style="mix-blend-mode:multiply"><rect width="1600" height="900" fill="url(#lc_${id})"${m}/></g>
+      <g class="rl-cold rl-fade" style="mix-blend-mode:multiply"><rect width="1600" height="900" fill="url(#lc_${id})"${m}/>${c.coldExtra || ''}</g>
       <g class="rl-warm rl-fade" style="mix-blend-mode:multiply;opacity:0"><rect width="1600" height="900" fill="url(#lw_${id})"${m}/></g>
       <g class="rl-soft rl-fade" style="mix-blend-mode:soft-light;opacity:0"><g${lm}><rect width="1600" height="900" fill="url(#ls_${id})"/></g></g>
       <g class="rl-glow rl-fade" style="mix-blend-mode:screen;opacity:0"><g class="${c.noFlick ? '' : 'rl-flick2'}"${lm}>${c.glowShapes}</g></g>
       ${c.moonBaseShapes ? `<g class="rl-moonbase rl-fade" style="mix-blend-mode:screen"><g${m}>${c.moonBaseShapes}</g></g>` : ''}
-      <g class="rl-moon rl-fade" style="mix-blend-mode:screen;opacity:0"><g${m}>${c.moonShapes}</g></g>
+      <g class="rl-moon rl-fade" style="mix-blend-mode:screen;opacity:0"><g${c.moonMask ? ` mask="url(#${c.moonMask})"` : m}>${c.moonShapes}</g></g>
       <g class="rl-motesC rl-fade" style="opacity:0.5">${motes(c.motesC[0], c.motesC[1], c.motesC[2], c.motesC[3])}</g>
       <g class="rl-motesW rl-fade" style="opacity:0">${motes(c.motesW[0], c.motesW[1], c.motesW[2], c.motesW[3], 1.2)}</g>`;
   }
@@ -1066,10 +1076,22 @@
     setOp(q('rl-soft'), lit ? 1 : 0, anim);
     setOp(q('rl-glow'), lit ? 1 : 0, anim);
     setOp(q('rl-moon'), open ? 1 : 0, anim);
-    setOp(q('rl-moonbase'), open ? 0 : (lit ? 0.6 : 1), anim);
+    setOp(q('rl-moonbase'), lit && !open ? 0.85 : 1, anim);
     setOp(q('rl-motesW'), lit ? 1 : 0, anim);
     setOp(q('rl-motesC'), open ? 1 : (lit ? 0.3 : 0.55), anim);
     st.top.querySelectorAll('.rl-flick,.rl-flick2').forEach(e => e.classList.toggle('on', lit));
+  }
+
+  // second-look detail: after the lamp is lit, the moth drawn on Edith's pinned sketch is gone the next
+  // time you face south — only its faint impression and an empty specimen pin remain.
+  let sketchGone = false;
+  function updateSketch(leaving) {
+    if (!sketchGone && G.get('lampLit') && (leaving || G.view() !== 'south' || document.body.dataset.ready !== '1')) sketchGone = true;
+    const b = state.south && state.south.base;
+    if (!b) return;
+    const m = b.querySelector('.sk-moth'), g = b.querySelector('.sk-gone');
+    if (m) m.style.display = sketchGone ? 'none' : '';
+    if (g) g.style.display = sketchGone ? '' : 'none';
   }
 
   // portrait: her eyes follow the cursor with a slow, lagging catch-up, and she very rarely blinks
@@ -1133,7 +1155,7 @@
         G.svg(lightingMarkup(w), g);
         applyLight(w);
       },
-      update() { applyLight(w); },
+      update() { applyLight(w); if (w === 'south') updateSketch(false); },
       enter() {
         const st = state[w];
         [st.base, st.top].forEach(e => e && e.classList.remove('rl-paused'));
@@ -1142,7 +1164,7 @@
       exit() {
         const st = state[w];
         [st.base, st.top].forEach(e => e && e.classList.add('rl-paused'));
-        if (w === 'south') eyesOff();
+        if (w === 'south') { eyesOff(); updateSketch(true); }
       },
     });
   });

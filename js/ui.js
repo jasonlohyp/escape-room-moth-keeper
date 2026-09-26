@@ -336,14 +336,29 @@
     E.label.querySelector('.n').textContent = it.name || id;
     E.label.querySelector('.d').textContent = it.desc || '';
     E.label.classList.add('show');
-    if (autohide) S.labelTimer = setTimeout(() => E.label.classList.remove('show'), autohide);
+    fitCaption();
+    if (autohide) S.labelTimer = setTimeout(() => { E.label.classList.remove('show'); fitCaptionLater(); }, autohide);
   }
+  // the item plate must never cover caption text: while it shows, the caption ends before the plate
+  function fitCaption() {
+    const on = E.label.classList.contains('show');
+    E.caption.style.width = '';
+    if (!on) return;
+    const lr = E.label.getBoundingClientRect(), cr = E.caption.getBoundingClientRect();
+    const u = unit();
+    const plateLeft = lr.left - 10 * u; // plate slides in from +10u
+    const vOverlap = lr.top < cr.bottom && lr.bottom > cr.top;
+    if (!vOverlap || plateLeft >= cr.right) return;
+    E.caption.style.width = Math.max(120, plateLeft - cr.left - 24 * u) + 'px';
+  }
+  function fitCaptionLater() { setTimeout(() => { if (!E.label.classList.contains('show')) E.caption.style.width = ''; }, 450); }
   function hideLabel(delay) {
     clearTimeout(S.labelTimer);
     S.labelTimer = setTimeout(() => {
       const sel = G.selected(), hov = E.slots.find(s => s.matches(':hover') && s.dataset.item);
       if (hov) return;
       E.label.classList.remove('show');
+      fitCaptionLater();
       void sel;
     }, delay || 0);
   }
