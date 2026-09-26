@@ -127,7 +127,7 @@
   DESK.lampUseHandlers = DESK.lampUseHandlers || [];
   DESK.onLampUse = fn => DESK.lampUseHandlers.push(fn);
 
-  const HAND = `'Homemade Apple', 'IM Fell English', cursive`;
+  const HAND = `'Patrick Hand', 'IM Fell English', cursive`;
   const FELL = `'IM Fell English', 'Cormorant Garamond', Georgia, serif`;
   const INK = '#1c140f';
 
@@ -238,7 +238,7 @@
       R.projHot = G.el('path', { d: 'M440 110 H1160 V330 H440 Z', fill: 'transparent', 'pointer-events': 'none' }, g);
       G.hotspot(R.projHot, {
         cursor: 'look',
-        click() { G.say("Four moths, cast by the lampshade. Edith's four dearest."); },
+        click() { G.say("Four moths, cast by the lampshade. Edith’s four dearest."); },
       });
     },
     update() {
@@ -1064,20 +1064,41 @@
       J.inkLayer = G.el('g', { style: 'display:none', 'pointer-events': 'none' }, g);
       J.inkRefs = buildInk(J.inkLayer);
       G.el('rect', { width: 1600, height: 900, fill: 'url(#dkVig)', 'pointer-events': 'none' }, g);
-      // page-turn controls: page curls in the corners
+      // page-turn controls: dog-ear curls in the corners, each with a soft glow pill
+      // (always faintly visible so the affordance reads at rest, brightening on hover) and a bold chevron.
+      G.svg(`
+        <radialGradient id="dkTurnGlow" cx="50%" cy="50%" r="50%">
+          <stop offset="0" stop-color="#ffcf7a" stop-opacity="0.55"/><stop offset="0.6" stop-color="#c99a45" stop-opacity="0.18"/><stop offset="1" stop-color="#c99a45" stop-opacity="0"/>
+        </radialGradient>`, g);
+      J.nextGlow = G.el('circle', { cx: 1368, cy: 755, r: 56, fill: 'url(#dkTurnGlow)', opacity: 0.28, 'pointer-events': 'none', style: 'transition: opacity .25s ease' }, g);
+      J.prevGlow = G.el('circle', { cx: 232, cy: 755, r: 56, fill: 'url(#dkTurnGlow)', opacity: 0.28, 'pointer-events': 'none', style: 'transition: opacity .25s ease' }, g);
       J.nextCurl = G.svg(`
         <path d="M1398 784 L1398 724 C1376 740 1352 764 1338 786 Z" fill="#d8c8a4" stroke="${INK}" stroke-width="1.4"/>
         <path d="M1398 724 C1380 748 1362 770 1338 786 L1398 784 Z" fill="#000" opacity="0.1"/>
-        <path d="M1356 752 l18 -4 l-10 16" fill="none" stroke="#5a4430" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.7"/>`, g);
+        <path d="M1352 754 l22 -5 l-12 20" fill="none" stroke="#5a4430" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.92"/>`, g);
       J.prevCurl = G.svg(`
         <path d="M202 784 L202 724 C224 740 248 764 262 786 Z" fill="#d8c8a4" stroke="${INK}" stroke-width="1.4"/>
         <path d="M202 724 C220 748 238 770 262 786 L202 784 Z" fill="#000" opacity="0.1"/>
-        <path d="M244 752 l-18 -4 l10 16" fill="none" stroke="#5a4430" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.7"/>`, g);
+        <path d="M248 754 l-22 -5 l12 20" fill="none" stroke="#5a4430" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.92"/>`, g);
       J.nextCurl.setAttribute('pointer-events', 'none'); J.prevCurl.setAttribute('pointer-events', 'none');
+      [J.nextCurl, J.prevCurl].forEach((c, i) => {
+        c.style.transition = 'transform .25s ease-out';
+        c.style.transformOrigin = i === 0 ? '1398px 784px' : '202px 784px';
+        c.style.transformBox = 'fill-box';
+      });
       J.hotNext = G.el('path', { d: RIGHT_PAGE_D, fill: 'transparent' }, g);
       J.hotPrev = G.el('path', { d: LEFT_PAGE_D, fill: 'transparent' }, g);
       G.hotspot(J.hotNext, { cursor: 'go', click() { turn(1); } });
       G.hotspot(J.hotPrev, { cursor: 'go', click() { turn(-1); } });
+      J.hotNext.addEventListener('mouseenter', () => { if (J.spread < PAGES.length - 1) { J.nextCurl.style.transform = 'scale(1.07)'; J.nextGlow.setAttribute('opacity', 0.7); } });
+      J.hotNext.addEventListener('mouseleave', () => { J.nextCurl.style.transform = ''; J.nextGlow.setAttribute('opacity', 0.28); });
+      J.hotPrev.addEventListener('mouseenter', () => { if (J.spread > 0) { J.prevCurl.style.transform = 'scale(1.07)'; J.prevGlow.setAttribute('opacity', 0.7); } });
+      J.hotPrev.addEventListener('mouseleave', () => { J.prevCurl.style.transform = ''; J.prevGlow.setAttribute('opacity', 0.28); });
+      // "Page X of Y" indicator, set above the book like a running header
+      J.pageInd = G.el('text', {
+        x: 800, y: 58, 'text-anchor': 'middle', 'font-family': FELL, 'font-size': 19,
+        fill: '#e9dcb8', opacity: 0.68, 'letter-spacing': '.06em', 'pointer-events': 'none',
+      }, g);
       showSpread(0);
     },
     update() {
@@ -1088,10 +1109,14 @@
       J.moon.setAttribute('opacity', moonlit ? 1 : 0);
       applyMoon(J.static[2].rr, moonlit);
       syncInk();
-      J.nextCurl.style.display = J.spread < PAGES.length - 1 ? '' : 'none';
-      J.prevCurl.style.display = J.spread > 0 ? '' : 'none';
-      J.hotNext.style.cursor = J.spread < PAGES.length - 1 ? '' : 'default';
-      J.hotPrev.style.cursor = J.spread > 0 ? '' : 'default';
+      const hasNext = J.spread < PAGES.length - 1, hasPrev = J.spread > 0;
+      J.nextCurl.style.display = hasNext ? '' : 'none';
+      J.prevCurl.style.display = hasPrev ? '' : 'none';
+      J.nextGlow.style.display = hasNext ? '' : 'none';
+      J.prevGlow.style.display = hasPrev ? '' : 'none';
+      J.hotNext.style.cursor = hasNext ? '' : 'default';
+      J.hotPrev.style.cursor = hasPrev ? '' : 'default';
+      if (J.pageInd) J.pageInd.textContent = `Page ${J.spread * 2 + 1}–${J.spread * 2 + 2} of ${PAGES.length * 2}`;
     },
     enter() {
       if (!G.get('journalRead')) G.set('journalRead');
@@ -1252,9 +1277,9 @@
   }
 
   // ================================================================== hints & debug steps
-  G.registerHint({ id: 'journal', order: 5, when: () => !G.get('journalRead'), lines: ['There is a journal lying on the desk.', 'Edith\'s journal is on the desk, by the lamp. Read it.', 'Edith’s journal lies on the writing desk. Open it and read.'] });
+  G.registerHint({ id: 'journal', order: 5, when: () => !G.get('journalRead'), lines: ['There is a journal lying on the desk.', 'Edith’s journal is on the desk, by the lamp. Read it.', 'Edith’s journal lies on the writing desk. Open it and read.'] });
   G.registerHint({ id: 'lamp', order: 20, when: () => G.get('gotMatches') && !G.get('lampLit'), lines: ['It is so dark in here. Something on the desk could give light.', 'The oil lamp on the desk has a dry wick — and you have matches.', 'Take up the matches and bring a flame to the lamp’s wick.'] });
-  G.registerHint({ id: 'ink', order: 50, when: () => G.get('windowOpen') && !G.get('inkSeen'), lines: ['The moonlight is falling across the desk now.', 'One of the journal\'s pages was blank. "Some words I write only for the moon."', 'Open the journal to its third spread. In the moonlight, four moons appear.'] });
+  G.registerHint({ id: 'ink', order: 50, when: () => G.get('windowOpen') && !G.get('inkSeen'), lines: ['The moonlight is falling across the desk now.', 'One of the journal’s pages was blank. “Some words I write only for the moon.”', 'Open the journal to its third spread. In the moonlight, four moons appear.'] });
   G.registerStep(5, 'journal', () => G.set('journalRead'));
   G.registerStep(20, 'lamp', () => { G.take('matches'); G.set('lampLit'); });
   G.registerStep(50, 'ink', () => { G.set('journalRead'); G.set('inkSeen'); });

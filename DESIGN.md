@@ -66,7 +66,7 @@ Each press escalates: nudge → stronger nudge → explicit answer (the answer o
 - **Lighting states** (flags): before `lampLit` the room is moonlit-cold (blue-teal, low contrast, deep shadows).
   After `lampLit`, warm amber pool around the desk (south) with bleed into other walls. After `windowOpen`,
   a cold moonbeam from the west window.
-- Fonts: `"IM Fell English", "Cormorant Garamond", Georgia, serif` (loaded from Google Fonts, graceful fallback). Handwriting: `"Homemade Apple", "IM Fell English", cursive` for Edith's journal.
+- Fonts: `"IM Fell English", "Cormorant Garamond", Georgia, serif` (loaded from Google Fonts, graceful fallback). Handwriting: `"Patrick Hand", "IM Fell English", cursive` for Edith's journal.
 - Motion: slow, weighted, eased (no bouncy UI). Dust motes, flame flicker, rain streaks, candle-glow breathing.
 
 ## Stage & layout contract (SVG viewBox `0 0 1600 900`)

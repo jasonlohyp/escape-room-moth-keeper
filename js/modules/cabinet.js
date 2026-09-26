@@ -755,7 +755,7 @@
             <rect x="-104" y="-18" width="208" height="46" fill="#efe5cc"/><rect x="-104" y="-18" width="208" height="46" fill="url(#cabPPaper)"/>
             <rect x="-100" y="-14" width="200" height="38" fill="none" stroke="#6a5a40" stroke-width="0.8" opacity="0.6"/>
             <text x="0" y="3" text-anchor="middle" font-family="'IM Fell English', Georgia, serif" font-style="italic" font-size="${M.label.length > 20 ? 17 : 20}" fill="#2a1c10">${M.label}</text>
-            <text x="0" y="20" text-anchor="middle" font-family="'Homemade Apple', 'IM Fell English', cursive" font-size="9.5" fill="#4a3624" opacity="0.9">${M.loc}</text>
+            <text x="0" y="20" text-anchor="middle" font-family="'Patrick Hand', 'IM Fell English', cursive" font-size="9.5" fill="#4a3624" opacity="0.9">${M.loc}</text>
             <text x="-94" y="-4" font-family="'IM Fell English', Georgia, serif" font-size="9" fill="#6a5a40">${M.no}</text>
             <path d="M92,-12 L96,-4" stroke="#5a5650" stroke-width="1" opacity="0.8"/><circle cx="92" cy="-12" r="2.6" fill="#8a8680" stroke="${INK}" stroke-width="0.8"/>
           </g>`, host);

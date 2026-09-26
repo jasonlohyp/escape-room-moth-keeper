@@ -9,7 +9,7 @@
   'use strict';
 
   const INK = '#1c140f';
-  const HAND = `'Homemade Apple', 'IM Fell English', cursive`;
+  const HAND = `'Patrick Hand', 'IM Fell English', cursive`;
   const FELL = `'IM Fell English', 'Cormorant Garamond', Georgia, serif`;
   const SOLUTION = [0, 2, 4, 6];             // new, first quarter, full, last quarter
   const PHASE_NAMES = ['new moon', 'waxing crescent', 'first quarter', 'waxing gibbous', 'full moon', 'waning gibbous', 'last quarter', 'waning crescent'];
