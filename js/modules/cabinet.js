@@ -119,8 +119,17 @@
     <linearGradient id="cabColdDim" x1="1" y1="0.1" x2="0" y2="0.9">
       <stop offset="0" stop-color="#a8bed4"/><stop offset="0.5" stop-color="#7890a8"/><stop offset="1" stop-color="#4a5e72"/>
     </linearGradient>
-    <linearGradient id="cabWarmGlass" x1="1" y1="1" x2="0" y2="0">
-      <stop offset="0" stop-color="#ffc070" stop-opacity="0.28"/><stop offset="0.5" stop-color="#ffb060" stop-opacity="0.08"/><stop offset="1" stop-color="#ffb060" stop-opacity="0"/>
+    <linearGradient id="cabLitBack" x1="0" y1="0" x2="1" y2="0.8">
+      <stop offset="0" stop-color="#9a7858"/><stop offset="0.4" stop-color="#6a5440"/><stop offset="1" stop-color="#3a2e24"/>
+    </linearGradient>
+    <linearGradient id="cabLitDim" x1="0" y1="0" x2="1" y2="0.8">
+      <stop offset="0" stop-color="#fff0d8"/><stop offset="0.45" stop-color="#c8b49a"/><stop offset="1" stop-color="#7a6a58"/>
+    </linearGradient>
+    <linearGradient id="cabLitTint" x1="0" y1="0" x2="1" y2="0.8">
+      <stop offset="0" stop-color="#fff2dc"/><stop offset="0.5" stop-color="#e8d4b8"/><stop offset="1" stop-color="#a8927a"/>
+    </linearGradient>
+    <linearGradient id="cabWarmGlass" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffc070" stop-opacity="0.16"/><stop offset="0.4" stop-color="#ffb060" stop-opacity="0.04"/><stop offset="1" stop-color="#ffb060" stop-opacity="0"/>
     </linearGradient>
     <linearGradient id="cabVelvetG" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" stop-color="#1e0a0b"/><stop offset="0.45" stop-color="#4a1618"/><stop offset="1" stop-color="#6e2224"/>
@@ -552,6 +561,7 @@
       // backing + moths
       m += `<rect x="538" y="222" width="524" height="284" fill="url(#cabBacking)"/>
             <rect x="538" y="222" width="524" height="284" fill="url(#cabPPaper)"/><rect x="538" y="222" width="524" height="284" fill="url(#cabPStain)" opacity="0.5"/>`;
+      m += `<rect id="cab-wall-bdark" x="538" y="222" width="524" height="284" fill="#6c7884" style="mix-blend-mode:multiply"/>`;
       m += `<g id="cab-wall-moths"></g>`;
       m += `<rect id="cab-wall-dim" x="538" y="222" width="524" height="284" fill="#12222e" opacity="0.3" style="mix-blend-mode:multiply"/>
             <rect x="538" y="222" width="524" height="284" fill="url(#cabBackVig)"/>
@@ -563,7 +573,7 @@
               <path d="M684,222 L700,222 L598,506 L582,506 Z" fill="#dfeaff" opacity="0.12"/>
               <path d="M540,224 L760,224 L540,420 Z" fill="#9fc0e0" opacity="0.06"/></g>
             <g id="cab-wall-warm"><rect x="538" y="222" width="524" height="284" fill="url(#cabWarmGlass)"/>
-              <path d="M1020,222 L1062,222 L1062,300 L990,506 L948,506 Z" fill="#ffd48a" opacity="0.1"/></g>
+              <path d="M560,222 L600,222 L538,330 L538,280 Z" fill="#ffd48a" opacity="0.08"/></g>
             <path d="M600,222 L680,222 L560,506 L538,506 L538,370 Z" fill="#fff" opacity="0.06"/>
             <path d="M700,222 L722,222 L602,506 L580,506 Z" fill="#fff" opacity="0.07"/>
             <path d="M960,222 L1010,222 L900,506 L850,506 Z" fill="#cfe3ff" opacity="0.045"/></g>`;
@@ -629,6 +639,7 @@
       wall.els.glint = g.querySelector('#cab-wall-keyglint');
       wall.els.digits = [0, 1, 2, 3].map(i => g.querySelector('#cab-wall-d' + i));
       wall.els.dim = g.querySelector('#cab-wall-dim');
+      wall.els.bdark = g.querySelector('#cab-wall-bdark');
       wall.els.warm = g.querySelector('#cab-wall-warm');
       wall.els.cold = g.querySelector('#cab-wall-cold');
     },
@@ -636,10 +647,11 @@
       if (!wall.g) return;
       const open = !!G.get('drawerOpen');
       const lit = !!G.get('lampLit');
-      wall.els.dim.setAttribute('fill', lit ? '#ffb45a' : 'url(#cabColdDim)');
-      wall.els.dim.setAttribute('opacity', lit ? '0.22' : '1');
+      wall.els.dim.setAttribute('fill', lit ? 'url(#cabLitDim)' : 'url(#cabColdDim)');
+      wall.els.dim.setAttribute('opacity', '1');
+      wall.els.bdark.setAttribute('fill', lit ? 'url(#cabLitBack)' : '#727e8a');
       wall.els.cold.style.display = lit ? 'none' : '';
-      wall.els.dim.style.mixBlendMode = lit ? 'soft-light' : 'multiply';
+      wall.els.dim.style.mixBlendMode = 'multiply';
       wall.els.warm.style.display = lit ? '' : 'none';
       wall.els.cavity.style.display = open ? '' : 'none';
       wall.els.glint.style.display = open && !G.get('gotKey') ? '' : 'none';
@@ -763,9 +775,9 @@
   });
   function setTint(el) {
     const lit = !!G.get('lampLit');
-    el.setAttribute('fill', lit ? '#ffb85a' : '#12222e');
-    el.setAttribute('opacity', lit ? '0.14' : '0.22');
-    el.style.mixBlendMode = lit ? 'soft-light' : 'multiply';
+    el.setAttribute('fill', lit ? 'url(#cabLitTint)' : '#12222e');
+    el.setAttribute('opacity', lit ? '1' : '0.22');
+    el.style.mixBlendMode = 'multiply';
   }
 
   function loosePins() {

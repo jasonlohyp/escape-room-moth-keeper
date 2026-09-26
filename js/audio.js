@@ -144,8 +144,18 @@
     let node = g;
     if (c.createStereoPanner) { const p = c.createStereoPanner(); p.pan.value = clamp(o.pan == null ? rr(-0.12, 0.12) : o.pan, -1, 1); g.connect(p); node = p; }
     node.connect(K.out);
-    if (K.wet && rev > 0) { const s = c.createGain(); s.gain.value = rev; node.connect(s); s.connect(K.wet); }
+    const nodes = [g];
+    if (node !== g) nodes.push(node);
+    if (K.wet && rev > 0) { const s = c.createGain(); s.gain.value = rev; node.connect(s); s.connect(K.wet); nodes.push(s); }
+    g.__vr = { n: 0, nodes };
     return g;
+  }
+  // Reference-count sources feeding a voice(); the voice's gain/pan/send are disconnected after the last one ends.
+  function track(dest) {
+    const r = dest && dest.__vr;
+    if (!r) return null;
+    r.n++;
+    return () => { if (--r.n <= 0) setTimeout(() => { if (r.n <= 0) r.nodes.forEach(n => { try { n.disconnect(); } catch (e) { } }); }, 60); };
   }
   function tone(K, dest, p) {
     const c = K.c, o = c.createOscillator(), g = c.createGain();
@@ -158,7 +168,8 @@
     if (w) K.wow.connect(o.detune);
     env(g.gain, p.t, a, p.g, p.d, p.hold);
     o.connect(g); g.connect(dest);
-    o.onended = () => { try { if (w) w.disconnect(o.detune); o.disconnect(); g.disconnect(); } catch (e) { } };
+    const done = track(dest);
+    o.onended = () => { try { if (w) w.disconnect(o.detune); o.disconnect(); g.disconnect(); } catch (e) { } if (done) done(); };
     o.start(p.t); o.stop(end + 0.05);
     return g;
   }
@@ -183,7 +194,8 @@
     const g = c.createGain();
     if (p.flat) g.gain.value = p.g; else env(g.gain, p.t, a, p.g, p.d, p.hold);
     n.connect(g); g.connect(dest);
-    s.onended = () => { try { s.disconnect(); g.disconnect(); } catch (e) { } };
+    const done = track(dest);
+    s.onended = () => { try { s.disconnect(); g.disconnect(); } catch (e) { } if (done) done(); };
     s.start(p.t, custom ? 0 : R() * (s.buffer.duration - dur - 0.1 > 0 ? s.buffer.duration - dur - 0.1 : 0));
     s.stop(p.t + dur + 0.05);
     return g;
@@ -199,7 +211,8 @@
       s.connect(b); b.connect(bg); bg.connect(out);
     });
     out.connect(dest);
-    s.onended = () => { try { s.disconnect(); out.disconnect(); } catch (e) { } };
+    const done = track(dest);
+    s.onended = () => { try { s.disconnect(); out.disconnect(); } catch (e) { } if (done) done(); };
     s.start(t); s.stop(t + buf.duration / (rate || 1) + 0.05);
   }
   function creak(K, dest, t, p) {
@@ -262,17 +275,25 @@
     pwCache.set(c, w);
     return w;
   }
+  // Body: a fixed bank of narrow wood resonances (one "instrument"); vibrato sweeps the harmonics across them.
+  const BODY = [[196, 12, 7], [275, 10, 8], [392, 14, 6], [520, 12, 7], [705, 14, 6], [985, 12, 6], [1350, 14, 5], [1880, 12, 5], [2750, 10, 4]];
   function padNote(K, dest, t, f, dur, v, bright, atk, rel) {
     const c = K.c, g = c.createGain();
     atk = atk || 1.2; rel = rel || 2.5;
     const hold = Math.max(atk, dur), end = t + hold + rel + 0.1;
-    // body: highpass, two body resonances, bridge hill, soft (muted) top
-    const hp = filt(K, g, t, { type: 'highpass', f: 70 });
-    const b1 = filt(K, hp, t, { type: 'peaking', f: rr(260, 300), q: 1.4, gain: 5 });
-    const b2 = filt(K, b1, t, { type: 'peaking', f: rr(480, 560), q: 1.8, gain: 3 });
-    const b3 = filt(K, b2, t, { type: 'peaking', f: 2400, q: 0.9, gain: bright ? 3 : -2 });
-    const lp = filt(K, b3, t, { type: 'lowpass', f: bright ? 2600 : 1500, q: 0.5 });
-    lp.connect(dest);
+    const inp = c.createGain();               // body input: bowed string + scratch
+    g.connect(inp);
+    let n = filt(K, inp, t, { type: 'highpass', f: 70 });
+    BODY.forEach(([bf, q, gain]) => { n = filt(K, n, t, { type: 'peaking', f: bf, q, gain: gain * 0.8 }); });
+    n = filt(K, n, t, { type: 'peaking', f: 1200, q: 0.5, gain: -6 }); // compensate the bank's build-up
+    // bow pressure: the tone opens as the stroke swells and darkens as it dies
+    const top = bright ? 3400 : 2100;
+    const lp = filt(K, n, t, { type: 'lowpass', f: 420, q: 0.6 });
+    lp.frequency.setValueAtTime(420, t);
+    lp.frequency.linearRampToValueAtTime(top, t + atk);
+    lp.frequency.setValueAtTime(top, t + hold);
+    lp.frequency.exponentialRampToValueAtTime(380, t + hold + rel);
+    const out = c.createGain(); out.gain.value = 0.55; lp.connect(out); out.connect(dest);
     g.gain.setValueAtTime(0, t);
     g.gain.linearRampToValueAtTime(v * 0.7, t + atk * 0.6);
     g.gain.linearRampToValueAtTime(v, t + atk);
@@ -280,23 +301,30 @@
     g.gain.exponentialRampToValueAtTime(0.0001, t + hold + rel);
     const vib = c.createOscillator(), vg = c.createGain();
     vib.frequency.value = rr(4.6, 5.6);
-    vg.gain.setValueAtTime(0, t); vg.gain.linearRampToValueAtTime(rr(5, 9), t + atk * 1.3);
+    vg.gain.setValueAtTime(0, t); vg.gain.linearRampToValueAtTime(rr(7, 12), t + atk * 1.3);
     vib.connect(vg); vib.start(t); vib.stop(end);
     const srcs = [vib];
-    [[-5, 0.5], [6, 0.5]].forEach(([dt, gg]) => {
+    // rosin noise, amplitude-modulated by the string itself so the hiss is pitched and follows vibrato
+    const ns = c.createBufferSource(); ns.buffer = K.nb.pink; ns.loop = true;
+    const nf = filt(K, ns, t, { type: 'bandpass', f: Math.min(6000, f * 3.2), q: 0.9 });
+    const ng = c.createGain(); ng.gain.value = 0.05; nf.connect(ng); ng.connect(g);
+    [[-5, 0.5], [6, 0.5]].forEach(([dt, gg], i) => {
       const o = c.createOscillator(), og = c.createGain();
       o.setPeriodicWave(bowWave(c)); o.frequency.value = f; o.detune.value = dt + (R() - 0.5) * 3; og.gain.value = gg;
       vg.connect(o.detune);
       o.connect(og); og.connect(g); o.start(t); o.stop(end);
+      if (i === 0) { const am = c.createGain(); am.gain.value = 0.35; o.connect(am); am.connect(ng.gain); srcs.push(am); }
       srcs.push(o);
     });
-    // bow noise (rosin hiss) riding the same envelope
-    const ns = c.createBufferSource(); ns.buffer = K.nb.pink; ns.loop = true;
-    const nf = filt(K, ns, t, { type: 'bandpass', f: Math.min(6000, f * 3.2), q: 1.2 });
-    const ng = c.createGain(); ng.gain.value = 0.3; nf.connect(ng); ng.connect(g);
     ns.start(t, R() * 3); ns.stop(end);
     srcs.push(ns);
-    ns.onended = () => { try { srcs.forEach(n => n.disconnect()); vg.disconnect(); g.disconnect(); lp.disconnect(); } catch (e) { } };
+    // bow scratch: ~30 ms of rough noise as the hair bites, straight into the body
+    const sc = c.createBufferSource(); sc.buffer = K.nb.white; sc.loop = true;
+    const sf = filt(K, sc, t, { type: 'bandpass', f: Math.min(5000, f * 5 + 1200), q: 0.8 });
+    const sg = c.createGain(); env(sg.gain, t, 0.004, v * 1.2, 0.03); sf.connect(sg); sg.connect(inp);
+    sc.start(t, R() * 3); sc.stop(t + 0.08);
+    const done = track(dest);
+    ns.onended = () => { try { srcs.forEach(x => x.disconnect()); sc.disconnect(); sg.disconnect(); vg.disconnect(); g.disconnect(); inp.disconnect(); out.disconnect(); } catch (e) { } if (done) done(); };
   }
 
   const boost = (o, k) => Object.assign({}, o, { vol: (o.vol == null ? 1 : o.vol) * k });
@@ -459,7 +487,9 @@
       for (let i = 0; i < n; i++) {
         const d = rr(0.22, 0.5);
         const v = voice(K, Object.assign({}, o, { pan: clamp((o.pan || 0) + rr(-0.6, 0.6), -1, 1) }), 0.3);
-        noise(K, v, { t: tt, buf: flutterBuf(K.c, d, rr(15, 23)), flat: true, g: rr(0.35, 0.55), filters: [{ type: 'bandpass', f: rr(900, 1500), q: 0.6 }, { type: 'highpass', f: 250 }, { type: 'lowpass', f: 3200 }] });
+        const fb = flutterBuf(K.c, d, rr(15, 23)), gg = rr(0.35, 0.55) * 1.8;   // +5 dB: the hero sound
+        noise(K, v, { t: tt, buf: fb, flat: true, g: gg, filters: [{ type: 'bandpass', f: rr(900, 1500), q: 0.6 }, { type: 'highpass', f: 250 }, { type: 'lowpass', f: 3200 }] });
+        noise(K, v, { t: tt, buf: fb, flat: true, g: gg * 1.4, filters: [{ type: 'bandpass', f: rr(380, 520), q: 1.3 }, { type: 'lowpass', f: 700 }] }); // wing thumps
         tt += d + rr(0.12, 0.4);
       }
     },
@@ -660,13 +690,16 @@
     chain(loopSrc(nb.brown), BQ('bandpass', 170, 1), L.roarG, L.lampOn);
     chain(loopSrc(nb.white), BQ('bandpass', 2600, 0.6), G_(0.006), L.lampOn);
     L.KL = { c, out: L.lampOn, wet: roomRev, nb };
+    L.lampLoop = loopSrc(popBuf(c, 6.3, 3.5), 1);
+    chain(L.lampLoop, G_(1), L.lampOn);
 
     // ---- music drone ----
     L.drone = G_(0); L.drone.connect(musBus); L.drone.gain.setTargetAtTime(1, now + 2, 4);
     L.droneLP = BQ('lowpass', 380, 0.8);
     L.droneLP.connect(L.drone);
+    L.droneOscs = [];
     [[mtof(38), 'sine', 0.05], [mtof(45), 'triangle', 0.025], [mtof(50), 'bow', 0.02], [mtof(50) * 1.004, 'bow', 0.02]].forEach(([f, ty, g]) => {
-      const o = c.createOscillator(); if (ty === 'bow') o.setPeriodicWave(bowWave(c)); else o.type = ty; o.frequency.value = f; o.start(); A.nodes.push(o);
+      const o = c.createOscillator(); if (ty === 'bow') o.setPeriodicWave(bowWave(c)); else o.type = ty; o.frequency.value = f; o.start(); A.nodes.push(o); L.droneOscs.push(o);
       chain(o, G_(g), L.droneLP);
     });
     L.droneThird = G_(0); L.droneThird.connect(L.droneLP); // F (minor) or F# (major) added when warm
@@ -786,15 +819,31 @@
     drip();
     later(gutterEpisode, n * per + rr(20, 50));
   }
-  function lampCrackle() {
-    if (A.lamp && running()) {
-      const K = A.L.KL, t = ctx.currentTime + 0.05, v = voice(K, { pan: rr(-0.2, 0.2) }, 0.2);
-      const big = R() < 0.12;
-      noise(K, v, { t, a: 0.0004, d: big ? 0.012 : rr(0.002, 0.006), g: big ? 0.25 : Math.pow(R(), 2) * 0.1 + 0.01, filters: [{ type: 'bandpass', f: rr(1500, 5000), q: 1 }] });
-      ramp(A.L.roarG.gain, rr(0.22, 0.4), 0.08); // flicker
+  // Wick crackle: resonant pops (and the odd bigger snap) rendered into a stereo loop.
+  function popBuf(c, dur, rate) {
+    const sr = c.sampleRate, n = Math.floor(dur * sr), b = c.createBuffer(2, n, sr);
+    const L = b.getChannelData(0), Rr = b.getChannelData(1), g = new Float32Array(Math.floor(sr * 0.03));
+    let t = R() * 0.2;
+    while (t < dur) {
+      t += -Math.log(1 - R() * 0.999) / rate;
+      const big = R() < 0.12, f = rr(1500, 5000), r = Math.exp(-Math.PI * (f / 1.0) / sr), cw = 2 * r * Math.cos(2 * Math.PI * f / sr);
+      const ex = Math.floor(sr * (big ? 0.012 : rr(0.002, 0.006))), len = Math.min(g.length, ex + Math.floor(sr * 0.004));
+      let y1 = 0, y2 = 0, pk = 1e-9;
+      for (let k = 0; k < len; k++) { const x = k < ex ? (R() * 2 - 1) * Math.exp(-k / (ex / 3)) : 0; const y = x + cw * y1 - r * r * y2; y2 = y1; y1 = y; g[k] = y; pk = Math.max(pk, Math.abs(y)); }
+      const amp = big ? 0.25 : Math.pow(R(), 2) * 0.1 + 0.01, p = rr(-0.2, 0.2);
+      const gl = Math.cos((p + 1) * Math.PI / 4), gr = Math.sin((p + 1) * Math.PI / 4), i0 = Math.floor(t * sr);
+      for (let k = 0; k < len; k++) { const j = (i0 + k) % n, y = g[k] * amp / pk; L[j] += y * gl; Rr[j] += y * gr; }
     }
-    later(lampCrackle, rr(0.08, 0.7));
+    return b;
   }
+  function lampCrackle() { // flicker only: no nodes created
+    if (A.lamp && running()) {
+      ramp(A.L.roarG.gain, rr(0.22, 0.4), 0.08);
+      ramp(A.L.lampLoop.playbackRate, rr(0.85, 1.15), 0.5);
+    }
+    later(lampCrackle, rr(0.15, 0.7));
+  }
+
   function windWander() {
     const L = A.L;
     if (A.win) {
@@ -828,14 +877,39 @@
     if (L.windPan.pan) ramp(L.windPan.pan, win[0] * 0.8, 0.4);
   }
 
+  // ---- uncanny accents: a reversed swell into the lamp's light; the whole room sags in pitch as the window opens ----
+  function uncanny(kind) {
+    if (!running()) return;
+    const L = A.L, t = ctx.currentTime + 0.05, K = KM;
+    if (kind === 'lamp') {
+      // reversed swell: grows from nothing, bends up a semitone, then is cut dead as the flame catches
+      const g = ctx.createGain(), lp = BQ('lowpass', 500, 0.7);
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.0008, t + 0.2); g.gain.exponentialRampToValueAtTime(0.09, t + 1.7);
+      g.gain.setTargetAtTime(0, t + 1.72, 0.015);
+      lp.frequency.setValueAtTime(400, t); lp.frequency.exponentialRampToValueAtTime(3000, t + 1.7);
+      chain(g, lp, K.out);
+      [62, 65, 69, 75].forEach(m => { // D F A Eb: the Neapolitan rub
+        const o = ctx.createOscillator(); o.setPeriodicWave(bowWave(ctx)); o.frequency.setValueAtTime(mtof(m - 1), t);
+        o.frequency.exponentialRampToValueAtTime(mtof(m), t + 1.7); o.connect(g); o.start(t); o.stop(t + 2);
+        o.onended = () => { try { o.disconnect(); } catch (e) { } };
+      });
+      noise(K, g, { t, buf: 'pink', a: 1.6, d: 0.05, g: 0.3, filters: [{ type: 'bandpass', f: 800, q: 0.7, pts: [[1.7, 4000]] }] });
+      setTimeout(() => { try { g.disconnect(); lp.disconnect(); } catch (e) { } }, 2600);
+    } else if (kind === 'window') {
+      (L.droneOscs || []).forEach(o => { o.detune.setTargetAtTime(-45, t, 0.5); o.detune.setTargetAtTime(0, t + 2.2, 1.2); });
+      L.thirdOsc.detune.setTargetAtTime(-45, t, 0.5); L.thirdOsc.detune.setTargetAtTime(0, t + 2.2, 1.2);
+    }
+  }
+
   // ---- flags ----
   function sync(initial) {
     if (!A.on || !window.G) return;
     const L = A.L;
     const lamp = !!G.get('lampLit'), win = !!G.get('windowOpen'), hatched = !!G.get('hatched'), door = !!G.get('doorOpen');
-    if (lamp !== A.lamp) { A.lamp = lamp; ramp(L.lampOn.gain, lamp ? 0.5 : 0, lamp ? 1.2 : 0.3); }
+    if (lamp !== A.lamp) { A.lamp = lamp; ramp(L.lampOn.gain, lamp ? 0.5 : 0, lamp ? 1.2 : 0.3); if (lamp && !initial) uncanny('lamp'); }
     if (win !== A.win) {
       A.win = win;
+      if (win && !initial) uncanny('window');
       ramp(L.rainTone.frequency, win ? 6500 : RAIN_CLOSED, initial ? 0.1 : 1.5);
       ramp(L.dropLayers[2].g.gain, win ? 1 : 0, initial ? 0.1 : 1.5);
       ramp(L.rainGain.gain, win ? 1.2 : 0.9, initial ? 0.1 : 1.5);

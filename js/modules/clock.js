@@ -25,6 +25,12 @@
   let defsDone = false;
   function ensureDefs() {
     if (defsDone) return;
+    if (!document.getElementById('ck-css')) {
+      const st = document.createElement('style');
+      st.id = 'ck-css';
+      st.textContent = '.ck-breathe{animation:ckBreathe 1.2s ease-in-out infinite}@keyframes ckBreathe{0%,100%{opacity:.12}50%{opacity:.95}}';
+      document.head.appendChild(st);
+    }
     const d = document.getElementById('defs');
     if (!d) return;
     defsDone = true;
@@ -172,8 +178,9 @@
       <stop offset="0" stop-color="#cfe3ff" stop-opacity="0.34"/><stop offset="0.55" stop-color="#a9c6ea" stop-opacity="0.2"/><stop offset="1" stop-color="#8fb3d9" stop-opacity="0.04"/>
     </linearGradient>
     <radialGradient id="ck-mothGlow" cx="50%" cy="50%" r="50%">
-      <stop offset="0" stop-color="#fdf6dc" stop-opacity="0.55"/><stop offset="1" stop-color="#fdf6dc" stop-opacity="0"/>
+      <stop offset="0" stop-color="#e8fbe8" stop-opacity="0.75"/><stop offset="0.5" stop-color="#bff0c8" stop-opacity="0.3"/><stop offset="1" stop-color="#a8d8b0" stop-opacity="0"/>
     </radialGradient>
+    <clipPath id="ck-dialClip"><circle cx="${CX}" cy="${CY}" r="253"/></clipPath>
     <pattern id="ck-damask" width="140" height="180" patternUnits="userSpaceOnUse">
       <g fill="#2f3a2e">
         <path d="M70,18 C84,40 98,58 88,80 C82,94 74,98 70,112 C66,98 58,94 52,80 C42,58 56,40 70,18Z"/>
@@ -405,7 +412,7 @@
   const ang = { h: START_H * 30, m: START_M * 30 };   // current displayed (unwrapped) angles
   const lift = { h: 0, m: 0 };                          // 0..1 "picked up" amount per hand
   let drag = null, animating = false, swinging = false, swingStart = 0, saidEnter = false;
-  let active = null, hovered = null, hoverIcon = null, askedWhich = false;
+  let active = null, hovered = null, hoverIcon = null, askedWhichAt = -1e9, saidWhere = false;
   let V = {}, WO = {};   // element refs for the view / wall object
 
   function posOf(which) { const f = G.get(which === 'h' ? 'clockH' : 'clockM'); return typeof f === 'number' ? f : (which === 'h' ? START_H : START_M); }
@@ -741,6 +748,22 @@
       <circle cx="${CX}" cy="${CY}" r="14" fill="url(#ck-bossG)" stroke="${INK}" stroke-width="2"/>
       <circle cx="${CX}" cy="${CY}" r="6.5" fill="#8a6424" stroke="${INK}" stroke-width="1.2"/>
       <circle cx="${CX - 2}" cy="${CY - 2}" r="2.2" fill="#fff4cc" opacity="0.9"/>
+      <g class="ck-ringFlash" style="opacity:0" filter="url(#glow)">
+        <circle cx="${CX}" cy="${CY}" r="243" fill="none" stroke="#fff4c8" stroke-width="7" stroke-dasharray="260 1270" stroke-linecap="round" transform="rotate(-90 ${CX} ${CY})" class="ck-ringArc"/>
+        <circle cx="${CX}" cy="${CY}" r="243" fill="none" stroke="#ffe39a" stroke-width="3" opacity="0.5"/>
+      </g>
+      <!-- lamp rim light on the right of the bezel and case -->
+      <g class="ck-lampRim" style="opacity:0;transition:opacity 1.2s ease" pointer-events="none">
+        <path d="M${pol(250, 25, CX, CY).map(f1).join(',')} A250,250 0 0 1 ${pol(250, 155, CX, CY).map(f1).join(',')}" fill="none" stroke="#ffc978" stroke-width="5" stroke-linecap="round" filter="url(#ck-blur3)" opacity="0.9"/>
+        <path d="M${pol(247, 45, CX, CY).map(f1).join(',')} A247,247 0 0 1 ${pol(247, 130, CX, CY).map(f1).join(',')}" fill="none" stroke="#fff0c8" stroke-width="1.6" stroke-linecap="round"/>
+        <path d="M1119,34 V534 M1137,-6 V540 M997,592 V900" stroke="#ffc978" stroke-width="3" filter="url(#ck-blur3)" opacity="0.85"/>
+        <path d="M1154,543 h-60" stroke="#ffc978" stroke-width="2" opacity="0.6"/>
+      </g>
+      <!-- moonbeam crossing the dial glass -->
+      <g class="ck-moonGlass" style="opacity:0;transition:opacity 1.6s ease" clip-path="url(#ck-dialClip)" pointer-events="none">
+        <path d="M430,-40 L560,-40 L1060,640 L930,640Z" fill="#e6f0ff" opacity="0.2" filter="url(#ck-blur12)" style="mix-blend-mode:screen"/>
+        <path d="M478,-40 L500,-40 L1000,640 L978,640Z" fill="#ffffff" opacity="0.28" filter="url(#ck-blur3)" style="mix-blend-mode:screen"/>
+      </g>
       <!-- glass reflections -->
       <path d="M${CX - 196},${CY - 40} A200,200 0 0 1 ${CX - 40},${CY - 196}" stroke="#ffffff" stroke-width="22" fill="none" opacity="0.07" stroke-linecap="round"/>
       <path d="M${CX - 210},${CY - 20} A212,212 0 0 1 ${CX - 110},${CY - 180}" stroke="#ffffff" stroke-width="3" fill="none" opacity="0.2" stroke-linecap="round"/>
@@ -775,7 +798,7 @@
     V.warm = q('.ck-warm');
     V.lits = Array.from(root.querySelectorAll('.ck-lit'));
     V.rewardLight = q('.ck-rewardLight');
-    V.light = { shaft: q('.ck-moonShaft'), cold: q('.ck-cold'), dim: q('.ck-dim'), warmL: q('.ck-warmL'), warmG: q('.ck-warmG'), moon: q('.ck-moonL') };
+    V.light = { glass: q('.ck-moonGlass'), rim: q('.ck-lampRim'), shaft: q('.ck-moonShaft'), cold: q('.ck-cold'), dim: q('.ck-dim'), warmL: q('.ck-warmL'), warmG: q('.ck-warmG'), moon: q('.ck-moonL') };
     V.mbWrap = q('.ck-matchbox');
 
     V.matchbox = G.svg(matchboxScene(), V.mbWrap);
@@ -787,6 +810,7 @@
       click() {
         if (G.get('gotMatches')) return;
         G.give('matches', V.matchbox);
+        G.say('A box of matches. Three left.');
         G.set('gotMatches');
         V.matchbox.style.display = 'none';
       },
@@ -860,7 +884,7 @@
     if (!V.hour) return;
     const parts = [['h', V.hour, V.hsh, 6, 9], ['m', V.min, V.msh, 8, 11]];
     for (const [w, el, sh, ox, oy] of parts) {
-      const L = lift[w], a = f1(ang[w] + jolt * (w === 'h' ? 1 : -1.4)), sc = (1 + 0.06 * L).toFixed(3);
+      const L = Math.min(1, lift[w] + (active === w && !G.get('clockSolved') && !swinging ? 0.4 : 0)), a = f1(ang[w] + jolt * (w === 'h' ? 1 : -1.4)), sc = (1 + 0.06 * L).toFixed(3);
       el.setAttribute('transform', `translate(${CX},${CY}) rotate(${a}) scale(${sc})`);
       sh.setAttribute('transform', `translate(${f1(CX + ox + 18 * L)},${f1(CY + oy + 25 * L)}) rotate(${a}) scale(${sc})`);
     }
@@ -873,6 +897,7 @@
       const act = !solvedOrBusy && active === w;
       const hov = !solvedOrBusy && hovered === w;
       V.rim[w].style.opacity = (grabbed || act) ? 1 : hov ? 0.75 : 0;
+      V.rim[w].classList.toggle('ck-breathe', !solvedOrBusy && !active && !grabbed && !hov);
       (w === 'h' ? V.hour : V.min).style.filter = (grabbed || act) ? 'drop-shadow(0 0 6px rgba(255,205,110,0.95))' : hov ? 'drop-shadow(0 0 4px rgba(255,210,120,0.6))' : '';
     });
   }
@@ -886,7 +911,11 @@
     await liftTo(w, 0, 220);
   }
   function selectHand(w) {
-    if (active !== w) { active = w; G.sfx('click', { vol: 0.5 }); }
+    if (active !== w) {
+      const first = !active;
+      active = w; G.sfx('click', { vol: 0.5 });
+      if (first && !saidWhere) { saidWhere = true; G.say('Now — where should it point?'); }
+    }
     updateRims();
     pulse(w);
   }
@@ -944,6 +973,7 @@
     if (!drag.which || drag.queued) return;
     if (!drag.moved && Math.hypot(p.x - drag.start.x, p.y - drag.start.y) > 6) {
       drag.moved = true;
+      if (!active && !saidWhere) { saidWhere = true; G.say('Now — where should it point?'); }
       active = drag.which;
       setHoverIcon(null);
       liftTo(drag.which, 1, 130);
@@ -989,7 +1019,7 @@
     if (hand) {
       if (icon == null) handClick = true;
       else if (hand === 'h' && r <= HOUR_LEN + 6) handClick = true;
-      else if (hand === 'm' && posOf('m') === icon && distToHand(p, ang.m, MIN_LEN) < 12) handClick = true;
+      else if (hand === 'm' && active !== 'm' && posOf('m') === icon && distToHand(p, ang.m, MIN_LEN) < 12) handClick = true;
     }
     if (handClick) {
       if (active !== hand) { selectHand(hand); }            // first click on a hand only picks it up
@@ -999,11 +1029,11 @@
       }
     } else if (icon != null && !active) {
       pulse('h'); pulse('m');
-      if (!askedWhich) { askedWhich = true; G.say('Which hand — the short or the long?'); }
+      if (performance.now() - askedWhichAt > 8000) { askedWhichAt = performance.now(); G.say('Which hand — the short or the long?'); }
     } else if (icon != null) {
       const cur = posOf(active);
-      const steps = icon === cur ? 1 : mod(icon - cur + 6, 12) - 6;
-      await sweep(active, steps);
+      if (icon === cur) await nudge(active);
+      else await sweep(active, mod(icon - cur + 6, 12) - 6);
     } else {
       G.say('Pictures instead of numbers. Father’s work, surely.');
     }
@@ -1013,6 +1043,14 @@
     if (!drag) return;
     const d = drag; drag = null;
     if (d.which && d.moved) settle(d.which, ang[d.which], Math.round(ang[d.which] / 30) * 30, 150);
+  }
+  async function nudge(which) {
+    animating = true;
+    const base = ang[which];
+    await G.tween(260, t => { ang[which] = base + Math.sin(t * Math.PI * 2) * 2.5 * (1 - t); renderHands(); }, 'linear');
+    ang[which] = base; renderHands();
+    G.sfx('tick', { vol: 0.5 });
+    animating = false;
   }
   async function sweep(which, steps) {
     animating = true;
@@ -1082,22 +1120,23 @@
   }
   function mothFlight() {
     const m = G.svg(`<g class="ck-moth" opacity="0">
-        <circle r="30" fill="url(#ck-mothGlow)" class="ck-mhalo"/>
+        <circle r="44" fill="url(#ck-mothGlow)" class="ck-mhalo"/>
         <g class="ck-mw" stroke="#5a4a36" stroke-width="0.9" stroke-linejoin="round">
-          <path d="M-1,-3 C-9,-12 -22,-16 -25,-13 C-25,-6 -20,1 -2,2Z" fill="#f6f0dc"/><path d="M1,-3 C9,-12 22,-16 25,-13 C25,-6 20,1 2,2Z" fill="#f6f0dc"/>
-          <path d="M-1,2 C-9,4 -16,9 -15,15 C-11,19 -4,13 -1,6Z" fill="#e9e0c4"/><path d="M1,2 C9,4 16,9 15,15 C11,19 4,13 1,6Z" fill="#e9e0c4"/>
+          <path d="M-1,-3 C-9,-12 -22,-16 -25,-13 C-25,-6 -20,1 -2,2Z" fill="#d6f2da"/><path d="M1,-3 C9,-12 22,-16 25,-13 C25,-6 20,1 2,2Z" fill="#d6f2da"/>
+          <path d="M-1,2 C-9,4 -15,10 -14,17 C-13,24 -12,30 -9,36 C-8,30 -8,24 -6,18 C-4,14 -2,10 -1,6Z" fill="#b9e3c2"/><path d="M1,2 C9,4 15,10 14,17 C13,24 12,30 9,36 C8,30 8,24 6,18 C4,14 2,10 1,6Z" fill="#b9e3c2"/>
+          <path d="M-25,-13 C-18,-12 -10,-8 -2,-2 M25,-13 C18,-12 10,-8 2,-2" fill="none" stroke="#b07a7a" stroke-width="1.3"/>
           <path d="M-4,-3 C-12,-8 -18,-11 -22,-12 M4,-3 C12,-8 18,-11 22,-12" fill="none" stroke="#b8a888" stroke-width="0.7"/>
           <circle cx="-14" cy="-6" r="1.6" fill="#b8a888" stroke="none"/><circle cx="14" cy="-6" r="1.6" fill="#b8a888" stroke="none"/>
         </g>
-        <ellipse rx="2.8" ry="8" cy="2" fill="#e3d6b2" stroke="#5a4a36" stroke-width="0.8"/>
+        <ellipse rx="3" ry="8.5" cy="2" fill="#f4f0de" stroke="#5a4a36" stroke-width="0.8"/>
         <path d="M-1,-6 q-3,-6 -8,-8 M1,-6 q3,-6 8,-8" fill="none" stroke="#5a4a36" stroke-width="0.8"/>
       </g>`, V.fx);
     const mg = m.firstElementChild, wings = m.querySelector('.ck-mw');
-    const S0 = 2.2;
+    const S0 = 3;
     // phase 1: rises out of the case and hovers in the light shaft over the pendulum
     const hover = G.tween(800, t => {
       const x = 812 + Math.sin(t * 9) * 6, y = 720 - 90 * G.ease.out(t) + Math.cos(t * 13) * 4;
-      wings.setAttribute('transform', `scale(${(0.35 + 0.65 * Math.abs(Math.sin(t * 34))).toFixed(2)},1)`);
+      wings.setAttribute('transform', `scale(${(0.2 + 0.8 * Math.abs(Math.sin(t * 52))).toFixed(2)},1)`);
       mg.setAttribute('transform', `translate(${f1(x)},${f1(y)}) rotate(${f1(Math.sin(t * 7) * 8)}) scale(${S0})`);
       mg.setAttribute('opacity', Math.min(1, t * 3).toFixed(2));
     }, 'linear');
@@ -1107,7 +1146,7 @@
     return hover.then(() => G.tween(3000, t => {
       const x = bez(t, 0) + Math.sin(t * 18) * 12, y = bez(t, 1) + Math.cos(t * 14) * 9;
       wings.setAttribute('transform', `scale(${(0.3 + 0.7 * Math.abs(Math.sin(t * 70))).toFixed(2)},1)`);
-      mg.setAttribute('transform', `translate(${f1(x)},${f1(y)}) rotate(${f1(20 + Math.sin(t * 9) * 12)}) scale(${(S0 - t * 0.9).toFixed(2)})`);
+      mg.setAttribute('transform', `translate(${f1(x)},${f1(y)}) rotate(${f1(20 + Math.sin(t * 9) * 12)}) scale(${(S0 - t * 1.2).toFixed(2)})`);
       mg.setAttribute('opacity', Math.min(1, (1 - t) * 3).toFixed(2));
     }, 'inOut')).then(() => m.remove());
   }
@@ -1115,6 +1154,13 @@
     [SOL_H, SOL_M].forEach(i => { const l = V.lits[i]; l.dataset.hold = on ? '1' : ''; l.style.transition = on ? 'opacity .25s ease' : 'opacity 1.2s ease'; l.style.opacity = on ? 1 : 0; });
   }
 
+  function ringFlash() {
+    const g = V.root.querySelector('.ck-ringFlash'), arc = g.querySelector('.ck-ringArc');
+    return G.tween(900, t => {
+      arc.setAttribute('stroke-dashoffset', f1(-1530 * t));
+      g.style.opacity = (Math.min(1, t * 6) * (1 - t * t)).toFixed(3);
+    }, 'out').then(() => { g.style.opacity = 0; });
+  }
   async function solve() {
     if (swinging || G.get('clockSolved')) return;
     G.busy(true);
@@ -1126,6 +1172,7 @@
       glowIcons(true);
       V.warm.style.transition = 'opacity .3s ease'; V.warm.style.opacity = 1;
       shake(520, 5);
+      ringFlash();
       dustFall();
       await G.tween(520, t => { jolt = Math.sin(t * Math.PI * 5) * 4 * (1 - t); renderHands(); }, 'linear');
       jolt = 0; renderHands();
@@ -1204,6 +1251,8 @@
     V.light.warmG.style.opacity = lit ? 1 : 0;
     V.light.moon.style.opacity = open ? 1 : 0;
     V.light.shaft.style.opacity = open ? 1 : 0;
+    V.light.glass.style.opacity = open ? 1 : 0;
+    V.light.rim.style.opacity = lit ? 1 : 0;
     ensureLoop();
   }
   // ------------------------------------------------------------------ registration
