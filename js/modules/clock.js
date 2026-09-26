@@ -340,23 +340,40 @@
   ];
   const MIN_PATHS = [
     'M0,48 C-6.5,48 -7.5,40 -4.2,34 L-2.2,12 L2.2,12 L4.2,34 C7.5,40 6.5,48 0,48Z M0,36 a3,3 0 1 0 0.01,0Z',
-    'M-3,14 L-2.3,-60 L2.3,-60 L3,14Z',
+    'M-3.6,14 L-2.9,-60 L2.9,-60 L3.6,14Z',
     'M0,-57 L-8,-71.5 L0,-88 L8,-71.5Z M0,-64 L-3.8,-71.5 L0,-80 L3.8,-71.5Z',
-    'M-1.9,-86 L-1.1,-180 L1.1,-180 L1.9,-86Z',
-    'M0,-213 C3.4,-205 6.5,-195 3.4,-187 L1.2,-179.5 L-1.2,-179.5 L-3.4,-187 C-6.5,-195 -3.4,-205 0,-213Z M0,-201 C1.2,-197 1.6,-193 0.6,-190 L-0.6,-190 C-1.6,-193 -1.2,-197 0,-201Z',
+    'M-2.8,-86 L-1.9,-178 L1.9,-178 L2.8,-86Z',
+    'M0,-216 C6,-207 10.5,-195 6.5,-185 L2.4,-176 L-2.4,-176 L-6.5,-185 C-10.5,-195 -6,-207 0,-216Z M0,-203 C2,-198 2.6,-193 1,-189 L-1,-189 C-2.6,-193 -2,-198 0,-203Z',
   ];
   function handMarkup(paths, fill, stroke, sw) {
     return paths.map(d => `<path d="${d}" fill-rule="evenodd" fill="${fill}" ${stroke ? `stroke="${stroke}" stroke-width="${sw}" stroke-linejoin="round"` : ''}/>`).join('');
   }
 
   // ------------------------------------------------------------------ gilt corner moth (spandrel)
+  // moth motif (head up, ~100 wide): feathery bipectinate antennae, furry body, triangular forewings, rounded hindwings
+  function mothMotif(fill, line, vein, bodyFill) {
+    let comb = '';
+    for (let k = 0; k < 7; k++) {
+      const t = k / 6, x = -3 - 12 * t, y = -12 - 17 * t + 3 * t * t, L = 4.2 - 2 * t;
+      comb += `M${f1(x)},${f1(y)}l${f1(-L)},${f1(-L * 0.35)}M${f1(x)},${f1(y)}l${f1(L * 0.3)},${f1(-L)}`;
+    }
+    const half = `
+      <path d="M-3,-7 C-16,-17 -34,-22 -52,-21 C-50,-12 -46,-4 -40,1 C-28,4 -14,5 -3,3Z" fill="${fill}"/>
+      <path d="M-3,3 C-14,5 -30,8 -34,18 C-35,28 -24,32 -14,27 C-8,23 -4,16 -3,10Z" fill="${fill}"/>
+      <path d="M-6,-6 C-18,-12 -32,-15 -46,-17 M-8,0 C-20,-2 -32,-2 -40,0 M-6,6 C-14,10 -22,14 -28,20" fill="none" stroke="${vein}" stroke-width="1.1"/>
+      <path d="M-33,-10 a4,4 0 1 0 0.01,0" fill="none" stroke="${vein}" stroke-width="1.2"/>
+      <path d="M-3,-12 C-7,-18 -11,-24 -15,-29" fill="none" stroke="${line}" stroke-width="1.3"/>
+      <path d="${comb}" stroke="${line}" stroke-width="0.9" fill="none"/>`;
+    return `${half}<g transform="scale(-1,1)">${half}</g>
+      <ellipse cx="0" cy="-8" rx="5.5" ry="5.5" fill="${bodyFill}"/>
+      <path d="M-5.5,-3 C-7,6 -6,16 0,24 C6,16 7,6 5.5,-3 C3,-5 -3,-5 -5.5,-3Z" fill="${bodyFill}"/>
+      <path d="M-4,1 h8 M-4.5,6 h9 M-4,11 h8 M-3,16 h6" stroke="${line}" stroke-width="0.9" opacity="0.7"/>
+      <path d="M-5,-10 l-2,-1 M5,-10 l2,-1 M-5.5,-5 l-2,0 M5.5,-5 l2,0" stroke="${line}" stroke-width="0.8"/>
+      <circle cx="-2.4" cy="-12" r="1.3" fill="${line}"/><circle cx="2.4" cy="-12" r="1.3" fill="${line}"/>`;
+  }
   function spandrel(x, y, rot) {
-    return `<g transform="translate(${x},${y}) rotate(${rot})" stroke="#4a3210" stroke-width="1.2" stroke-linejoin="round">
-      <path d="M0,0 C-10,-6 -34,-4 -46,6 C-36,4 -26,8 -18,16 C-28,14 -40,22 -44,32 C-30,24 -16,24 -4,14Z" fill="url(#ck-gildG)"/>
-      <path d="M0,0 C6,-10 4,-34 -6,-46 C-4,-36 -8,-26 -16,-18 C-14,-28 -22,-40 -32,-44 C-24,-30 -24,-16 -14,-4Z" fill="url(#ck-gildG)"/>
-      <ellipse cx="-3" cy="-3" rx="4" ry="11" transform="rotate(-45 -3 -3)" fill="#e7c476"/>
-      <path d="M-6,-10 q-2,-14 -12,-20 M-10,-6 q-14,-2 -20,-12" fill="none"/>
-      <circle cx="-28" cy="6" r="3.2" fill="#6e4d1c" stroke="none"/><circle cx="-6" cy="-28" r="3.2" fill="#6e4d1c" stroke="none"/>
+    return `<g transform="translate(${x},${y}) rotate(${rot})" stroke-linejoin="round">
+      <g transform="translate(-6,-6) rotate(135) scale(0.8)" stroke="#4a3210" stroke-width="1.5">${mothMotif('url(#ck-gildG)', '#4a3210', '#8a6424', '#d9b060')}</g>
       <path d="M-50,12 c-8,6 -14,20 -6,30 c4,5 12,2 10,-4 M12,-50 c6,-8 20,-14 30,-6 c5,4 2,12 -4,10" fill="none" stroke="#c49440" stroke-width="2.2" stroke-linecap="round"/>
       <path d="M-44,40 c2,8 10,12 16,8 M40,-44 c8,2 12,10 8,16" fill="none" stroke="#c49440" stroke-width="1.8" stroke-linecap="round"/>
     </g>`;
@@ -381,7 +398,7 @@
   const ang = { h: START_H * 30, m: START_M * 30 };   // current displayed (unwrapped) angles
   const lift = { h: 0, m: 0 };                          // 0..1 "picked up" amount per hand
   let drag = null, animating = false, swinging = false, swingStart = 0, saidEnter = false;
-  let active = 'h', hovered = null, hoverIcon = null;
+  let active = null, hovered = null, hoverIcon = null, askedWhich = false;
   let V = {}, WO = {};   // element refs for the view / wall object
 
   function posOf(which) { const f = G.get(which === 'h' ? 'clockH' : 'clockM'); return typeof f === 'number' ? f : (which === 'h' ? START_H : START_M); }
@@ -483,13 +500,8 @@
       <path d="M318,151 l0,-8 M482,151 l0,-8" stroke="${INK}" stroke-width="2"/>
       <circle cx="318" cy="141" r="2.5" fill="#e7c476" stroke="${INK}"/><circle cx="482" cy="141" r="2.5" fill="#e7c476" stroke="${INK}"/>
       <!-- carved moth crest -->
-      <g transform="translate(400,138)" stroke="${INK}" stroke-width="1.8" stroke-linejoin="round" filter="url(#ck-grainH)">
-        <path d="M-2,4 C-12,-14 -34,-26 -46,-18 C-52,-10 -40,6 -24,8 C-36,12 -40,26 -30,30 C-18,32 -8,22 -2,12Z" fill="url(#ck-walnutH)"/>
-        <path d="M2,4 C12,-14 34,-26 46,-18 C52,-10 40,6 24,8 C36,12 40,26 30,30 C18,32 8,22 2,12Z" fill="url(#ck-walnutH)"/>
-        <path d="M-6,0 C-16,-10 -30,-16 -40,-14 M6,0 C16,-10 30,-16 40,-14 M-6,12 C-14,16 -22,22 -28,26 M6,12 C14,16 22,22 28,26" fill="none" stroke="#a87650" stroke-width="1.1"/>
-        <circle cx="-26" cy="-6" r="4" fill="#3a2418" stroke-width="1.2"/><circle cx="26" cy="-6" r="4" fill="#3a2418" stroke-width="1.2"/>
-        <ellipse cx="0" cy="8" rx="4.5" ry="14" fill="#7a4e30"/>
-        <path d="M-2,-5 q-4,-10 -12,-12 M2,-5 q4,-10 12,-12" fill="none" stroke-width="1.5"/>
+      <g transform="translate(400,140) scale(0.95)" stroke="${INK}" stroke-width="1.8" stroke-linejoin="round" filter="url(#ck-grainH)">
+        ${mothMotif('url(#ck-walnutH)', INK, '#a87650', '#6a4229')}
       </g>
       <!-- dial -->
       <circle cx="${cx}" cy="${dy}" r="60" fill="url(#ck-bezelG)" stroke="${INK}" stroke-width="2"/>
@@ -712,10 +724,10 @@
         <g class="ck-hshadow">${handMarkup(HOUR_PATHS, '#000')}</g>
         <g class="ck-mshadow">${handMarkup(MIN_PATHS, '#000')}</g>
       </g>
-      <g class="ck-hour">${handMarkup(HOUR_PATHS, 'url(#ck-steelG)', INK, 1.3)}
+      <g class="ck-hour">${handMarkup(HOUR_PATHS, 'none', '#f6efdc', 4.6)}${handMarkup(HOUR_PATHS, 'url(#ck-steelG)', INK, 1.3)}
         <path d="M0,10 L0,-40 M0,-88 L0,-102" stroke="#6f8fb0" stroke-width="0.9" opacity="0.6"/>
         <g class="ck-rim" style="opacity:0">${handMarkup(HOUR_PATHS, 'none', '#f3d27e', 2.2)}</g></g>
-      <g class="ck-min">${handMarkup(MIN_PATHS, 'url(#ck-steelG)', INK, 1.2)}
+      <g class="ck-min">${handMarkup(MIN_PATHS, 'none', '#f6efdc', 4.4)}${handMarkup(MIN_PATHS, 'url(#ck-steelG)', INK, 1.3)}
         <path d="M0,8 L0,-56 M0,-90 L0,-176" stroke="#6f8fb0" stroke-width="0.7" opacity="0.6"/>
         <g class="ck-rim" style="opacity:0">${handMarkup(MIN_PATHS, 'none', '#f3d27e', 2)}</g></g>
       <circle cx="${CX}" cy="${CY}" r="14" fill="url(#ck-bossG)" stroke="${INK}" stroke-width="2"/>
@@ -833,25 +845,35 @@
     if (!V.hour) return;
     const parts = [['h', V.hour, V.hsh, 6, 9], ['m', V.min, V.msh, 8, 11]];
     for (const [w, el, sh, ox, oy] of parts) {
-      const L = lift[w], a = f1(ang[w] + jolt * (w === 'h' ? 1 : -1.4)), sc = (1 + 0.045 * L).toFixed(3);
+      const L = lift[w], a = f1(ang[w] + jolt * (w === 'h' ? 1 : -1.4)), sc = (1 + 0.06 * L).toFixed(3);
       el.setAttribute('transform', `translate(${CX},${CY}) rotate(${a}) scale(${sc})`);
-      sh.setAttribute('transform', `translate(${f1(CX + ox + 12 * L)},${f1(CY + oy + 16 * L)}) rotate(${a}) scale(${sc})`);
+      sh.setAttribute('transform', `translate(${f1(CX + ox + 18 * L)},${f1(CY + oy + 25 * L)}) rotate(${a}) scale(${sc})`);
     }
   }
   function updateRims() {
     if (!V.rim) return;
     const solvedOrBusy = !!G.get('clockSolved') || swinging || G.isBusy();
     ['h', 'm'].forEach(w => {
-      const on = !solvedOrBusy && ((drag && drag.which === w && drag.moved) || hovered === w || lift[w] > 0.5);
-      const idle = !solvedOrBusy && active === w;
-      V.rim[w].style.opacity = on ? 1 : idle ? 0.4 : 0;
-      (w === 'h' ? V.hour : V.min).style.filter = on ? 'drop-shadow(0 0 5px rgba(255,210,120,0.8))' : '';
+      const grabbed = !solvedOrBusy && ((drag && drag.which === w && drag.moved) || lift[w] > 0.5);
+      const act = !solvedOrBusy && active === w;
+      const hov = !solvedOrBusy && hovered === w;
+      V.rim[w].style.opacity = (grabbed || act) ? 1 : hov ? 0.75 : 0;
+      (w === 'h' ? V.hour : V.min).style.filter = (grabbed || act) ? 'drop-shadow(0 0 6px rgba(255,205,110,0.95))' : hov ? 'drop-shadow(0 0 4px rgba(255,210,120,0.6))' : '';
     });
   }
   function setHoverIcon(i) {
     if (hoverIcon === i) return;
     hoverIcon = i;
     V.lits.forEach(l => { if (!l.dataset.hold) l.style.opacity = (+l.dataset.i === i) ? 0.4 : 0; });
+  }
+  async function pulse(w) {
+    await liftTo(w, 1, 110);
+    await liftTo(w, 0, 220);
+  }
+  function selectHand(w) {
+    if (active !== w) { active = w; G.sfx('click', { vol: 0.5 }); }
+    updateRims();
+    pulse(w);
   }
   function liftTo(w, v, ms) {
     const from = lift[w];
@@ -955,9 +977,14 @@
       else if (hand === 'm' && posOf('m') === icon && distToHand(p, ang.m, MIN_LEN) < 12) handClick = true;
     }
     if (handClick) {
-      active = hand;
-      liftTo(hand, 1, 90);
-      await settle(hand, ang[hand], Math.round(ang[hand] / 30) * 30 + 30, 280);
+      if (active !== hand) { selectHand(hand); }            // first click on a hand only picks it up
+      else {
+        liftTo(hand, 1, 90);
+        await settle(hand, ang[hand], Math.round(ang[hand] / 30) * 30 + 30, 280);
+      }
+    } else if (icon != null && !active) {
+      pulse('h'); pulse('m');
+      if (!askedWhich) { askedWhich = true; G.say('Which hand — the short or the long?'); }
     } else if (icon != null) {
       const cur = posOf(active);
       const steps = icon === cur ? 1 : mod(icon - cur + 6, 12) - 6;
@@ -1078,7 +1105,7 @@
       dustFall();
       await G.tween(520, t => { jolt = Math.sin(t * Math.PI * 5) * 4 * (1 - t); renderHands(); }, 'linear');
       jolt = 0; renderHands();
-      await G.wait(700);
+      await G.wait(900);
       glowIcons(false);
       V.warm.style.transition = 'opacity 1.6s ease'; V.warm.style.opacity = 0.25;
       swinging = true; swingStart = performance.now();
@@ -1165,7 +1192,7 @@
       ensureLoop();
       if (!saidEnter && !G.get('clockSolved') && G.get('clockH') == null && G.get('clockM') == null) {
         saidEnter = true;
-        setTimeout(() => { if (G.view() === 'clock') G.say('The hands are stiff, but they move.'); }, 250);
+        setTimeout(() => { if (G.view() === 'clock') G.say('The hands are stiff, but they move.'); }, 520);
       }
     },
     exit() { if (drag) onCancel(); hovered = null; if (V.lits) setHoverIcon(null); updateRims(); },

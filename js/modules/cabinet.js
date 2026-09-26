@@ -116,6 +116,9 @@
       <stop offset="0.8" stop-color="#000" stop-opacity="0.3"/><stop offset="1" stop-color="#000" stop-opacity="0.88"/>
     </linearGradient>
     <linearGradient id="cabImprint" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#12040a"/><stop offset="1" stop-color="#2a0a10"/></linearGradient>
+    <linearGradient id="cabColdDim" x1="1" y1="0.1" x2="0" y2="0.9">
+      <stop offset="0" stop-color="#a8bed4"/><stop offset="0.5" stop-color="#7890a8"/><stop offset="1" stop-color="#4a5e72"/>
+    </linearGradient>
     <linearGradient id="cabWarmGlass" x1="1" y1="1" x2="0" y2="0">
       <stop offset="0" stop-color="#ffc070" stop-opacity="0.28"/><stop offset="0.5" stop-color="#ffb060" stop-opacity="0.08"/><stop offset="1" stop-color="#ffb060" stop-opacity="0"/>
     </linearGradient>
@@ -213,15 +216,15 @@
     atlas: {
       label: 'Attacus atlas', loc: 'Ceylon — 3.iii.1891', no: 'No. 7',
       say: 'Attacus atlas. The atlas moth — its wingtips curl like a snake\'s head.',
-      fw: 'M7,-24 C46,-54 104,-76 158,-86 C180,-90 200,-82 198,-64 C197,-54 192,-46 184,-44 C180,-50 174,-52 166,-50 C152,-44 146,-30 144,-12 C142,2 138,10 132,16 C96,18 52,12 9,2 Z',
+      fw: 'M7,-24 C46,-54 104,-76 150,-84 C166,-88 180,-98 188,-110 C198,-114 206,-102 200,-88 C194,-76 184,-66 174,-60 C160,-52 146,-30 144,-12 C142,2 138,10 132,16 C96,18 52,12 9,2 Z',
       hw: 'M7,0 C52,4 116,10 150,34 C166,58 150,96 118,122 C92,142 56,146 34,124 C16,104 8,64 6,20 Z',
       fwGrad: { r: 190, stops: [[0, '#4a1a0e'], [0.25, '#8a3a1c'], [0.62, '#b4562a'], [0.85, '#c9803e'], [1, '#d8a060']] },
       hwGrad: { r: 170, stops: [[0, '#4a1a0e'], [0.3, '#8e3c1c'], [0.7, '#b25428'], [0.9, '#cf8e4c'], [1, '#e0b070']] },
       edge: '#3a1208', band: '#e7c07a',
       fwDeco: `<path d="M38,-60 C54,-40 68,-18 70,10" stroke="#f3dcb2" stroke-width="4.5" fill="none" opacity="0.85"/>
                <path d="M32,-58 C48,-38 60,-16 62,9" stroke="#3a140a" stroke-width="2.5" fill="none" opacity="0.7"/>
-               <path d="M146,-84 C172,-90 200,-80 196,-60 C192,-50 184,-46 176,-50 C168,-58 156,-66 146,-84 Z" fill="#caa0a4" opacity="0.75"/>
-               <path d="M150,-84 C166,-88 184,-84 194,-72" stroke="#f4e2c8" stroke-width="3" fill="none" opacity="0.6"/>
+               <path d="M148,-84 C166,-88 180,-98 188,-112 C200,-116 208,-100 200,-86 C192,-74 180,-66 170,-62 C162,-70 154,-78 148,-84 Z" fill="#caa0a4" opacity="0.75"/>
+               <path d="M150,-84 C166,-88 180,-98 188,-110" stroke="#f4e2c8" stroke-width="3" fill="none" opacity="0.6"/>
                <path d="M166,-52 C156,-40 150,-22 148,-4 C146,6 142,12 136,16" stroke="#ecc88a" stroke-width="12" fill="none" opacity="0.55"/>
                <path d="M158,-46 C146,-32 140,-14 138,2 C136,10 132,14 126,16" stroke="#3a140a" stroke-width="1.6" fill="none" opacity="0.8" stroke-dasharray="5 3"/>`,
       hwDeco: `<path d="M18,26 C44,30 84,38 118,54 C128,60 134,70 138,78" stroke="#f3dcb2" stroke-width="4.5" fill="none" opacity="0.85"/>
@@ -235,13 +238,13 @@
       pal: { halo: '#f2dfae', outer: INK, ring: '#e4b453', inner: '#7a2616', pupil: '#120a06' },
       body: { th: [11, 16], abd: [70, 10], thc: '#7a3a1e', abc: '#a35a2e', hair: '#e8c898', seg: '#f0d8b0' },
       ant: ['feather', 44, 28, '#5a2a14', 6],
-      top: -98, bottom: 146, span: 200,
+      top: -118, bottom: 146, span: 206,
     },
     luna: {
       label: 'Actias luna', loc: 'Vermont — 12.vi.1894', no: 'No. 3',
       say: 'Actias luna. The moon moth, trailing its long pale tails.',
       fw: 'M6,-22 C38,-50 96,-80 136,-86 C150,-88 156,-78 150,-64 C138,-38 124,-12 108,10 C74,14 40,8 8,2 Z',
-      hw: 'M7,2 C50,6 96,14 114,34 C124,54 106,80 86,96 C74,122 70,168 76,212 C78,224 64,228 58,216 C44,178 46,132 42,108 C24,90 12,60 6,20 Z',
+      hw: 'M7,2 C50,6 96,14 114,34 C124,54 106,80 86,96 C74,122 70,168 74,198 C86,204 88,224 72,232 C58,236 50,222 56,206 C46,176 46,132 42,108 C24,90 12,60 6,20 Z',
       fwGrad: { r: 160, stops: [[0, '#e6f2dc'], [0.35, '#c6e6c4'], [0.7, '#a8d8b0'], [1, '#86c09c']] },
       hwGrad: { r: 230, stops: [[0, '#e6f2dc'], [0.3, '#bde0bc'], [0.6, '#98cca4'], [0.85, '#7cb892'], [1, '#c8c08a']] },
       edge: '#4f7a5e', band: '#e0d690',
@@ -249,7 +252,7 @@
                <path d="M150,-64 C138,-38 124,-12 108,10" stroke="#d9d08a" stroke-width="5" fill="none" opacity="0.9"/>
                <path d="M20,-6 C46,-20 70,-28 84,-60" stroke="#7fb08e" stroke-width="2" fill="none" opacity="0.5"/>`,
       hwDeco: `<path d="M114,34 C124,54 106,80 86,96 C74,122 70,168 76,212" stroke="#d9d08a" stroke-width="5" fill="none" opacity="0.9"/>
-               <path d="M72,176 C70,196 72,210 74,220 C66,226 60,222 58,214 C54,200 54,186 56,172 Z" fill="#d6a86e" opacity="0.75"/>
+               <path d="M60,178 C66,186 72,194 76,198 C88,204 90,224 72,234 C56,238 48,222 56,206 C56,196 58,186 60,178 Z" fill="#d6a86e" opacity="0.75"/>
                <path d="M24,28 C44,34 60,50 70,70" stroke="#7fb08e" stroke-width="2" fill="none" opacity="0.5"/>`,
       fwVeins: [[70, -60], [120, -80], [146, -62], [128, -30], [106, 8], [64, 10]],
       hwVeins: [[60, 8], [104, 24], [110, 60], [80, 100], [66, 200], [44, 104]],
@@ -258,7 +261,7 @@
       pal: { halo: '#eef4d8', outer: '#3a1f2a', ring: '#ecc463', inner: '#8a3440', pupil: '#1a0d10' },
       body: { th: [10, 15], abd: [58, 9], thc: '#f2f0e4', abc: '#e8e6d4', hair: '#ffffff', seg: '#c8c6b0' },
       ant: ['feather', 40, 24, '#8a6a34', 5],
-      top: -100, bottom: 230, span: 158,
+      top: -100, bottom: 240, span: 158,
     },
     hawk: {
       label: 'Sphinx ligustri', loc: 'Kent — 22.vii.1896', no: 'No. 11',
@@ -555,6 +558,10 @@
             <path d="M538,222 L1062,222 L1062,236 L538,236 Z" fill="#1c0e06" opacity="0.35" filter="url(#cabBlur1)"/>`;
       // glass: reflections
       m += `<g pointer-events="none"><rect x="538" y="222" width="524" height="284" fill="url(#cabGlass)"/>
+            <g id="cab-wall-cold">
+              <path d="M612,222 L668,222 L566,506 L538,506 L538,420 Z" fill="#cfe3ff" opacity="0.1"/>
+              <path d="M684,222 L700,222 L598,506 L582,506 Z" fill="#dfeaff" opacity="0.12"/>
+              <path d="M540,224 L760,224 L540,420 Z" fill="#9fc0e0" opacity="0.06"/></g>
             <g id="cab-wall-warm"><rect x="538" y="222" width="524" height="284" fill="url(#cabWarmGlass)"/>
               <path d="M1020,222 L1062,222 L1062,300 L990,506 L948,506 Z" fill="#ffd48a" opacity="0.1"/></g>
             <path d="M600,222 L680,222 L560,506 L538,506 L538,370 Z" fill="#fff" opacity="0.06"/>
@@ -623,13 +630,15 @@
       wall.els.digits = [0, 1, 2, 3].map(i => g.querySelector('#cab-wall-d' + i));
       wall.els.dim = g.querySelector('#cab-wall-dim');
       wall.els.warm = g.querySelector('#cab-wall-warm');
+      wall.els.cold = g.querySelector('#cab-wall-cold');
     },
     update() {
       if (!wall.g) return;
       const open = !!G.get('drawerOpen');
       const lit = !!G.get('lampLit');
-      wall.els.dim.setAttribute('fill', lit ? '#ffb45a' : '#12222e');
-      wall.els.dim.setAttribute('opacity', lit ? '0.22' : '0.32');
+      wall.els.dim.setAttribute('fill', lit ? '#ffb45a' : 'url(#cabColdDim)');
+      wall.els.dim.setAttribute('opacity', lit ? '0.22' : '1');
+      wall.els.cold.style.display = lit ? 'none' : '';
       wall.els.dim.style.mixBlendMode = lit ? 'soft-light' : 'multiply';
       wall.els.warm.style.display = lit ? '' : 'none';
       wall.els.cavity.style.display = open ? '' : 'none';
@@ -771,7 +780,7 @@
   const dr = { wheelEls: [] };
   const WX = [635, 745, 855, 965], WY = 468, WW = 78, WH = 116, DS = 78; // digit spacing
   const FRONT = { x: 100, y: 150, w: 1400, h: 620 };
-  const SLIDE = 440;
+  const SLIDE = 560, INNER_EXTRA = 120;
   G.registerView('drawer', {
     parent: 'east',
     build(g) {
@@ -983,6 +992,7 @@
       if (code === CODE.join('') || code === lastWrong) return;
       lastWrong = code;
       G.sfx('lockFail');
+      G.say('The wheels hold fast.');
       rattle(2);
     }, 1100);
   }
@@ -990,7 +1000,7 @@
   function setOpenPose(t) {
     const s = 1 + 0.07 * t, dy = SLIDE * t;
     dr.front.setAttribute('transform', t ? `translate(800,${f1(FRONT.y + dy)}) scale(${s}) translate(-800,${-FRONT.y})` : '');
-    dr.inner.setAttribute('transform', `translate(0,${f1(-SLIDE + dy)})`);
+    dr.inner.setAttribute('transform', `translate(0,${f1(-SLIDE + dy + INNER_EXTRA * t)})`);
     dr.bolt.setAttribute('transform', t ? 'translate(-130,0)' : '');
     dr.motto.setAttribute('opacity', t ? 0 : 1);
   }
@@ -1042,7 +1052,7 @@
       await G.tween(1400, t => {
         const s = 1 + 0.07 * t, dy = SLIDE * t;
         dr.front.setAttribute('transform', `translate(800,${f1(FRONT.y + dy)}) scale(${f1(s * 1000) / 1000}) translate(-800,${-FRONT.y})`);
-        dr.inner.setAttribute('transform', `translate(0,${f1(-SLIDE + dy)})`);
+        dr.inner.setAttribute('transform', `translate(0,${f1(-SLIDE + dy + INNER_EXTRA * t)})`);
         dr.motto.setAttribute('opacity', f1(Math.max(0, 1 - t * 2.5) * 100) / 100);
       }, 'inOut');
       solving = false;

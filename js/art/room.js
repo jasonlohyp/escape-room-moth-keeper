@@ -324,6 +324,12 @@
       ${rad('pBg', -30, -60, 170, [[0, '#56502f'], [0.45, '#2f2b19'], [1, '#110f08']])}
       ${rad('pSkin', -8, -32, 42, [[0, '#f3e7d4'], [0.55, '#e2cdb2'], [0.85, '#c8a98c'], [1, '#a88870']])}
       ${rad('pNeck', -4, 10, 30, [[0, '#dcc4a8'], [1, '#9c7e66']])}
+      ${lin('pBgShade', -80, 0, 80, 0, [[0.45, '#000', 0], [1, '#000', 0.35]])}
+      ${lin('pFaceShade', -24, 0, 24, 0, [[0, '#5a3a2a', 0.05], [0.5, '#5a3a2a', 0], [0.72, '#5a3a2a', 0.08], [1, '#5a3a2a', 0.38]])}
+      ${lin('pJaw', 0, -8, 0, 8, [[0, '#5a3a2a', 0], [1, '#5a3a2a', 0.3]])}
+      ${lin('pNeckShade', 0, 4, 0, 16, [[0, '#4a2e22', 0.45], [1, '#4a2e22', 0]])}
+      ${rad('pCheek', 0, 0, 1, [[0, '#d98f86', 0.42], [1, '#d98f86', 0]], 'gradientUnits="objectBoundingBox" cx="0.5" cy="0.5" r="0.5"')}
+      ${rad('pBrow', 0, 0, 1, [[0, '#fff8ea', 0.45], [1, '#fff8ea', 0]], 'gradientUnits="objectBoundingBox" cx="0.5" cy="0.5" r="0.5"')}
       ${lin('pCollar', -18, 0, 18, 0, [[0, '#8a7e64'], [0.35, '#e8dfc4'], [0.7, '#d3c7a8'], [1, '#7a6e54']])}
       ${lin('pDress', -70, 40, 70, 110, [[0, '#2d4144'], [0.4, '#172326'], [1, '#0b1012']])}
       ${lin('pHair', -30, -80, 30, 0, [[0, '#3b2a20'], [0.5, '#1b120e'], [1, '#0f0a08']])}
@@ -343,7 +349,7 @@
       <g clip-path="url(#pClip)">
         <rect x="-80" y="-115" width="160" height="230" fill="url(#pBg)"/>
         <path d="M-80,-60 C-50,-80 -30,-70 -10,-95" stroke="#6a623c" stroke-width="10" opacity="0.12" fill="none"/>
-        <path d="M40,-100 C60,-60 70,-30 80,10" stroke="#000" stroke-width="30" opacity="0.2" fill="none"/>
+        <rect x="-80" y="-115" width="160" height="230" fill="url(#pBgShade)"/>
         <g transform="translate(0,16) scale(1.2)">
         <!-- hair mass behind (an up-do: ends above the jaw) -->
         <path d="M-37,-24 C-46,-58 -26,-79 0,-79 C26,-79 46,-58 37,-24 C35,-17 31,-14 26,-13 L-26,-13 C-31,-14 -35,-17 -37,-24 Z" fill="url(#pHair)"/>
@@ -356,12 +362,12 @@
         <!-- ears -->
         <path d="M-24,-26 C-29,-28 -30,-18 -25,-14 Z" fill="#c9ab92"/><path d="M24,-26 C29,-28 30,-18 25,-14 Z" fill="#b8987e"/>
         <!-- neck -->
-        <path d="M-12.5,-4 C-12.5,8 -13.5,14 -14.5,22 L14.5,22 C13.5,14 12.5,8 12.5,-4 Z" fill="url(#pNeck)"/><path d="M-12,2 C-4,10 5,10 12.5,0 L12.5,6 C5,13 -4,13 -12,6 Z" fill="#6a4a3a" opacity="0.3"/>
-        <path d="M-9,4 C-2,9 4,9 10,2" stroke="#8a6a55" stroke-width="3" opacity="0.35" fill="none"/>
+        <path d="M-14,-6 C-14,4 -15,9 -16,16 L16,16 C15,9 14,4 14,-6 Z" fill="url(#pNeck)"/><path d="M-14,-6 C-14,4 -15,9 -16,16 L16,16 C15,9 14,4 14,-6 Z" fill="url(#pNeckShade)"/>
+        
         <!-- lace collar (high, but short) -->
-        <path d="M-15,16 C-16,22 -16,28 -18,33 C-6,37 6,37 18,33 C16,28 16,22 15,16 C5,18.5 -5,18.5 -15,16 Z" fill="url(#pCollar)" ${K} stroke-width="0.7"/>
-        <path d="M-14,16 q1.75,-2.6 3.5,0 q1.75,-2.6 3.5,0 q1.75,-2.6 3.5,0 q1.75,-2.6 3.5,0 q1.75,-2.6 3.5,0 q1.75,-2.6 3.5,0 q1.75,-2.6 3.5,0 q1.75,-2.6 3.5,0" fill="#ece3c8" stroke="#9a8c6e" stroke-width="0.5"/>
-        <path d="M-10,20 L-11,34 M-5,20 L-5,35 M0,20 L0,36 M5,20 L5,35 M10,20 L11,34" stroke="#9a8c6e" stroke-width="0.6" opacity="0.6"/>
+        <path d="M-16,11 C-17,19 -17,27 -18,33 C-6,37 6,37 18,33 C17,27 17,19 16,11 C5,13.5 -5,13.5 -16,11 Z" fill="url(#pCollar)" ${K} stroke-width="0.7"/>
+        <path d="M-16,11 q2,-2.6 4,0 q1.75,-2.6 3.5,0 q1.75,-2.6 3.5,0 q1.75,-2.6 3.5,0 q1.75,-2.6 3.5,0 q1.75,-2.6 3.5,0 q1.75,-2.6 3.5,0 q1.75,-2.6 3.5,0 q1.75,-2.6 3.5,0" fill="#ece3c8" stroke="#9a8c6e" stroke-width="0.5"/>
+        <path d="M-11,15 L-11,34 M-5,15 L-5,35 M0,15 L0,36 M5,15 L5,35 M11,15 L11,34" stroke="#9a8c6e" stroke-width="0.6" opacity="0.6"/>
         <path d="M-17,33 C-6,37 6,37 17,33 L22,39 C7,45 -7,45 -22,39 Z" fill="#c9bb99" stroke="#8a7a5a" stroke-width="0.5"/>
         <path d="M-20,39 q2,3 4,0 q2,3 4,0 q2,3 4,0 q2,3 4,0 q2,3 4,0 q2,3 4,0 q2,3 4,0 q2,3 4,0 q2,3 4,0 q2,3 4,0" fill="none" stroke="#e9e0c4" stroke-width="0.7" opacity="0.8"/>
         <!-- moth brooch -->
@@ -376,11 +382,11 @@
         </g>
         <!-- face -->
         <path d="M0,-56 C15,-56 23.5,-44 23.5,-28 C23.5,-13 17,-1 6,5.5 C2.5,7.5 -2.5,7.5 -6,5.5 C-17,-1 -23.5,-13 -23.5,-28 C-23.5,-44 -15,-56 0,-56 Z" fill="url(#pSkin)"/>
-        <path d="M13,-46 C23,-36 23,-14 12,-1 C20,-14 21,-32 13,-46 Z" fill="#8a6a55" opacity="0.3"/>
-        <path d="M-6,5.5 C-2.5,7.5 2.5,7.5 6,5.5 C3,9 -3,9 -6,5.5 Z" fill="#7a5a48" opacity="0.4"/>
-        <ellipse cx="-12.5" cy="-14" rx="6.5" ry="4" fill="#d98f86" opacity="0.26"/>
-        <ellipse cx="12.5" cy="-14" rx="5.5" ry="3.6" fill="#d98f86" opacity="0.2"/>
-        <ellipse cx="-6" cy="-44" rx="10" ry="4.5" fill="#fff8ea" opacity="0.35"/>
+        
+        
+        <ellipse cx="-13" cy="-13" rx="9" ry="6.5" fill="url(#pCheek)"/>
+        <ellipse cx="13" cy="-13" rx="8" ry="6" fill="url(#pCheek)" opacity="0.8"/>
+        <ellipse cx="-5" cy="-43" rx="13" ry="7" fill="url(#pBrow)"/><ellipse cx="-9" cy="-20" rx="6" ry="4" fill="url(#pBrow)" opacity="0.6"/><ellipse cx="0" cy="3" rx="5" ry="2.5" fill="url(#pBrow)" opacity="0.5"/>
         <!-- eyes -->
         <g>
           <path d="M-16,-26 C-13,-29.5 -7,-29.5 -4,-26 C-7,-23.5 -13,-23.5 -16,-26 Z" fill="#ece4d4"/>
@@ -410,7 +416,7 @@
         <path d="M-31,-22 C-37,-52 -20,-71 0,-71 C20,-71 37,-52 31,-22 C28,-36 18,-47 4,-49 C1.5,-47 -1.5,-47 -4,-49 C-18,-47 -28,-36 -31,-22 Z" fill="url(#pHair)"/>
         <path d="M-31,-22 C-30,-30 -27,-34 -22,-36 C-24,-30 -24,-25 -21,-20 C-25,-19 -29,-20 -31,-22 Z M31,-22 C30,-30 27,-34 22,-36 C24,-30 24,-25 21,-20 C25,-19 29,-20 31,-22 Z" fill="#150e0b"/>
         <path d="M-33,-30 C-34,-50 -22,-66 -6,-69" stroke="#7a6050" stroke-width="1.6" fill="none" opacity="0.45"/>
-        <path d="M-3,-63 C-12,-60 -20,-51 -23,-38 M-7,-65 C-17,-61 -25,-51 -27,-36 M4,-63 C13,-60 20,-51 23,-38 M8,-65 C18,-61 25,-51 27,-36" stroke="#5a4232" stroke-width="0.9" opacity="0.7" fill="none"/>
+        <path d="M-3,-63 C-12,-60 -20,-51 -23,-38 M-7,-65 C-17,-61 -25,-51 -27,-36 M4,-63 C13,-60 20,-51 23,-38 M8,-65 C18,-61 25,-51 27,-36" stroke="#5a4232" stroke-width="0.9" opacity="0.35" fill="none"/>
         <path d="M-20,-60 C-12,-66 -2,-67 4,-66" stroke="#6a5040" stroke-width="2" opacity="0.35" fill="none"/>
         <circle cx="25.5" cy="-11" r="1.7" fill="#efe6d6"/><circle cx="25" cy="-11.6" r="0.6" fill="#fff"/>
         </g>
