@@ -545,6 +545,7 @@
   // ================================================================== BOX close-up
   const BX = { dials: [4, 4, 4, 4], rot: [0, 0, 0, 0], turning: [false, false, false, false] };
   const DIAL_X = [530, 710, 890, 1070], DIAL_Y = 604;
+  const LID_N = 40, LID_D = 2400, LID_OPEN = 100 * Math.PI / 180;
   function pearlMoth(x, y, s, r, op) {
     return `<g transform="translate(${x} ${y}) rotate(${r}) scale(${s})" opacity="${op || 1}">
       <g fill="url(#fnPearl)" stroke="#2a0f0a" stroke-width="${1.6 / s}">
@@ -640,9 +641,9 @@
           <rect x="360" y="280" width="26" height="432" fill="#1a0806" opacity=".35" filter="url(#blur6)"/>
           <ellipse class="bx-cshadow" cx="636" cy="540" rx="140" ry="22" fill="#4a2a26" opacity=".45" filter="url(#blur6)"/>
           <g class="bx-imp" transform="translate(630 508) rotate(-7) scale(1.35)">
-            <path d="${COC}" fill="#8a655b" opacity=".22" filter="url(#fnBlur3)" transform="scale(.96 .9)"/>
+            <path d="${COC}" fill="#a0766a" opacity=".13" filter="url(#fnBlur3)" transform="scale(.96 .9)"/>
             <path d="${COC}" fill="none" stroke="#6a463f" stroke-width="5" opacity=".22" filter="url(#fnBlur3)" transform="translate(0 -3) scale(.94 .86)"/>
-            <path d="${COC}" fill="none" stroke="#f3e2d6" stroke-width="4" opacity=".45" filter="url(#fnBlur3)" transform="translate(0 4) scale(1.02 .98)"/>
+            <path d="${COC}" fill="none" stroke="#f6e8de" stroke-width="5" opacity=".6" filter="url(#fnBlur3)" transform="translate(0 4) scale(1.02 .98)"/>
             <path d="M-60,-6 C-20,-10 30,-8 70,-2 M-50,8 C-10,12 30,10 64,6" stroke="#a88074" stroke-width="1.4" fill="none" opacity=".3" filter="url(#fnBlur3)"/>
             <path d="M-100,4 C-118,12 -126,24 -130,38 M96,4 C112,14 120,26 128,36 M20,-30 C30,-44 44,-50 60,-48" stroke="#fbf4e8" stroke-width=".8" fill="none" opacity=".55"/>
           </g>
@@ -690,18 +691,17 @@
           G.go('letter');
         },
       });
-      // ------- lid underside (shown when open)
-      BX.under = G.svg(`
-        <g>
-          <path d="M346,64 L1254,64 L1270,250 L330,250 Z" fill="url(#fnRoseV)" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/>
-          <path d="M372,86 L1228,86 L1240,232 L360,232 Z" fill="url(#fnSilk)" stroke="${INK}" stroke-width="2"/>
-          <path d="M380,110 C700,96 900,124 1220,104 M378,160 C700,146 900,174 1226,156 M376,208 C700,194 900,222 1232,204" stroke="#8e6b61" stroke-width="1.4" fill="none" opacity=".5"/>
-          <path d="M372,86 L1228,86 L1240,232 L360,232 Z" fill="#1a0806" opacity=".25"/>
-          <g transform="translate(800 158) scale(.34 .2)" opacity=".5">${pearlMoth(0, 0, 1, 0, 1)}</g>
-          <rect x="420" y="240" width="60" height="18" rx="4" fill="url(#gBrass)" stroke="${INK}" stroke-width="1.6"/>
-          <rect x="1120" y="240" width="60" height="18" rx="4" fill="url(#gBrass)" stroke="${INK}" stroke-width="1.6"/>
-        </g>`, g);
-      BX.under.style.transformBox = 'view-box';
+      // ------- lid underside art (lid-local coords, drawn as seen once the lid swings past vertical)
+      G.svg(`<defs><g id="fnUnderArt">
+          <rect x="330" y="250" width="940" height="490" rx="16" fill="url(#fnRoseV)" stroke="${INK}" stroke-width="3"/>
+          <rect x="362" y="282" width="876" height="426" rx="6" fill="url(#fnSilk)" stroke="${INK}" stroke-width="2"/>
+          <path d="M370,360 C700,346 900,374 1230,356 M370,450 C700,436 900,464 1230,446 M370,540 C700,526 900,554 1230,536 M370,630 C700,616 900,644 1230,626" stroke="#8e6b61" stroke-width="2" fill="none" opacity=".45"/>
+          <g transform="translate(800 520) rotate(180) scale(.9)" opacity=".45">${pearlMoth(0, 0, 1, 0, 1)}</g>
+          <rect x="362" y="282" width="876" height="60" fill="#1a0806" opacity=".25"/>
+          <rect x="420" y="250" width="60" height="20" rx="4" fill="url(#gBrass)" stroke="${INK}" stroke-width="1.6"/>
+          <rect x="1120" y="250" width="60" height="20" rx="4" fill="url(#gBrass)" stroke="${INK}" stroke-width="1.6"/>
+        </g></defs>`, g);
+      BX.inShade = G.el('rect', { x: 360, y: 280, width: 880, height: 432, fill: '#0c0402', opacity: 0, 'pointer-events': 'none' }, g);
       // ------- the lid itself (closed)
       let rgrain = '';
       for (let i = 0; i < 30; i++) {
@@ -767,15 +767,26 @@
         click() { G.say(G.get('inkSeen') ? 'Moths in mother-of-pearl, and four little moons below. The journal\'s silver moons were drawn for this.' : 'Rosewood, inlaid with pearl moths. It is locked by four little moon dials.'); },
       });
       BX.lid.appendChild(BX.lidHot); // covers the inlay only (dials sit below y 500)
+      // hinged perspective swing: the lid is re-drawn as 16 thin strips, each an affine slice of a true projection
+      BX.swingDefs = G.el('defs', {}, g);
+      BX.swing = G.el('g', { 'pointer-events': 'none', style: 'display:none' }, g);
+      BX.strips = [];
+      for (let i = 0; i < LID_N; i++) {
+        const v0 = i * 490 / LID_N, v1 = (i + 1) * 490 / LID_N;
+        const cp = G.el('clipPath', { id: 'fnLS' + i }, BX.swingDefs);
+        G.el('rect', { x: 320, y: 250 + v0 - 0.8, width: 960, height: v1 - v0 + 1.6 }, cp);
+        BX.strips.push({ v0, v1, u: G.el('use', { href: '#fnUnderArt', 'clip-path': `url(#fnLS${i})` }, BX.swing) });
+      }
+      BX.lidShade = G.el('polygon', { fill: '#000', opacity: 0 }, BX.swing);
     },
     update() {
       const open = !!G.get('boxOpen');
       if (!BX.opening) {
         BX.lid.style.display = open ? 'none' : '';
         BX.lidHot.style.display = open ? 'none' : '';
-        BX.under.style.display = open ? '' : 'none';
-        BX.under.removeAttribute('transform');
         BX.lid.removeAttribute('transform');
+        BX.inShade.setAttribute('opacity', 0);
+        if (open) renderLid(LID_OPEN); else BX.swing.style.display = 'none';
       }
       const got = !!G.get('gotCocoon');
       BX.cocoonG.style.display = got ? 'none' : '';
@@ -790,6 +801,40 @@
     },
   });
 
+  function lidP(x, y, ph) {
+    const v = y - 250, Y = 250 + v * Math.cos(ph), Z = -v * Math.sin(ph), f = LID_D / (LID_D + Z);
+    return [800 + (x - 800) * f, 450 + (Y - 450) * f];
+  }
+  function renderLid(ph) {
+    BX.swing.style.display = '';
+    const face = ph <= Math.PI / 2, href = face ? '#fnLidClone' : '#fnUnderArt';
+    for (const st of BX.strips) {
+      const y0 = 250 + st.v0, y1 = 250 + st.v1;
+      const ym = (y0 + y1) / 2;
+      const A = lidP(330, ym, ph), B = lidP(1270, ym, ph), M = lidP(800, ym, ph), C0 = lidP(800, y0, ph), C1 = lidP(800, y1, ph);
+      const a = (B[0] - A[0]) / 940, b = (B[1] - A[1]) / 940, c = (C1[0] - C0[0]) / (y1 - y0), d = (C1[1] - C0[1]) / (y1 - y0);
+      const e = M[0] - a * 800 - c * ym, f = M[1] - b * 800 - d * ym;
+      if (st.u.getAttribute('href') !== href) st.u.setAttribute('href', href);
+      st.u.setAttribute('transform', `matrix(${a.toFixed(5)} ${b.toFixed(5)} ${c.toFixed(5)} ${d.toFixed(5)} ${e.toFixed(2)} ${f.toFixed(2)})`);
+    }
+    BX.lidShade.setAttribute('points', [[330, 250], [1270, 250], [1270, 740], [330, 740]].map(([x, y]) => lidP(x, y, ph).map(v => v.toFixed(1)).join(',')).join(' '));
+    const k = face ? 0.5 * Math.sin(ph) : lerp(0.5, 0.1, clamp((ph - Math.PI / 2) / (LID_OPEN - Math.PI / 2), 0, 1));
+    BX.lidShade.setAttribute('opacity', k.toFixed(3));
+  }
+  function dustPuff(parent) {
+    const gp = G.el('g', { 'pointer-events': 'none' }, parent);
+    const ps = [];
+    for (let i = 0; i < 34; i++) {
+      const side = i % 4, u = Math.random();
+      const x = side < 2 ? 330 + u * 940 : (side === 2 ? 330 : 1270), y = side < 2 ? (side ? 740 : 250) : 250 + u * 490;
+      const ang = Math.atan2(y - 495, x - 800) + rnd(-0.5, 0.5);
+      ps.push({ el: G.el('circle', { cx: x, cy: y, r: rnd(1.2, 3.2), fill: '#f5e9d6', opacity: 0 }, gp), x, y, dx: Math.cos(ang) * rnd(14, 46), dy: Math.sin(ang) * rnd(10, 30) - rnd(4, 18) });
+    }
+    return G.tween(1300, t => ps.forEach(p => {
+      p.el.setAttribute('cx', (p.x + p.dx * t).toFixed(1)); p.el.setAttribute('cy', (p.y + p.dy * t).toFixed(1));
+      p.el.setAttribute('opacity', (Math.sin(Math.PI * Math.min(1, t * 1.3)) * 0.7).toFixed(3));
+    }), 'out').then(() => gp.remove());
+  }
   function turnDial(i) {
     if (BX.turning[i] || G.get('boxOpen') || BX.opening) return;
     BX.turning[i] = true;
@@ -826,24 +871,26 @@
         const f = d.querySelector('.dial-flash');
         setTimeout(() => G.tween(700, t => f.setAttribute('opacity', (Math.sin(t * Math.PI) * 0.95).toFixed(3)), 'linear'), i * 110);
       });
+      dustPuff(BX.lid.parentNode);
       await G.wait(900);
-      // lid pops a hair, then swings up on its hinge (y=250)
+      // lid pops a hair, then swings up on its hinge (y=250) in perspective
       await G.tween(160, t => BX.lid.setAttribute('transform', `translate(0 ${-4 * t})`), 'out');
       G.sfx('boxOpen');
       BX.lidHot.style.display = 'none';
       BX.letterG.style.pointerEvents = 'none';
-      await G.tween(620, t => {
-        const s = 1 - t;
-        BX.lid.setAttribute('transform', `translate(0 250) scale(1 ${Math.max(0.001, s).toFixed(4)}) translate(0 -250)`);
-        BX.lid.setAttribute('opacity', (1 - 0.4 * t).toFixed(3));
-      }, 'in');
+      const old = BX.swingDefs.querySelector('#fnLidClone'); if (old) old.remove();
+      const clone = BX.lid.cloneNode(true);
+      clone.id = 'fnLidClone'; clone.removeAttribute('transform'); clone.style.display = '';
+      BX.swingDefs.appendChild(clone);
       BX.lid.style.display = 'none';
-      BX.lid.removeAttribute('opacity');
-      BX.under.style.display = '';
-      await G.tween(520, t => {
-        BX.under.setAttribute('transform', `translate(0 250) scale(1 ${Math.max(0.001, t).toFixed(4)}) translate(0 -250)`);
-      }, 'out');
-      BX.under.removeAttribute('transform');
+      BX.inShade.setAttribute('opacity', 0.75);
+      renderLid(0.001);
+      await G.tween(1250, t => {
+        const ph = t * LID_OPEN;
+        renderLid(ph);
+        BX.inShade.setAttribute('opacity', (0.75 * Math.pow(Math.max(0, Math.cos(ph)), 0.7)).toFixed(3));
+      }, t => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2));
+      BX.inShade.setAttribute('opacity', 0);
       BX.opening = false;
       G.set('boxOpen');
       G.say('Inside, on faded silk: a cocoon — and a letter sealed with a moth.');
@@ -937,7 +984,7 @@
   // ================================================================== DOOR (north)
   // closed-door geometry (stage units); the leaf is re-projected every frame while it swings (hinge = left edge).
   const DL = 672, DR = 928, DT = 188, DB = 788, PX = 800, PY = 446, PLATE_S = 1.0;
-  const CAMX = 800, CAMY = 470, CAMD = 1150, OPEN_ANG = 74;
+  const CAMX = 800, CAMY = 470, CAMD = 1150, OPEN_ANG = 93;
   function proj(x, y, th) {
     const u = x - DL, X = DL + u * Math.cos(th), Z = u * Math.sin(th), f = CAMD / (CAMD + Z);
     return [CAMX + (X - CAMX) * f, CAMY + (y - CAMY) * f];
@@ -972,16 +1019,18 @@
         </g>
         <!-- raised brass body -->
         <g stroke="${INK}" stroke-width="1.6">
-          <path d="M3,-18 C6,-30 10,-38 17,-44 M-3,-18 C-6,-30 -10,-38 -17,-44" stroke="url(#gBrass)" stroke-width="3.4" fill="none" stroke-linecap="round"/>
-          <path d="M3,-18 C6,-30 10,-38 17,-44 M-3,-18 C-6,-30 -10,-38 -17,-44" stroke="${INK}" stroke-width=".8" fill="none" opacity=".6"/>
-          <circle cx="17.5" cy="-45" r="2.8" fill="url(#gBrass)"/><circle cx="-17.5" cy="-45" r="2.8" fill="url(#gBrass)"/>
-          <ellipse cy="15" rx="7" ry="18" fill="url(#gBrass)"/>
+          ${[1, -1].map(sd => `<path d="M${sd * 3},-19 Q${sd * 5},-36 ${sd * 16},-47 Q${sd * 13},-32 ${sd * 3},-19 Z" fill="url(#gBrass)" stroke-width="1"/>
+          <path d="M${sd * 3},-19 Q${sd * 6},-34 ${sd * 16},-47" stroke="#4a3210" stroke-width=".9" fill="none"/>
+          <path d="${[0.25, 0.4, 0.55, 0.7, 0.85].map(t => { const x = sd * (3 + 13 * t * t), y = -19 - 28 * t; return `M${x.toFixed(1)},${y.toFixed(1)} l${(sd * 4.5 * (1 - t * .5)).toFixed(1)},${(-1.5).toFixed(1)} M${x.toFixed(1)},${y.toFixed(1)} l${(-sd * 2.5 * (1 - t * .5)).toFixed(1)},${(-3.5 * (1 - t * .4)).toFixed(1)}`; }).join(' ')}" stroke="#c9a14f" stroke-width="1.1" fill="none" stroke-linecap="round"/>`).join('')}
+          <ellipse cy="16" rx="8.6" ry="19" fill="url(#gBrass)"/>
           <path d="M-6,8 Q0,11 6,8 M-6.4,14 Q0,17 6.4,14 M-6,20 Q0,23 6,20 M-4.6,26 Q0,28.5 4.6,26" stroke="#6e4d1c" stroke-width="1" fill="none"/>
-          <ellipse cy="-6" rx="9" ry="10" fill="url(#gBrass)"/>
-          <circle cy="-17" r="5" fill="url(#gBrass)"/>
+          <ellipse cy="-6" rx="11" ry="11.5" fill="url(#gBrass)"/>
+          <path d="M-9,-10 Q0,-16 9,-10" stroke="#6e4d1c" stroke-width="1.4" fill="none"/>
+          <path d="M-8,-2 l-3,2 M8,-2 l3,2 M-7,3 l-3,3 M7,3 l3,3" stroke="#6e4d1c" stroke-width="1" fill="none"/>
+          <circle cy="-18" r="5.2" fill="url(#gBrass)"/>
           <path d="M-4,-10 C-2,-14 3,-14 5,-10" stroke="#fff1c1" stroke-width="1.4" fill="none" opacity=".7"/>
         </g>
-        ${detail ? `<g fill="#e7c476" stroke="${INK}" stroke-width=".6">${[[60, -40], [52, -2], [44, 30], [26, 98], [-60, -40], [-52, -2], [-44, 30], [-26, 98]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="1.8"/>`).join('')}</g>` : ''}
+        ${[[60, -41], [53, -3], [42, 32], [27, 99], [-60, -41], [-53, -3], [-42, 32], [-27, 99]].map(([x, y]) => `<g class="pl-riv" data-x="${x}" data-y="${y}" transform="translate(${x} ${y})"><circle r="3.2" fill="url(#gBrass)" stroke="${INK}" stroke-width=".7"/><path d="M-2.6,0 H2.6" stroke="#3a2a12" stroke-width="1.1"/><circle cx="-1" cy="-1" r=".8" fill="#fff1c1" opacity=".8"/></g>`).join('')}
       </g>`;
   }
   const D = { th: 0, polys: [], plateM: null };
@@ -995,6 +1044,15 @@
     D.polys.push({ el, pts });
     return el;
   }
+  function setMech(k) { // 0 = locked, 1 = drawn back
+    const o = D.mech0, sh = (dst, src, dx, dy) => dst.forEach((p, i) => { p[0] = src[i][0] + dx; p[1] = src[i][1] + dy; });
+    const r = clamp(k * 2, 0, 1), b = clamp(k * 2 - 1, 0, 1);
+    sh(D.rod, o.rod, -26 * smooth(r), 0); sh(D.knob, o.knob, -26 * smooth(r), 0);
+    sh(D.barU, o.barU, 0, 30 * smooth(b)); sh(D.barL, o.barL, 0, -30 * smooth(b));
+    const a = k * Math.PI; // hub turns (drawn as a rotating square)
+    D.hub.forEach((p, i) => { const an = a + i * Math.PI / 2 + Math.PI / 4; p[0] = 915 + Math.cos(an) * 8.5; p[1] = 446 + Math.sin(an) * 8.5; });
+    setDoor(D.th);
+  }
   function setDoor(th) {
     D.th = th;
     for (const p of D.polys) p.el.setAttribute('points', p.pts.map(([x, y]) => proj(x, y, th).map(v => v.toFixed(1)).join(',')).join(' '));
@@ -1007,31 +1065,54 @@
     D.edgeShadow.setAttribute('points', `${fe[0]},${fe[1]} ${fe[0] + 60 * k},${fe[1]} ${fb[0] + 60 * k},${fb[1]} ${fb[0]},${fb[1]}`);
   }
 
+  const MOON = { x: 806, y: 300, r: 30 };
   function buildSky(g) {
+    const R = srand(99);
     let stars = '';
-    for (let i = 0; i < 70; i++) {
-      const x = DL + Math.random() * (DR - DL), y = DT + Math.random() * 420;
-      stars += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(Math.random() * 1.1 + .3).toFixed(2)}" fill="#fff" opacity="${(Math.random() * .6 + .25).toFixed(2)}"/>`;
+    for (let i = 0; i < 90; i++) {
+      const x = DL + R() * (DR - DL), y = DT + R() * 430, r = R();
+      stars += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(r * 1.1 + .3).toFixed(2)}" fill="#fff" opacity="${(R() * .55 + .2).toFixed(2)}"/>`;
     }
-    let roofs = 'M660,800 L660,700 L690,700 L690,676 L702,676 L702,700 L730,700 L746,684 L770,684 L786,700 L790,712 L826,712 L826,690 L836,690 L836,712 L850,712 L872,694 L898,694 L914,708 L940,708 L940,800 Z';
+    const ridge = (y0, amp, step, seed) => {
+      const Rr = srand(seed); let d = `M${DL - 20},${DB + 20} L${DL - 20},${y0}`;
+      for (let x = DL - 20; x <= DR + 20; x += step) d += ` L${x},${(y0 - Rr() * amp).toFixed(1)}`;
+      return d + ` L${DR + 20},${DB + 20} Z`;
+    };
+    // treeline: rounded crowns
+    let trees = `M${DL - 20},${DB + 20} L${DL - 20},700`;
+    const Rt = srand(12);
+    for (let x = DL - 20; x < DR + 20;) {
+      const w = 10 + Rt() * 16, h = 18 + Rt() * 34;
+      trees += ` L${x.toFixed(1)},700 Q${(x + w * 0.1).toFixed(1)},${(700 - h).toFixed(1)} ${(x + w / 2).toFixed(1)},${(700 - h - 4).toFixed(1)} Q${(x + w * 0.9).toFixed(1)},${(700 - h).toFixed(1)} ${(x + w).toFixed(1)},700`;
+      x += w;
+    }
+    trees += ` L${DR + 20},${DB + 20} Z`;
+    const roofs = `M${DL - 20},${DB + 20} L${DL - 20},744 L700,744 L700,726 L708,726 L708,744 L728,744 L752,724 L790,724 L812,744 L840,744 L840,736 L862,712 L884,736 L884,744 L912,744 L912,732 L920,732 L920,744 L${DR + 20},744 L${DR + 20},${DB + 20} Z`;
     G.svg(`
-      <defs><clipPath id="fnDoorway"><rect x="${DL}" y="${DT}" width="${DR - DL}" height="${DB - DT}"/></clipPath></defs>
+      <defs>
+        <clipPath id="fnDoorway"><rect x="${DL}" y="${DT}" width="${DR - DL}" height="${DB - DT}"/></clipPath>
+        <radialGradient id="fnMoonGlowS" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#eaf2ff" stop-opacity=".55"/><stop offset=".4" stop-color="#9fbde6" stop-opacity=".18"/><stop offset="1" stop-color="#6f93c2" stop-opacity="0"/></radialGradient>
+      </defs>
       <g clip-path="url(#fnDoorway)">
         <rect x="${DL - 10}" y="${DT - 10}" width="${DR - DL + 20}" height="${DB - DT + 20}" fill="url(#fnSky)"/>
         ${stars}
-        <circle cx="826" cy="330" r="210" fill="url(#fnMoonHalo)" opacity=".75"/>
-        <circle cx="826" cy="330" r="40" fill="#fbf8ec"/>
-        <circle cx="826" cy="330" r="40" fill="url(#fnMoonLit)" opacity=".6"/>
-        <g fill="#b9b39c" opacity=".35"><ellipse cx="814" cy="320" rx="9" ry="7"/><ellipse cx="836" cy="340" rx="11" ry="8"/><ellipse cx="820" cy="348" rx="5" ry="4"/></g>
-        <g filter="url(#blur6)" opacity=".7">
-          <ellipse cx="740" cy="420" rx="120" ry="12" fill="#3d5f8c"/><ellipse cx="900" cy="380" rx="110" ry="10" fill="#4a6c98"/>
-          <ellipse cx="760" cy="416" rx="90" ry="4" fill="#cfe3ff" opacity=".6"/>
+        <circle cx="${MOON.x}" cy="${MOON.y}" r="190" fill="url(#fnMoonGlowS)"/>
+        <g filter="url(#blur6)" opacity=".75">
+          <ellipse cx="740" cy="392" rx="120" ry="9" fill="#3d5f8c"/><ellipse cx="900" cy="360" rx="100" ry="8" fill="#4a6c98"/>
+          <ellipse cx="760" cy="389" rx="90" ry="3" fill="#dfeaff" opacity=".6"/>
         </g>
-        <path d="M660,660 C700,640 740,650 780,636 C820,624 860,640 940,628 L940,800 L660,800 Z" fill="#162a44" opacity=".85"/>
-        <path d="${roofs}" fill="#08111d"/>
-        <rect x="694" y="664" width="5" height="10" fill="#08111d"/>
-        <rect x="878" y="700" width="6" height="5" fill="#ffcf7a" opacity=".7"/>
+        <path d="${ridge(640, 26, 22, 3)}" fill="#3f5f8a" opacity=".75"/>
+        <rect x="${DL}" y="600" width="${DR - DL}" height="80" fill="#9fbde6" opacity=".18" filter="url(#blur6)"/>
+        <path d="${ridge(676, 18, 14, 8)}" fill="#223a5c"/>
+        <path d="${trees}" fill="#101d31"/>
+        <rect x="${DL}" y="690" width="${DR - DL}" height="30" fill="#9fbde6" opacity=".12" filter="url(#blur6)"/>
+        <path d="${roofs}" fill="#060b14"/>
+        <rect x="857" y="724" width="6" height="7" fill="#ffcf7a" opacity=".75"/>
         <g class="fn-skymoths"></g>
+        <circle cx="${MOON.x}" cy="${MOON.y}" r="${MOON.r + 10}" fill="#eaf2ff" opacity=".35" filter="url(#blur6)"/>
+        <circle cx="${MOON.x}" cy="${MOON.y}" r="${MOON.r}" fill="#fbf8ec"/>
+        <circle cx="${MOON.x}" cy="${MOON.y}" r="${MOON.r}" fill="url(#fnMoonLit)" opacity=".55"/>
+        <g fill="#b9b39c" opacity=".4"><ellipse cx="${MOON.x - 9}" cy="${MOON.y - 8}" rx="7" ry="5.5"/><ellipse cx="${MOON.x + 8}" cy="${MOON.y + 7}" rx="9" ry="6.5"/><ellipse cx="${MOON.x - 4}" cy="${MOON.y + 13}" rx="4" ry="3"/></g>
       </g>`, g);
     return g.querySelector('.fn-skymoths');
   }
@@ -1055,7 +1136,8 @@
       G.el('polygon', { points: `${DL},${DT} ${DR},${DT} ${b2[0]},${b2[1]} ${b1[0]},${b1[1]}`, fill: '#140c07' }, rv);
       D.edgeShadow = G.el('polygon', { points: '', fill: '#050302', opacity: 0, filter: 'url(#fnBlur3)' }, g);
       // --------- the leaf (projected)
-      const leaf = D.leaf = G.el('g', { 'stroke-linejoin': 'round' }, g);
+      G.svg(`<defs><clipPath id="fnLeafClip"><rect x="${DL}" y="0" width="400" height="900"/></clipPath></defs>`, g);
+      const leaf = D.leaf = G.el('g', { 'stroke-linejoin': 'round', 'clip-path': 'url(#fnLeafClip)' }, g);
       mkPoly(leaf, [[DL, DT], [DR, DT], [DR, DB], [DL, DB]], { fill: 'url(#fnDoorWood)', stroke: INK, 'stroke-width': 3 });
       // grain
       for (let i = 0; i < 14; i++) {
@@ -1079,6 +1161,21 @@
       // middle rail plate zone
       mkPoly(leaf, [[694, 386], [906, 386], [906, 584], [694, 584]], { fill: '#26170d', stroke: '#140a05', 'stroke-width': 1.5, opacity: .8 });
       mkLine(leaf, [[DL + 2, DT + 2], [DR - 2, DT + 2]], { stroke: '#7a5236', 'stroke-width': 1.5, opacity: .5 });
+      // --- locking mechanism: an espagnolette bar in two halves along the free edge + a bolt rod from the plate
+      const brass = { fill: 'url(#gBrass)', stroke: INK, 'stroke-width': 1.3 };
+      mkPoly(leaf, [[909, DT + 2], [923, DT + 2], [923, DB - 2], [909, DB - 2]], { fill: '#0d0805', opacity: .85 });          // bar channel
+      D.barU = [[911, DT - 14], [921, DT - 14], [921, 428], [911, 428]];
+      D.barL = [[911, 464], [921, 464], [921, DB + 14], [911, DB + 14]];
+      mkPoly(leaf, D.barU, brass); mkPoly(leaf, D.barL, brass);
+      mkPoly(leaf, [[846, 438], [926, 438], [926, 454], [846, 454]], { fill: '#0b0705', stroke: '#6e4d1c', 'stroke-width': 1.4 }); // rod slot
+      D.rod = [[866, 441.5], [946, 441.5], [946, 450.5], [866, 450.5]];
+      D.knob = [[858, 438], [870, 438], [870, 454], [858, 454]];
+      mkPoly(leaf, D.rod, brass); mkPoly(leaf, D.knob, brass);
+      [250, 340, 560, 690].forEach(y => mkPoly(leaf, [[906, y], [926, y], [926, y + 9], [906, y + 9]], brass));             // guide straps
+      mkPoly(leaf, [[902, 426], [928, 426], [928, 466], [902, 466]], brass);                                                // gear housing
+      D.hub = [[909, 440], [921, 440], [921, 452], [909, 452]];
+      mkPoly(leaf, D.hub, { fill: '#6e4d1c', stroke: INK, 'stroke-width': 1 });
+      D.mech0 = { barU: D.barU.map(p => p.slice()), barL: D.barL.map(p => p.slice()), rod: D.rod.map(p => p.slice()), knob: D.knob.map(p => p.slice()), hub: D.hub.map(p => p.slice()) };
       D.plate = G.el('g', {}, leaf);
       G.svg(`<ellipse cx="0" cy="20" rx="92" ry="96" fill="#000" opacity=".5" filter="url(#blur6)" transform="translate(0 6)"/>${plateMarkup(false)}`, D.plate);
       D.shade = mkPoly(leaf, [[DL, DT], [DR, DT], [DR, DB], [DL, DB]], { fill: '#000', opacity: 0 });
@@ -1119,7 +1216,7 @@
     update() {
       if (D.animating) return;
       const open = !!G.get('doorOpen');
-      setDoor(open ? OPEN_ANG * Math.PI / 180 : 0);
+      D.th = open ? OPEN_ANG * Math.PI / 180 : 0; setMech(open ? 1 : 0);
       D.underLight.style.display = open ? 'none' : '';
       D.hot.style.display = open ? 'none' : '';
       const lit = !!G.get('hatched');
@@ -1130,55 +1227,68 @@
     exit() { stopSwarm(); },
   });
 
-  // light flooding into the room + moths (north top layer)
+  // moonlight flooding in: a shaft through the doorway onto the floor (north top layer)
   const LT = {};
   function ensureOpenLight(alpha) {
     const top = topLayer('north');
     if (!LT.g || !LT.g.isConnected) {
       LT.g = G.el('g', { class: 'fn-light' }, top);
       G.svg(`
+        <defs>
+          <linearGradient id="fnShaft" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#dfeaff" stop-opacity=".02"/><stop offset=".55" stop-color="#dfeaff" stop-opacity=".14"/><stop offset="1" stop-color="#eef4ff" stop-opacity=".3"/>
+          </linearGradient>
+          <linearGradient id="fnFloor" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#f4f8ff" stop-opacity=".95"/><stop offset=".6" stop-color="#cfe3ff" stop-opacity=".5"/><stop offset="1" stop-color="#cfe3ff" stop-opacity=".15"/>
+          </linearGradient>
+        </defs>
         <g style="mix-blend-mode:screen">
-          <rect width="1600" height="900" fill="#9fb8e0" opacity=".13"/>
-          <ellipse cx="820" cy="480" rx="620" ry="470" fill="url(#fnWhitePool)" opacity=".32"/>
-          <ellipse class="fn-burst" cx="830" cy="470" rx="420" ry="460" fill="url(#fnWhitePool)" opacity="0"/>
-          <polygon class="fn-spill" points="${DL + 60},${DB} ${DR},${DB} 1330,900 560,900" fill="url(#fnSpill)" filter="url(#blur6)"/>
-          <polygon points="${DL + 90},${DB} ${DR - 10},${DB} 1120,860 700,860" fill="#ffffff" opacity=".35" filter="url(#blur6)"/>
-          <rect x="${DL - 4}" y="${DT - 4}" width="${DR - DL + 8}" height="${DB - DT + 8}" fill="none" stroke="#e6f0ff" stroke-width="6" opacity=".35" filter="url(#blur6)"/>
-          <g class="fn-rays" filter="url(#blur6)">
-            <polygon points="760,${DT + 40} 820,${DT + 40} 1160,900 1010,900" fill="url(#fnRay)" opacity=".35"/>
-            <polygon points="820,${DT + 120} 880,${DT + 140} 1440,900 1250,900" fill="url(#fnRay)" opacity=".22"/>
-            <polygon points="720,${DT + 80} 770,${DT + 60} 900,900 780,900" fill="url(#fnRay)" opacity=".25"/>
-          </g>
-          <rect x="${DL}" y="${DT}" width="${DR - DL}" height="${DB - DT}" fill="#e7f0ff" opacity=".12" filter="url(#blur20)"/>
+          <polygon class="fn-shaft" points="${DL + 30},${DT + 20} ${DR},${DT + 20} 1250,900 700,900" fill="url(#fnShaft)" filter="url(#blur6)"/>
+          <polygon points="${DL + 30},${DB} ${DR},${DB} 1255,900 690,900" fill="url(#fnFloor)" filter="url(#blur6)"/>
+          <polygon points="${DL + 50},${DB + 2} ${DR - 6},${DB + 2} 1110,870 760,870" fill="#ffffff" opacity=".45" filter="url(#blur6)"/>
+          <rect x="${DL - 3}" y="${DT - 3}" width="${DR - DL + 6}" height="${DB - DT + 6}" fill="none" stroke="#e6f0ff" stroke-width="5" opacity=".45" filter="url(#blur6)"/>
+          <ellipse class="fn-burst" cx="${(DL + DR) / 2}" cy="470" rx="240" ry="360" fill="url(#fnWhitePool)" opacity="0"/>
         </g>
         <g class="fn-roommoths"></g>`, LT.g);
       LT.room = LT.g.querySelector('.fn-roommoths');
-      LT.rays = LT.g.querySelector('.fn-rays');
+      LT.shaft = LT.g.querySelector('.fn-shaft');
       LT.burst = LT.g.querySelector('.fn-burst');
     }
     LT.g.setAttribute('opacity', alpha.toFixed(3));
   }
 
-  // drifting moth swarm (sky beyond the door + a few spilling into the room)
+  // moths streaming toward the moon (behind the door) + a few drifting out into the room
   const SW = { sky: [], room: [], running: false, raf: 0 };
+  function spawnSky(m, scatter) {
+    m.z = Math.pow(Math.random(), 1.6);                       // mostly far & small, a few near & large
+    const edge = Math.random();
+    if (edge < 0.6) { m.x = rnd(DL - 10, DR + 10); m.y = DB + rnd(0, 30); }
+    else { m.x = Math.random() < 0.5 ? DL - 12 : DR + 12; m.y = rnd(420, DB); }
+    if (scatter) { m.x = rnd(DL, DR); m.y = rnd(DT + 40, DB); }
+    m.s = lerp(0.03, 0.14, m.z); m.a = lerp(0.3, 1, m.z); m.sp = lerp(22, 70, m.z);
+    m.sw = rnd(0.35, 0.9) * (Math.random() < 0.5 ? 1 : -1); m.ph = rnd(0, 6.28); m.hz = rnd(5, 9);
+    return m;
+  }
   function initSwarm() {
     if (SW.sky.length) return;
-    for (let i = 0; i < 150; i++) {
-      const u = G.el('use', { href: '#fnTiny', opacity: 0 }, D.skyMoths);
-      SW.sky.push({ u, x: rnd(DL - 10, DR + 10), y: rnd(DT, DB), s: rnd(0.035, 0.11), vx: rnd(-8, 8), vy: rnd(-28, -8), ph: rnd(0, 6.28), hz: rnd(5, 9), a: rnd(0.45, 0.95), w: rnd(0, 6.28) });
+    for (let i = 0; i < 120; i++) {
+      const m = spawnSky({}, true);
+      m.glow = m.z > 0.55 ? G.el('circle', { r: 26 * m.s / 0.14, fill: 'url(#fnGreenPool)', opacity: 0 }, D.skyMoths) : null;
+      m.u = G.el('use', { href: '#fnTiny', opacity: 0 }, D.skyMoths);
+      SW.sky.push(m);
     }
+  }
+  function spawnRoom(m, scatter) {
+    m.x = rnd(DL + 40, DR - 40); m.y = rnd(DT + 160, DB - 60);
+    const ang = rnd(-0.9, 0.9) + (Math.random() < 0.5 ? 0 : Math.PI);
+    m.vx = Math.cos(ang) * rnd(50, 120); m.vy = rnd(-18, 30);
+    m.gs = rnd(0.08, 0.16); m.life = 0; m.max = rnd(4, 7); m.ph = rnd(0, 6.28); m.hz = rnd(6, 10);
+    if (scatter) m.life = rnd(0, m.max);
+    return m;
   }
   function initRoom() {
     if (SW.room.length || !LT.room) return;
-    for (let i = 0; i < 34; i++) SW.room.push(spawnRoom({ u: G.el('use', { href: '#fnTiny', opacity: 0 }, LT.room) }, true));
-  }
-  function spawnRoom(m, scatter) {
-    m.x = rnd(DL + 30, DR - 30); m.y = rnd(DT + 60, DB - 80);
-    const ang = rnd(-Math.PI, Math.PI);
-    m.vx = Math.cos(ang) * rnd(40, 110); m.vy = Math.sin(ang) * rnd(30, 70) - 25;
-    m.s = 0.05; m.gs = rnd(0.07, 0.16); m.life = 0; m.max = rnd(4, 8); m.ph = rnd(0, 6.28); m.hz = rnd(6, 10);
-    if (scatter) m.life = rnd(0, m.max);
-    return m;
+    for (let i = 0; i < 16; i++) SW.room.push(spawnRoom({ u: G.el('use', { href: '#fnTiny', opacity: 0 }, LT.room) }, true));
   }
   function startSwarm() {
     if (SW.running) return;
@@ -1188,16 +1298,19 @@
     const loop = now => {
       if (!SW.running) return;
       const dt = Math.min(0.05, (now - last) / 1000); last = now;
-      const T = now / 1000;
+      const T = now / 1000, A = SW.alpha == null ? 1 : SW.alpha;
       for (const m of SW.sky) {
-        m.w += dt * 0.7;
-        m.x += (m.vx + Math.sin(m.w + m.y * 0.02) * 16) * dt;
-        m.y += (m.vy + Math.cos(m.w * 1.3) * 6) * dt;
-        if (m.y < DT - 20) { m.y = DB + 10; m.x = rnd(DL - 10, DR + 10); }
-        if (m.x < DL - 20) m.x = DR + 15; if (m.x > DR + 20) m.x = DL - 15;
-        const fl = 0.25 + 0.75 * Math.abs(Math.cos(T * m.hz + m.ph));
-        m.u.setAttribute('transform', `translate(${m.x.toFixed(1)} ${m.y.toFixed(1)}) scale(${(m.s * fl).toFixed(4)} ${m.s.toFixed(4)})`);
-        m.u.setAttribute('opacity', (m.a * (SW.alpha == null ? 1 : SW.alpha)).toFixed(2));
+        const dx = MOON.x - m.x, dy = MOON.y - m.y, d = Math.hypot(dx, dy) || 1;
+        const tx = -dy / d, ty = dx / d;                          // swirl around the moon while drawn in
+        m.x += (dx / d * m.sp + tx * m.sp * m.sw + Math.sin(T * 1.7 + m.ph) * 8) * dt;
+        m.y += (dy / d * m.sp + ty * m.sp * m.sw + Math.cos(T * 1.3 + m.ph) * 6) * dt;
+        const near = clamp((d - 26) / 90, 0, 1);                  // fade into the moon
+        if (d < 30) spawnSky(m);
+        const fl = 0.3 + 0.7 * Math.abs(Math.cos(T * m.hz + m.ph));
+        const s = m.s * (0.55 + 0.45 * near);
+        m.u.setAttribute('transform', `translate(${m.x.toFixed(1)} ${m.y.toFixed(1)}) rotate(${(Math.atan2(dx, -dy) * 57.3 * 0.4).toFixed(1)}) scale(${(s * fl).toFixed(4)} ${s.toFixed(4)})`);
+        m.u.setAttribute('opacity', (m.a * near * A).toFixed(2));
+        if (m.glow) { m.glow.setAttribute('cx', m.x.toFixed(1)); m.glow.setAttribute('cy', m.y.toFixed(1)); m.glow.setAttribute('opacity', (0.5 * near * A).toFixed(2)); }
       }
       if (LT.room && SW.roomOn) {
         initRoom();
@@ -1205,15 +1318,15 @@
           m.life += dt;
           if (m.life > m.max) spawnRoom(m);
           const k = m.life / m.max;
-          m.x += m.vx * dt * (0.4 + k); m.y += m.vy * dt * (0.4 + k) + Math.sin(T * 2 + m.ph) * 0.6;
-          m.s = lerp(0.04, m.gs * 2.2, k);
-          const fl = 0.2 + 0.8 * Math.abs(Math.cos(T * m.hz + m.ph));
-          const a = Math.min(1, k * 5) * (1 - smooth(clamp((k - 0.7) / 0.3, 0, 1))) * 0.85;
-          m.u.setAttribute('transform', `translate(${m.x.toFixed(1)} ${m.y.toFixed(1)}) rotate(${(m.vx * 0.15).toFixed(1)}) scale(${(m.s * fl).toFixed(4)} ${m.s.toFixed(4)})`);
+          m.x += m.vx * dt * (0.4 + k); m.y += m.vy * dt * (0.4 + k) + Math.sin(T * 2 + m.ph) * 0.5;
+          const s = lerp(0.05, m.gs * 2, k), fl = 0.25 + 0.75 * Math.abs(Math.cos(T * m.hz + m.ph));
+          let a = Math.min(1, k * 5) * (1 - smooth(clamp((k - 0.7) / 0.3, 0, 1))) * 0.8;
+          if (m.y < 200) a *= clamp((m.y - 150) / 50, 0, 1);    // keep the band above the door clear
+          m.u.setAttribute('transform', `translate(${m.x.toFixed(1)} ${m.y.toFixed(1)}) rotate(${(m.vx * 0.15).toFixed(1)}) scale(${(s * fl).toFixed(4)} ${s.toFixed(4)})`);
           m.u.setAttribute('opacity', a.toFixed(2));
         }
       }
-      if (LT.rays) LT.rays.setAttribute('opacity', (0.8 + 0.2 * Math.sin(T * 0.7)).toFixed(3));
+      if (LT.shaft) LT.shaft.setAttribute('opacity', (0.85 + 0.15 * Math.sin(T * 0.6)).toFixed(3));
       SW.raf = requestAnimationFrame(loop);
     };
     SW.raf = requestAnimationFrame(loop);
@@ -1496,13 +1609,20 @@
       await G.wait(300);
     }
     await G.tween(420, t => rays.setAttribute('opacity', (Math.sin(t * Math.PI) * 0.8).toFixed(3)), 'linear');
-    // the mechanism turns
+    // the mechanism turns: rivets unscrew, the bolt rod draws back, the bar halves slide out of their keepers
     G.sfx('doorUnlock');
-    await G.tween(900, (t, raw) => {
-      const shake = raw > 0.55 && raw < 0.75 ? Math.sin(raw * 200) * 1.2 : 0;
-      setCam('north', 1.6, 800 + shake, 452);
-    }, 'inOut');
-    D.plate.querySelector('.pl-fill').setAttribute('opacity', 0.85);
+    const rivs = [...D.plate.querySelectorAll('.pl-riv')];
+    await G.tween(650, t => rivs.forEach((r, i) => r.setAttribute('transform', `translate(${r.dataset.x} ${r.dataset.y}) rotate(${((i % 2 ? -1 : 1) * 270 * t).toFixed(1)})`)), 'inOut');
+    G.sfx('lockClick');
+    const camMech = cam('north', { s: 1.55, x: 850, y: 440 }, 700, 'inOut');
+    let clicked = false;
+    await G.tween(1300, (t, raw) => {
+      setMech(t);
+      if (!clicked && raw > 0.5) { clicked = true; G.sfx('lockClick'); }
+    }, 'linear');
+    await camMech;
+    await G.tween(260, (t, raw) => setCam('north', 1.55, 850 + Math.sin(raw * 60) * 1.4 * (1 - raw), 440), 'linear');
+    D.plate.querySelector('.pl-fill').setAttribute('opacity', 0.6);
     // she lifts from the plate as the door gives
     const lift = hover(m, 900, {
       hz: 3.5, amp: t => smooth(t) * 0.9,
@@ -1522,18 +1642,18 @@
     const openP = G.tween(2900, t => {
       setDoor(t * OPEN_ANG * Math.PI / 180);
       ensureOpenLight(smooth(clamp(t * 1.4, 0, 1)));
-      LT.burst.setAttribute('opacity', (Math.sin(clamp(t * 1.6, 0, 1) * Math.PI) * 0.75).toFixed(3));
+      LT.burst.setAttribute('opacity', (Math.sin(clamp(t * 1.6, 0, 1) * Math.PI) * 0.6).toFixed(3));
       plateGlow.setAttribute('opacity', (0.9 * (1 - t)).toFixed(3));
       SW.alpha = clamp(t * 1.5, 0, 1);
       if (t > 0.35) SW.roomOn = true;
     }, t => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2));
-    // she goes out through the door, towards the moon, among the others
-    const flyOut = fly(m, [[m.x, m.y], [860, 350], [880, 300], [848, 316], [826, 332]], {
-      ms: 3600,
-      hz: 5.5,
+    // she goes out through the door, towards the moon, among the others — and the scene is allowed to breathe
+    const flyOut = fly(m, [[m.x, m.y], [868, 356], [896, 300], [858, 246], [790, 262], [786, 300], [MOON.x, MOON.y]], {
+      ms: 7200,
+      hz: t => lerp(5.5, 4, t),
       ease: t => t,
-      scale: t => lerp(1.0, 0.07, Math.pow(t, 0.8)),
-      onFrame(t) { m.alpha = t < 0.8 ? 1 : 1 - (t - 0.8) / 0.2; m.glow = 1; },
+      scale: t => lerp(1.0, 0.045, Math.pow(t, 0.7)),
+      onFrame(t) { m.alpha = t < 0.85 ? 1 : 1 - (t - 0.85) / 0.15; m.glow = 1; },
     });
     await G.wait(400);
     await camOut;
@@ -1544,7 +1664,7 @@
     await flyOut;
     m.remove();
     plateGlow.remove();
-    await G.wait(2500);
+    await G.wait(1400);
     letterbox(false, 900);
   }
 
@@ -1572,5 +1692,7 @@
     useOnLamp,
     phaseNames: PHASE_NAMES,
     _dials: () => BX.dials.slice(),
+    _lid: deg => { const c = BX.lid.cloneNode(true); c.id = 'fnLidClone'; c.removeAttribute('transform'); c.style.display = ''; const o = BX.swingDefs.querySelector('#fnLidClone'); if (o) o.remove(); BX.swingDefs.appendChild(c); BX.lid.style.display = 'none'; renderLid(deg * Math.PI / 180); BX.inShade.setAttribute('opacity', (0.75 * Math.pow(Math.max(0, Math.cos(deg * Math.PI / 180)), 0.7)).toFixed(3)); },
+    _openBox: () => { BX.dials = SOLUTION.slice(); return openBox(); },
   });
 })();

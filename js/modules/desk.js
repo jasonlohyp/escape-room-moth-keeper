@@ -133,57 +133,79 @@
     { k: 'hawk', x: 914, y: 204, s: 0.96, r: 0 },
     { k: 'emperor', x: 1094, y: 238, s: 1.0, r: 0 },
   ];
+  // Projection layers are baked to bitmaps at load (blur/turbulence filters over large areas are far too
+  // expensive to rasterise on the frame lampLit flips). Each layer is an <image>: first an SVG data-URL
+  // (so it is correct immediately), then swapped for a PNG rendered once via canvas.
+  const PROJ_DEFS = `
+    <radialGradient id="dkWash" cx="900" cy="372" r="520" gradientUnits="userSpaceOnUse" gradientTransform="translate(900 372) scale(1 0.62) translate(-900 -372)">
+      <stop offset="0" stop-color="#ffcf7a" stop-opacity="0.34"/><stop offset="0.45" stop-color="#e0953a" stop-opacity="0.16"/><stop offset="1" stop-color="#e0853a" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="dkMothLight" cx="50%" cy="50%" r="60%">
+      <stop offset="0" stop-color="#fff1c1"/><stop offset="0.55" stop-color="#ffd98e"/><stop offset="1" stop-color="#f0a24c"/>
+    </radialGradient>
+    <filter id="dkSoft" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="1.1"/></filter>
+    <filter id="dkBleed" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="9"/></filter>
+    <filter id="dkB20" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="20"/></filter>
+    <filter id="dkWeave" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.05 0.9" numOctaves="2" seed="11" result="n"/>
+      <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -1.1 1.15" result="a"/>
+      <feComposite in="SourceGraphic" in2="a" operator="in"/>
+    </filter>`;
+  function bake(markup, x, y, w, h, scale, parent, attrs) {
+    const W = Math.round(w * scale), H = Math.round(h * scale);
+    const src = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="${x} ${y} ${w} ${h}"><defs>${PROJ_DEFS}</defs>${markup}</svg>`;
+    const url = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(src);
+    const im = G.el('image', Object.assign({ x, y, width: w, height: h, href: url, preserveAspectRatio: 'none' }, attrs || {}), parent);
+    const img = new Image();
+    img.onload = () => {
+      try {
+        const c = document.createElement('canvas'); c.width = W; c.height = H;
+        c.getContext('2d').drawImage(img, 0, 0, W, H);
+        im.setAttribute('href', c.toDataURL('image/png'));
+      } catch (e) { /* keep the SVG image */ }
+    };
+    img.src = url;
+    return im;
+  }
+
   G.registerWallObject('south', {
     z: -5,
     build(g) {
       G.svg(`
         <defs>
-          <radialGradient id="dkWash" cx="900" cy="372" r="520" gradientUnits="userSpaceOnUse" gradientTransform="translate(900 372) scale(1 0.62) translate(-900 -372)">
-            <stop offset="0" stop-color="#ffcf7a" stop-opacity="0.34"/>
-            <stop offset="0.45" stop-color="#e0953a" stop-opacity="0.16"/>
-            <stop offset="1" stop-color="#e0853a" stop-opacity="0"/>
-          </radialGradient>
-          <radialGradient id="dkMothLight" cx="50%" cy="50%" r="60%">
-            <stop offset="0" stop-color="#fff1c1"/>
-            <stop offset="0.55" stop-color="#ffd98e"/>
-            <stop offset="1" stop-color="#f0a24c"/>
-          </radialGradient>
           <radialGradient id="dkHalo" cx="50%" cy="50%" r="50%">
             <stop offset="0" stop-color="#ffcf7a" stop-opacity="0.6"/>
             <stop offset="0.35" stop-color="#f0a24c" stop-opacity="0.25"/>
             <stop offset="1" stop-color="#e0853a" stop-opacity="0"/>
           </radialGradient>
-          <filter id="dkSoft" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="1.1"/></filter>
-          <filter id="dkBleed" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="9"/></filter>
-          <filter id="dkWeave" x="0" y="0" width="100%" height="100%">
-            <feTurbulence type="fractalNoise" baseFrequency="0.05 0.9" numOctaves="2" seed="11" result="n"/>
-            <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -1.1 1.15" result="a"/>
-            <feComposite in="SourceGraphic" in2="a" operator="in"/>
-          </filter>
         </defs>`, g);
-      // warm halo around lamp (desk pool + wall bloom)
+      // warm halo around lamp (desk pool + wall bloom) — plain gradients, cheap
       R.halo = G.el('g', { opacity: 0, 'pointer-events': 'none' }, g);
       G.el('ellipse', { cx: 900, cy: 452, rx: 420, ry: 300, fill: 'url(#dkHalo)' }, R.halo);
       G.el('ellipse', { cx: 900, cy: 580, rx: 360, ry: 60, fill: 'url(#dkHalo)', opacity: 0.8 }, R.halo);
 
-      // faint dark cone either side of the shade (the shade body blocks the light)
+      // faint dark cone either side of the shade (baked)
       R.cone = G.el('g', { opacity: 0, 'pointer-events': 'none', style: 'mix-blend-mode:multiply' }, g);
-      G.el('path', { d: 'M852 360 L360 90 L330 470 L800 442 Z', fill: '#1a1410', opacity: 0.22, filter: 'url(#blur20)' }, R.cone);
-      G.el('path', { d: 'M948 360 L1440 90 L1470 470 L1000 442 Z', fill: '#1a1410', opacity: 0.22, filter: 'url(#blur20)' }, R.cone);
+      bake(`<path d="M852 360 L360 90 L330 470 L800 442 Z" fill="#1a1410" opacity="0.22" filter="url(#dkB20)"/>
+            <path d="M948 360 L1440 90 L1470 470 L1000 442 Z" fill="#1a1410" opacity="0.22" filter="url(#dkB20)"/>`,
+        260, 20, 1280, 520, 0.5, R.cone);
       R.proj = G.el('g', { opacity: 0, 'pointer-events': 'none', style: 'mix-blend-mode:screen' }, g);
-      // broad fan of light thrown up the wall by the shade's open top
-      G.el('path', { d: 'M852 362 L380 60 Q900 -30 1420 60 L948 362 Z', fill: 'url(#dkWash)', filter: 'url(#dkBleed)' }, R.proj);
-      // the bright rim of the shade's top opening
-      G.el('ellipse', { cx: 900, cy: 346, rx: 190, ry: 34, fill: '#ffcf7a', opacity: 0.1, filter: 'url(#blur20)' }, R.proj);
+      // broad fan of light up the wall + bright rim of the shade's top opening (baked, one layer)
+      R.wash = bake(`<path d="M852 362 L380 60 Q900 -30 1420 60 L948 362 Z" fill="url(#dkWash)" filter="url(#dkBleed)"/>
+            <ellipse cx="900" cy="346" rx="190" ry="34" fill="#ffcf7a" opacity="0.1" filter="url(#dkB20)"/>`,
+        300, -60, 1200, 480, 0.5, R.proj);
       R.moths = [];
-      SLOTS.forEach((s, i) => {
-        const outer = G.el('g', { transform: `translate(${s.x} ${s.y}) rotate(${s.r}) scale(${s.s})` }, R.proj);
+      SLOTS.forEach((s) => {
+        const outer = G.el('g', { transform: `translate(${s.x} ${s.y})` }, R.proj);
         const inner = G.el('g', {}, outer);
-        const t = 'translate(-100 -70)';
-        // penumbra (soft, slightly enlarged) + core + paper-grain shimmer
-        G.el('path', { d: SIL[s.k], transform: 'scale(1.05) ' + t, fill: '#f0a24c', opacity: 0.45, filter: 'url(#dkBleed)' }, inner);
-        G.el('path', { d: SIL[s.k], transform: t, fill: 'url(#dkMothLight)', opacity: 0.92, filter: 'url(#dkSoft)' }, inner);
-        const weave = G.el('path', { d: SIL[s.k], transform: t, fill: '#fff6d8', opacity: 0.35, filter: 'url(#dkWeave)' }, inner);
+        const loc = `transform="scale(${s.s})"`;
+        // penumbra + soft-edged core
+        bake(`<g ${loc}><path d="${SIL[s.k]}" transform="scale(1.05) translate(-100 -70)" fill="#f0a24c" opacity="0.45" filter="url(#dkBleed)"/>
+              <path d="${SIL[s.k]}" transform="translate(-100 -70)" fill="url(#dkMothLight)" opacity="0.92" filter="url(#dkSoft)"/></g>`,
+          -135, -105, 270, 210, 1.5, inner);
+        // paper-grain shimmer layer (its opacity flickers)
+        const weave = bake(`<g ${loc}><path d="${SIL[s.k]}" transform="translate(-100 -70)" fill="#fff6d8" filter="url(#dkWeave)"/></g>`,
+          -135, -105, 270, 210, 1.5, inner, { opacity: 0.35 });
         R.moths.push({ outer, inner, s, weave });
       });
       // click target (only live when lit)
@@ -393,6 +415,9 @@
         G.el('path', { d: SIL[h[0]], transform: `translate(${h[1]} ${h[2]}) rotate(${h[4]}) scale(${h[3]} ${h[3] * 0.9}) translate(-100 -70)` }, R.holes);
       });
       R.holes.setAttribute('fill', '#15100c');
+      R.holesLit = R.holes.cloneNode(true);
+      R.holesLit.setAttribute('fill', '#fff6d8'); R.holesLit.setAttribute('filter', 'url(#glow)'); R.holesLit.setAttribute('opacity', 0);
+      inner.appendChild(R.holesLit);
       G.svg(`
         <path d="${SHADE_D}" fill="none" stroke="${INK}" stroke-width="2.6" stroke-linejoin="round" filter="url(#ink)"/>
         <path d="M852 358 C870 363 930 363 948 358" fill="none" stroke="${INK}" stroke-width="1.6"/>
@@ -445,8 +470,8 @@
     R.shadeLit.setAttribute('opacity', k * 0.92);
     R.cold.setAttribute('opacity', 0.42 * (1 - k));
     R.brassLit.setAttribute('opacity', 0.35 * k);
-    R.holes.setAttribute('fill', k > 0.5 ? '#fff6d8' : '#15100c');
-    R.holes.setAttribute('filter', k > 0.5 ? 'url(#glow)' : '');
+    R.holes.setAttribute('opacity', 1 - k);
+    R.holesLit.setAttribute('opacity', k);
   }
 
   async function lightLamp() {
@@ -494,11 +519,9 @@
     // projection fades in, moths appear one by one
     R.proj.setAttribute('opacity', 1);
     R.moths.forEach(mm => mm.inner.setAttribute('opacity', 0));
-    const wash = [R.proj.children[0], R.proj.children[1]];
-    wash.forEach(w => w.setAttribute('opacity', 0));
+    R.wash.setAttribute('opacity', 0);
     await G.tween(2200, t => {
-      wash[0].setAttribute('opacity', Math.min(1, t * 1.6));
-      wash[1].setAttribute('opacity', 0.1 * Math.min(1, t * 1.6));
+      R.wash.setAttribute('opacity', Math.min(1, t * 1.6));
       R.moths.forEach((mm, i) => {
         const u = Math.max(0, Math.min(1, (t - 0.12 - i * 0.14) / 0.42));
         const e = G.ease.inOut(u);

@@ -359,6 +359,7 @@
     } else {
       E.held.classList.remove('on', 'over');
       S.over = false;
+      hideLabel(0);
     }
   }
   function moveHeld(x, y) { S.px = x; S.py = y; E.held.style.transform = `translate(${x}px, ${y}px)`; }

@@ -68,6 +68,9 @@
     0% { transform: translate(0px,0px); opacity: 0; } 20% { opacity: var(--o); } 80% { opacity: var(--o); }
     100% { transform: translate(var(--dx), var(--dy)); opacity: 0; } }
   .win-beam { transition: opacity 1.6s ease-in-out; }
+  @keyframes win-drip { 0% { transform: translate(0px, 0px); opacity: 0; } 15% { opacity: .9; } 85% { opacity: .8; } 100% { transform: translate(var(--dx), var(--dy)); opacity: 0; } }
+  @keyframes win-twitch { 0%, 86%, 100% { transform: rotate(0deg); } 89% { transform: rotate(-9deg); } 92% { transform: rotate(-2deg); } 95% { transform: rotate(-7deg); } }
+  .win-twitch { transform-box: fill-box; transform-origin: 0% 100%; animation: win-twitch 4.6s ease-in-out infinite; }
   .win-billow { transform-box: fill-box; }
   .win-bl { transform-origin: 0% 0%; } .win-br { transform-origin: 100% 0%; }
   @keyframes win-billowL { 0%,100% { transform: scaleX(1) skewX(0deg); } 30% { transform: scaleX(1.9) skewX(8deg); }
@@ -119,6 +122,9 @@
     <stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
   <linearGradient id="win-brass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f3d995"/>
     <stop offset=".35" stop-color="#c9983f"/><stop offset=".75" stop-color="#8a6224"/><stop offset="1" stop-color="#5a3e14"/></linearGradient>
+  <linearGradient id="win-sashsheen" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#bcd6ee" stop-opacity=".16"/>
+    <stop offset=".45" stop-color="#9fc4d8" stop-opacity=".05"/><stop offset=".6" stop-color="#dcebff" stop-opacity=".14"/>
+    <stop offset="1" stop-color="#9fc4d8" stop-opacity=".03"/></linearGradient>
   <linearGradient id="win-keyG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6dc96"/>
     <stop offset=".4" stop-color="#d0a24a"/><stop offset=".75" stop-color="#9a6c28"/><stop offset="1" stop-color="#5a3c12"/></linearGradient>
   <linearGradient id="win-brass2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e7c476"/>
@@ -280,6 +286,22 @@
     return `<g class="win-anim" style="--dx:${f(dx)}px;--dy:${H}px;animation:win-fall ${dur}s linear infinite">
       <path d="${lines}" stroke="#a9c1d6" stroke-opacity="${op}" stroke-width="${w}" stroke-linecap="round"/>
       <path transform="translate(${f(-dx)} ${-H})" d="${lines}" stroke="#a9c1d6" stroke-opacity="${op}" stroke-width="${w}" stroke-linecap="round"/></g>`;
+  }
+
+  // resting moth, side/three-quarter view, wings folded like a tent. Feet at y = 0, head to the left.
+  function restMothMarkup(tint) {
+    return `<ellipse cx="3" cy="1" rx="17" ry="2.6" fill="#03070a" opacity=".45"/>
+      <path d="M-7 -3L-10 0M-2 -3L-3 0M3 -3L5 0" stroke="#3b2e22" stroke-width=".8" stroke-linecap="round"/>
+      <ellipse cx="1" cy="-4.5" rx="9" ry="2.8" fill="#5c4b37"/>
+      <circle cx="-9" cy="-5" r="2.4" fill="#6b5842"/>
+      <path d="M-10 -6.5Q-15 -14 -8 -17M-9.5 -6.5Q-12 -13 -4 -15.5" stroke="#5c4b37" stroke-width=".8" fill="none" stroke-linecap="round"/>
+      <path d="M-6 -6C-2 -10 8 -12 17 -6.5L16 -3.4C8 -3.6 0 -4 -6 -6Z" fill="#b9ad8e" stroke="${INK}" stroke-width=".7" stroke-linejoin="round"/>
+      <g class="win-twitch">
+        <path d="M-6 -6.2C-3 -15 7 -17 18 -7L16.5 -4C8 -6 0 -5.8 -6 -6.2Z" fill="${tint}" stroke="${INK}" stroke-width=".8" stroke-linejoin="round"/>
+        <path d="M-2 -8.5C3 -11 9 -11.5 14 -8" stroke="#8a7a5e" stroke-width=".8" fill="none" opacity=".8"/>
+        <circle cx="6" cy="-10.4" r="1.3" fill="#8a7a5e" opacity=".7"/>
+        <path d="M-4 -9C0 -13 6 -14.2 12 -11.5" stroke="#fff6dc" stroke-width=".6" fill="none" opacity=".6"/>
+      </g>`;
   }
 
   function mothMarkup(scale, tint) {
@@ -554,32 +576,45 @@
     for (let i = 0; i < 22; i++) { const a = r() * 6.283, d = Math.sqrt(r()) * 188; drops.push([d * Math.cos(a), d * Math.sin(a), 1.2 + r() * 2]); }
     return {
       g, drops,
-      back: mk('path', { fill: '#0c120f', stroke: INK, 'stroke-linejoin': 'round' }),
+      back: mk('path', { fill: '#0c120f', 'fill-rule': 'evenodd', stroke: INK, 'stroke-linejoin': 'round' }),
       edge: mk('path', { fill: 'none', stroke: '#4d5f54', 'stroke-opacity': .55 }),
-      glass: mk('path', { fill: '#0d1a22', 'fill-opacity': .38 }),
-      tint: mk('path', { fill: '#9fc4d8', 'fill-opacity': .08 }),
-      dropsP: mk('path', { fill: '#cfe0ee', 'fill-opacity': .35 }),
+      glass: mk('path', { fill: '#0d1a22', 'fill-opacity': .22 }),
+      tint: mk('path', { fill: 'url(#win-sashsheen)' }),
+      moonRef: mk('path', { fill: '#eef3e6', 'fill-opacity': .55 }),
+      moonHalo: mk('path', { fill: '#cfe3ff', 'fill-opacity': .12 }),
+      dropsP: mk('path', { fill: '#07121a', 'fill-opacity': .4 }),
+      dropsH: mk('path', { fill: '#eef6ff', 'fill-opacity': .85 }),
       mullInk: mk('path', { fill: 'none', stroke: INK, 'stroke-linecap': 'butt' }),
       mull: mk('path', { fill: 'none', stroke: '#27342e', 'stroke-linecap': 'butt' }),
       rim: mk('path', { fill: '#2b3831', 'fill-rule': 'evenodd', stroke: INK, 'stroke-linejoin': 'round' }),
       rimHi: mk('path', { fill: 'none', stroke: '#6f8578', 'stroke-opacity': .5 }),
       glint: mk('path', { fill: 'none', stroke: '#eef6ff', 'stroke-linecap': 'round', 'stroke-opacity': .5 }),
       glint2: mk('path', { fill: 'none', stroke: '#eef6ff', 'stroke-linecap': 'round', 'stroke-opacity': .16 }),
-      shade: mk('path', { fill: '#05090c', opacity: .25 }),
+      rimLight: mk('path', { fill: 'none', stroke: '#dcebff', 'stroke-linecap': 'round', 'stroke-opacity': .75 }),
     };
   }
   function drawPersp(R, th) {
     const c = R.c, Pp = R.persp, P = projector(c, th), S = c.s;
     const kc = P(0, 0)[2], w = px => f(px * S * kc);
-    Pp.back.setAttribute('d', ringD(P, R_SASH, SASH_T));
+    Pp.back.setAttribute('d', ringD(P, R_SASH, SASH_T) + ringD(P, R_GLASS, SASH_T));
     Pp.back.setAttribute('stroke-width', w(1.6));
     Pp.edge.setAttribute('d', ringD(P, R_SASH - 1, SASH_T * .5));
     Pp.edge.setAttribute('stroke-width', w(2));
     const gl = ringD(P, R_GLASS);
-    Pp.glass.setAttribute('d', gl); Pp.tint.setAttribute('d', gl); Pp.shade.setAttribute('d', gl);
-    let dd = '';
-    for (const q of Pp.drops) { const p = P(q[0], q[1]), rr = f(q[2] * S * p[2]); dd += `M${f(p[0] - rr)} ${f(p[1])}a${rr} ${rr} 0 1 0 ${f(2 * rr)} 0a${rr} ${rr} 0 1 0 ${f(-2 * rr)} 0Z`; }
-    Pp.dropsP.setAttribute('d', dd);
+    Pp.glass.setAttribute('d', gl); Pp.tint.setAttribute('d', gl);
+    // beads on the glass (foreshortened)
+    const fx = Math.max(0.25, Math.cos(th));
+    let dd = '', dh = '';
+    for (const q of Pp.drops) { const p = P(q[0], q[1]), rr = q[2] * S * p[2]; dd += circ(p[0], p[1], rr * fx, rr * 1.1); dh += circ(p[0] - rr * .3 * fx, p[1] - rr * .4, rr * .3 * fx, rr * .3); }
+    Pp.dropsP.setAttribute('d', dd); Pp.dropsH.setAttribute('d', dh);
+    // a sliver of reflected moon (the moon is behind the viewer's right; the glass faces into the room at an angle)
+    const mp = P(-120, -70), mr = 16 * S * mp[2];
+    Pp.moonRef.setAttribute('d', circ(mp[0], mp[1], mr * fx * .9, mr));
+    Pp.moonHalo.setAttribute('d', circ(mp[0], mp[1], mr * fx * 3, mr * 3));
+    // light catching the free (outer) edge of the rim
+    let rl = '';
+    for (let i = 0; i <= 20; i++) { const a = (-55 + i * 5.5) * Math.PI / 180, q = P(R_SASH * Math.cos(a), R_SASH * Math.sin(a)); rl += (i ? 'L' : 'M') + f(q[0]) + ' ' + f(q[1]); }
+    Pp.rimLight.setAttribute('d', rl); Pp.rimLight.setAttribute('stroke-width', w(2.6));
     let md = ringD(P, 130, 0, 44) + ringD(P, 58, 0, 28);
     for (let k = 0; k < 8; k++) { const a = (-90 + k * 45) * Math.PI / 180, p0 = P(56 * Math.cos(a), 56 * Math.sin(a)), p1 = P(R_GLASS * Math.cos(a), R_GLASS * Math.sin(a)); md += `M${f(p0[0])} ${f(p0[1])}L${f(p1[0])} ${f(p1[1])}`; }
     for (let k = 0; k < 8; k++) { const a = (-67.5 + k * 45) * Math.PI / 180, p0 = P(128 * Math.cos(a), 128 * Math.sin(a)), p1 = P(R_GLASS * Math.cos(a), R_GLASS * Math.sin(a)); md += `M${f(p0[0])} ${f(p0[1])}L${f(p1[0])} ${f(p1[1])}`; }
@@ -593,7 +628,6 @@
     Pp.glint.setAttribute('stroke-width', w(3.2));
     Pp.glint2.setAttribute('d', seg([[-170, 10], [-40, -110], [60, -170]]));
     Pp.glint2.setAttribute('stroke-width', w(9));
-    Pp.shade.setAttribute('opacity', f(0.1 + 0.25 * th / OPEN_ANG));
     // latch (plate, lever, key) follows the sash: local affine fit of the projection around the keyhole
     const X = 0, Y = 196, p0 = P(X, Y), px = P(X + 1, Y), py = P(X, Y + 1);
     const a = px[0] - p0[0], b = px[1] - p0[1], cc = py[0] - p0[0], d = py[1] - p0[1];
@@ -611,7 +645,6 @@
     const root = G.el('g', { class: 'win-root win-paused' }, g);
     G.svg(`<defs>
       <clipPath id="win-open-${id}"><circle cx="${c.cx}" cy="${c.cy}" r="${rO + 1}"/></clipPath>
-      <clipPath id="win-sillclip-${id}"><circle cx="${c.cx}" cy="${c.cy}" r="${rO}"/><rect x="${c.cx - 330}" y="${c.cy + rO * .82}" width="660" height="${Math.max(0, 712 - c.cy - rO * .82)}"/></clipPath>
       <clipPath id="win-glass-${id}"><circle cx="${c.cx}" cy="${c.cy}" r="${R_GLASS * S}"/></clipPath>
     </defs>`, root);
     if (c.backdrop) G.svg(c.backdrop, root);
@@ -628,7 +661,7 @@
     G.svg(sashLocal(c, r), sash).setAttribute('transform', tr);
     G.svg(glassRain(c, r), sash).setAttribute('clip-path', `url(#win-glass-${id})`);
     const lampRef = G.svg(`<g style="mix-blend-mode:screen">
-      <circle class="win-lampdot" cx="${c.cx - 118 * S}" cy="${c.cy + 112 * S}" r="${9 * S}" fill="url(#win-flame)" style="animation:win-breathe 2.3s ease-in-out infinite"/>
+      <circle class="win-lampdot" cx="${c.cx - 118 * S}" cy="${c.cy + 112 * S}" r="${13 * S}" fill="url(#win-flame)" style="animation:win-breathe 2.3s ease-in-out infinite"/>
       <circle cx="${c.cx - 118 * S}" cy="${c.cy + 112 * S}" r="${1.6 * S}" fill="#fff1c1" opacity=".85"/>
       <path d="M${c.cx - 150 * S} ${c.cy + 96 * S}q${14 * S} ${-6 * S} ${26 * S} ${-4 * S}" stroke="#ffcf7a" stroke-opacity=".35" stroke-width="${1.4 * S}" fill="none" stroke-linecap="round"/></g>`, sash);
     lampRef.setAttribute('clip-path', `url(#win-glass-${id})`);
@@ -646,7 +679,17 @@
     const openFx = G.el('g', { class: 'win-openfx', opacity: 0, 'pointer-events': 'none' }, root);
     const inR = rng(c.seed + 99);
     G.svg(`<g clip-path="url(#win-open-${id})">${rainStreaks(c, B, inR, 0.32, Math.round(c.streaks * 0.35), 0.42, 2.2)}</g>`, openFx);
-    if (c.rainToSill) G.svg(`<g clip-path="url(#win-sillclip-${id})">${rainStreaks(c, { x0: 380, x1: 1220, y0: 300, y1: 712 }, rng(c.seed + 61), 0.3, 60, 0.45, 1.8)}</g>`, openFx);
+    if (c.rainToSill) {
+      // drops blown over the lip of the opening, falling onto the sill in front of the frame
+      const rr = rng(c.seed + 61);
+      let sp = '';
+      for (let i = 0; i < 16; i++) {
+        const x = 610 + rr() * 380, lip = c.cy + Math.sqrt(rO * rO - (x - c.cx) * (x - c.cx)) - 4, dy = 700 - lip;
+        sp += `<g transform="translate(${f(x)} ${f(lip)})"><g class="win-anim" style="--dx:${f(-6 + rr() * 12)}px;--dy:${f(dy)}px;animation:win-drip ${f(0.5 + rr() * 0.4)}s cubic-bezier(.5,0,1,1) ${f(-rr() * 2)}s infinite">
+          <ellipse rx="1.6" ry="${f(4 + rr() * 4)}" fill="#dcebff" opacity=".7"/></g></g>`;
+      }
+      G.svg(sp, openFx);
+    }
     if (c.openExtra) G.svg(c.openExtra, openFx);
     const curt = c.curtains ? G.svg(c.curtains, root) : null;
     // cold air wash (animated during opening)
@@ -712,11 +755,23 @@
       scheduleFlash(R);
     }, 9000 + Math.random() * 14000);
   }
+  function scheduleGust(R) {
+    clearTimeout(R.gust);
+    if (!R.active) return;
+    R.gust = setTimeout(async () => {
+      if (R.active && G.get('windowOpen') && !R.animating) {
+        const a = 0.05 + Math.random() * 0.05;
+        await G.tween(1600, (e, t) => { if (!R.animating) drawPersp(R, OPEN_ANG * (1 - a * Math.sin(t * Math.PI) * (1 - 0.3 * Math.sin(t * 9)))); }, 'linear');
+        if (!R.animating && G.get('windowOpen')) drawPersp(R, OPEN_ANG);
+      }
+      scheduleGust(R);
+    }, 4000 + Math.random() * 5000);
+  }
   function activate(R, on) {
     if (!R) return;
     R.active = on;
     R.root.classList.toggle('win-paused', !on);
-    if (on) scheduleFlash(R); else { clearTimeout(R.timer); R.flash.setAttribute('opacity', 0); }
+    if (on) { scheduleFlash(R); scheduleGust(R); } else { clearTimeout(R.timer); clearTimeout(R.gust); R.flash.setAttribute('opacity', 0); }
   }
 
   // A soft parallel shaft from P0 towards P1 (half-width w), cut at y = yEnd; edges fade via a cross-beam gradient.
@@ -758,7 +813,10 @@
     <rect x="522" y="610" width="556" height="14" fill="url(#win-sill)" stroke="${INK}" stroke-width="2.4"/>
     <path d="M548 601L1052 601" stroke="#a87a50" stroke-opacity=".5" stroke-width="1.2"/>
     <rect x="522" y="624" width="556" height="8" fill="#000" opacity=".3"/></g>`;
-  WEST.openExtra = `<ellipse cx="800" cy="604" rx="170" ry="7" fill="#cfe3ff" opacity=".35"/>`;
+  WEST.openExtra = `<g style="mix-blend-mode:screen">
+    <ellipse cx="800" cy="604" rx="230" ry="10" fill="url(#win-pool)" opacity=".95"/>
+    <ellipse cx="800" cy="603" rx="150" ry="4" fill="#e4efff" opacity=".4"/>
+    <ellipse cx="800" cy="617" rx="240" ry="8" fill="url(#win-pool)" opacity=".35"/></g>`;
 
   const CLOSE = {
     id: 'c', cx: 800, cy: -50, s: 3, k: 2.4, seed: 23, eyeY: 70,
@@ -826,6 +884,7 @@
     z: 10,
     build(g) {
       RW = buildWindow(g, WEST);
+      RW.restSmall = G.svg(`<g style="display:none" transform="translate(880 603) scale(.62)">${restMothMarkup('#e3d8b9')}</g>`, RW.root).firstChild;
       const hot = G.el('circle', { cx: 800, cy: 360, r: 238, fill: 'transparent' }, RW.root);
       G.hotspot(hot, {
         cursor: 'look',
@@ -833,7 +892,10 @@
         use(id) { G.go('window'); return true; },
       });
     },
-    update() { applyState(RW); },
+    update() {
+      applyState(RW);
+      if (RW.restSmall) RW.restSmall.style.display = (G.get('windowOpen') && landState === 'landed') ? '' : 'none';
+    },
     enter() { activate(RW, true); },
     exit() { activate(RW, false); },
   });
@@ -845,8 +907,10 @@
     build(g) {
       RC = buildWindow(g, CLOSE);
       // a moth that flies in through the open window and settles on the sill
-      RC.land = G.svg(`<g style="display:none"><g class="win-lm">${mothMarkup(1, '#e9dfc3')}</g></g>`, RC.root).firstChild;
-      RC.landState = 'none';
+      RC.land = G.svg(`<g style="display:none">
+        <g class="win-lm">${mothMarkup(1, '#e9dfc3')}</g>
+        <g class="win-rest" transform="translate(${LAND.x} ${LAND.y}) scale(${LAND.s})">${restMothMarkup('#e3d8b9')}</g></g>`, RC.root).firstChild;
+      RC.fly = RC.land.querySelector('.win-lm'); RC.rest = RC.land.querySelector('.win-rest');
       // vignette on top
       G.el('rect', { width: 1600, height: 900, fill: 'url(#win-vign)', 'pointer-events': 'none' }, RC.root);
       const glass = G.el('circle', { cx: 800, cy: -50, r: R_SASH * 3, fill: 'transparent' }, RC.root);
@@ -877,8 +941,8 @@
     },
     update() {
       applyState(RC);
-      if (RC && RC.land && !G.get('windowOpen')) { RC.landState = 'none'; RC.land.style.display = 'none'; }
-      else if (RC && RC.landState === 'landed') showLanded();
+      if (RC && RC.land && !G.get('windowOpen')) hideMoths();
+      else if (RC && landState === 'landed') showLanded();
     },
     enter() { activate(RC, true); scheduleLanding(2600); },
     exit() { activate(RC, false); },
@@ -890,29 +954,40 @@
     setLever(RC, 0);
   }
 
-  const LAND = { x: 1040, y: 708, s: 2.4 };
-  function placeMoth(x, y, s, rot) { RC.land.firstChild.setAttribute('transform', `translate(${f(x)} ${f(y)}) rotate(${f(rot)}) scale(${f(s)})`); }
+  const LAND = { x: 1040, y: 703, s: 1.7 };
+  let landState = 'none';
+  function placeMoth(x, y, s, rot) { RC.fly.setAttribute('transform', `translate(${f(x)} ${f(y)}) rotate(${f(rot)}) scale(${f(s)})`); }
   function showLanded() {
-    RC.land.style.display = ''; RC.land.classList.add('win-resting');
-    placeMoth(LAND.x, LAND.y, LAND.s, -8);
+    RC.land.style.display = ''; RC.fly.style.display = 'none'; RC.rest.style.display = '';
+    if (RW && RW.restSmall) RW.restSmall.style.display = '';
+  }
+  function hideMoths() {
+    landState = 'none';
+    if (RC && RC.land) RC.land.style.display = 'none';
+    if (RW && RW.restSmall) RW.restSmall.style.display = 'none';
   }
   let landTimer = null;
   function scheduleLanding(ms) {
     clearTimeout(landTimer);
-    if (!RC || !G.get('windowOpen') || RC.landState !== 'none') return;
+    if (!RC || !G.get('windowOpen') || landState !== 'none') return;
     landTimer = setTimeout(async () => {
-      if (G.view() !== 'window' || RC.landState !== 'none' || !G.get('windowOpen')) return;
-      RC.landState = 'flying';
-      RC.land.style.display = ''; RC.land.classList.remove('win-resting');
-      const P0 = [1230, 250], P1 = [560, 260], P2 = [760, 560], P3 = [LAND.x, LAND.y - 40];
+      if (G.view() !== 'window' || landState !== 'none' || !G.get('windowOpen')) return;
+      landState = 'flying';
+      RC.land.style.display = ''; RC.fly.style.display = ''; RC.rest.style.display = 'none';
+      const P0 = [1230, 250], P1 = [560, 260], P2 = [760, 560], P3 = [LAND.x, LAND.y - 34];
       await G.tween(3400, (e, t) => {
         const u = 1 - e, b = [0, 1].map(i => u * u * u * P0[i] + 3 * u * u * e * P1[i] + 3 * u * e * e * P2[i] + e * e * e * P3[i]);
         const wob = Math.sin(t * 22) * 10 * (1 - e);
-        placeMoth(b[0] + wob, b[1] + Math.cos(t * 17) * 8 * (1 - e), 0.9 + 1.6 * e, Math.sin(t * 9) * 25 * (1 - e));
+        placeMoth(b[0] + wob, b[1] + Math.cos(t * 17) * 8 * (1 - e), 0.8 + 0.9 * e, Math.sin(t * 9) * 25 * (1 - e));
       }, 'inOut');
       G.sfx('mothFlutter');
-      await G.tween(700, e => placeMoth(LAND.x, LAND.y - 40 * (1 - e), LAND.s, -8 * e), 'out');
-      RC.landState = 'landed';
+      // settle: drop onto the sill while the wings close
+      await G.tween(600, e => {
+        placeMoth(LAND.x, LAND.y - 12 - 22 * (1 - e), LAND.s * (1 - 0.1 * e), 0);
+        RC.fly.firstChild.setAttribute('transform', `scale(${f(LAND.s * (1 - 0.1 * e))}) scale(${f(1 - 0.8 * e)} 1)`);
+      }, 'out');
+      RC.fly.firstChild.setAttribute('transform', 'scale(1)');
+      landState = 'landed';
       showLanded();
     }, ms);
   }
@@ -950,15 +1025,24 @@
   }
 
   // ---------- moonbeams on the walls ----------
-  function beamObject(wall, markup, moteBox, moteDir, seed) {
+  function beamObject(wall, markup, moteBox, moteDir, seed, maskRect) {
     const B = { g: null, shown: false };
     G.registerWallObject(wall, {
       z: 50,
       build(g) {
         ensureCss(); ensureDefs();
         B.g = G.el('g', { class: 'win-beam win-paused', 'pointer-events': 'none', opacity: 0, style: 'mix-blend-mode:screen;display:none' }, g);
-        G.svg(markup, B.g);
-        if (moteBox) G.svg(motes(14, moteBox, seed, moteDir), B.g);
+        const inner = G.el('g', {}, B.g);
+        if (maskRect) {
+          // hold the light back from a rectangle (feathered by stacked steps), so clues painted there keep their contrast
+          const [x, y, w, h, keep] = maskRect, mid = 'win-bmask-' + wall;
+          let steps = '';
+          for (let i = 0; i < 6; i++) { const e = 36 - i * 7; steps += `<rect x="${x - e}" y="${y - e}" width="${w + 2 * e}" height="${h + 2 * e}" rx="${e + 6}" fill="#000" opacity="${f((1 - keep) / 6)}"/>`; }
+          G.svg(`<mask id="${mid}" maskUnits="userSpaceOnUse" x="0" y="0" width="1600" height="900"><rect width="1600" height="900" fill="#fff"/>${steps}</mask>`, B.g);
+          inner.setAttribute('mask', `url(#${mid})`);
+        }
+        G.svg(markup, inner);
+        if (moteBox) G.svg(motes(14, moteBox, seed, moteDir), inner);
       },
       update() {
         if (!B.g) return;
@@ -994,7 +1078,7 @@
     ${shaft([1500, -100], [621, 590], 32, 596, 0.14)}
     <ellipse cx="621" cy="578" rx="170" ry="42" fill="url(#win-pool)" opacity=".5"/>
     <ellipse cx="621" cy="580" rx="110" ry="22" fill="url(#win-pool)" opacity=".55"/>`,
-    [700, 150, 1150, 560], [-1, 0.8], 101);
+    [700, 360, 1150, 560], [-1, 0.8], 101, [430, 100, 750, 250, 0]);
   // north / west spills are provided by the room art's lighting layer (room.js buildTop, class rl-moon);
   // set EXTRA_SPILLS = true to add this module's own softer versions on top.
   const EXTRA_SPILLS = false;
