@@ -8,7 +8,7 @@
   const INK = '#1c140f';
   const CX = 800, CY = 290;               // close-up dial centre (stage coords)
   const R_EN = 226, R_ICON = 160;
-  const HOUR_LEN = 126, MIN_LEN = 212;
+  const HOUR_LEN = 112, MIN_LEN = 212;   // hour hand drawn at scale(1.35,0.88): short and broad
   const SOL_H = 8, SOL_M = 3, START_H = 10, START_M = 6;
   const DOOR = { x: 654, y: 602, w: 292, h: 230 };   // close-up case door
   const LEN = { x: 800, y: 652, r: 38 };
@@ -181,6 +181,9 @@
       <stop offset="0" stop-color="#e8fbe8" stop-opacity="0.75"/><stop offset="0.5" stop-color="#bff0c8" stop-opacity="0.3"/><stop offset="1" stop-color="#a8d8b0" stop-opacity="0"/>
     </radialGradient>
     <clipPath id="ck-dialClip"><circle cx="${CX}" cy="${CY}" r="253"/></clipPath>
+    <linearGradient id="ck-gildH" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#7a5520"/><stop offset="0.4" stop-color="#f3d890"/><stop offset="0.6" stop-color="#d2a650"/><stop offset="1" stop-color="#6e4d1c"/>
+    </linearGradient>
     <pattern id="ck-damask" width="140" height="180" patternUnits="userSpaceOnUse">
       <g fill="#2f3a2e">
         <path d="M70,18 C84,40 98,58 88,80 C82,94 74,98 70,112 C66,98 58,94 52,80 C42,58 56,40 70,18Z"/>
@@ -525,10 +528,10 @@
       ${icons}
       <path d="${pol(54, 137, cx, dy).map(f1).join(',').replace(/^/, 'M')} L${pol(40, 133, cx, dy).map(f1).join(',')} L${pol(30, 139, cx, dy).map(f1).join(',')}" stroke="#4a3b2a" stroke-width="0.7" fill="none"/>
       <g class="ck-wh" stroke="${INK}" stroke-width="1">
-        <path d="M-2.4,5 L-1.6,-15 C-8,-15 -8,-24 -2,-23.5 L0,-31 L2,-23.5 C8,-24 8,-15 1.6,-15 L2.4,5Z" fill="#1a2330"/>
+        <path d="M-3.4,5 L-2.4,-12 C-10,-12 -10,-22 -2.6,-21 L0,-27 L2.6,-21 C10,-22 10,-12 2.4,-12 L3.4,5Z" fill="#1a2330"/>
       </g>
       <g class="ck-wm" stroke="${INK}" stroke-width="0.8">
-        <path d="M-1.6,8 L-0.8,-44 L0,-50 L0.8,-44 L1.6,8Z" fill="#1a2330"/>
+        <path d="M-1.8,10 L-0.9,-43 L0,-51 L0.9,-43 L1.8,10Z M0,13 a2.6,2.6 0 1 0 0.01,0Z" fill="#d8aa50"/>
       </g>
       <circle cx="${cx}" cy="${dy}" r="3.5" fill="url(#ck-bossG)" stroke="${INK}" stroke-width="1"/>
       <path d="M352,212 a58,58 0 0 1 44,-20" stroke="#ffffff" stroke-width="3" fill="none" opacity="0.18" stroke-linecap="round"/>
@@ -736,15 +739,15 @@
         <circle cx="${CX}" cy="${CY}" r="${R_EN}" fill="none" stroke="#000" stroke-width="12" opacity="0.18" filter="url(#ck-blur3)"/>
       </g>
       <g class="ck-shadows" opacity="0.34" filter="url(#ck-blur3)">
-        <g class="ck-hshadow">${handMarkup(HOUR_PATHS, '#000')}</g>
+        <g class="ck-hshadow"><g transform="scale(1.35,0.88)">${handMarkup(HOUR_PATHS, '#000')}</g></g>
         <g class="ck-mshadow">${handMarkup(MIN_PATHS, '#000')}</g>
       </g>
-      <g class="ck-hour">${handMarkup(HOUR_PATHS, 'none', '#f6efdc', 4.6)}${handMarkup(HOUR_PATHS, 'url(#ck-steelG)', INK, 1.3)}
-        <path d="M0,10 L0,-40 M0,-88 L0,-102" stroke="#6f8fb0" stroke-width="0.9" opacity="0.6"/>
-        <g class="ck-rim" style="opacity:0">${handMarkup(HOUR_PATHS, 'none', '#f3d27e', 2.2)}</g></g>
-      <g class="ck-min">${handMarkup(MIN_PATHS, 'none', '#f6efdc', 4.4)}${handMarkup(MIN_PATHS, 'url(#ck-steelG)', INK, 1.3)}
-        <path d="M0,8 L0,-56 M0,-90 L0,-176" stroke="#6f8fb0" stroke-width="0.7" opacity="0.6"/>
-        <g class="ck-rim" style="opacity:0">${handMarkup(MIN_PATHS, 'none', '#f3d27e', 2)}</g></g>
+      <g class="ck-hour"><g transform="scale(1.35,0.88)">${handMarkup(HOUR_PATHS, 'none', '#f6efdc', 4.2)}${handMarkup(HOUR_PATHS, 'url(#ck-steelG)', INK, 1.2)}
+        <path d="M0,10 L0,-40 M0,-88 L0,-102" stroke="#7fa0c4" stroke-width="1" opacity="0.7"/></g>
+        <g class="ck-rim" style="opacity:0"><g transform="scale(1.35,0.88)">${handMarkup(HOUR_PATHS, 'none', '#f3d27e', 2)}</g></g></g>
+      <g class="ck-min">${handMarkup(MIN_PATHS, 'none', '#f6efdc', 4.4)}${handMarkup(MIN_PATHS, 'url(#ck-gildH)', INK, 1.3)}
+        <path d="M-0.6,8 L-0.4,-56 M-0.4,-90 L-0.3,-176" stroke="#fff4c8" stroke-width="0.9" opacity="0.8"/>
+        <g class="ck-rim" style="opacity:0">${handMarkup(MIN_PATHS, 'none', '#fff6d8', 2)}</g></g>
       <circle cx="${CX}" cy="${CY}" r="14" fill="url(#ck-bossG)" stroke="${INK}" stroke-width="2"/>
       <circle cx="${CX}" cy="${CY}" r="6.5" fill="#8a6424" stroke="${INK}" stroke-width="1.2"/>
       <circle cx="${CX - 2}" cy="${CY - 2}" r="2.2" fill="#fff4cc" opacity="0.9"/>
