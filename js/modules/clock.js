@@ -1144,7 +1144,7 @@
       await G.wait(320);
       doorPuff();
       V.rewardLight.style.opacity = 1;
-      setTimeout(mothFlight, 350);
+      setTimeout(mothFlight, 600);
       await G.tween(1300, t => applyDoor(V.doorR, DOOR, 9 + (OPEN_DEG - 9) * t, 13), 'inOut');
       V.doorHit.style.display = 'none';
       G.set('clockSolved');

@@ -116,6 +116,7 @@
       <radialGradient id="fnTear" cx="50%" cy="65%" r="70%">
         <stop offset="0" stop-color="#fffbe6"/><stop offset=".45" stop-color="#ffd98a"/><stop offset=".85" stop-color="#b9763a"/><stop offset="1" stop-color="#5a3418"/>
       </radialGradient>
+      <filter id="fnWhip" x="-5%" y="-5%" width="110%" height="110%"><feGaussianBlur class="fn-whipb" stdDeviation="0 0"/></filter>
       <filter id="fnBlur3" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="3"/></filter>
       <filter id="fnBlur40" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="40"/></filter>
     `);
@@ -1001,8 +1002,8 @@
       <g class="pl">
                 <g class="pl-rays" fill="none" stroke="#fff1c1" stroke-width="1.2" opacity="0"><path d="${rays}"/></g>
         <!-- brass rim (outer silhouette) -->
-        <g fill="none" stroke="${INK}" stroke-width="19" stroke-linejoin="round">${wing(FW)}${wing(HW)}</g>
-        <g fill="none" stroke="url(#gBrass)" stroke-width="15" stroke-linejoin="round">${wing(FW)}${wing(HW)}</g>
+        <g fill="none" stroke="${INK}" stroke-width="12" stroke-linejoin="round">${wing(FW)}${wing(HW)}</g>
+        <g fill="none" stroke="url(#gBrass)" stroke-width="9" stroke-linejoin="round">${wing(FW)}${wing(HW)}</g>
         <g fill="none" stroke="#f3dc9a" stroke-width="1.4" stroke-linejoin="round" opacity=".55" transform="translate(-.6 -1.2)">${wing(FW)}${wing(HW)}</g>
         ${detail ? ring(1.1, 'pl-eng', 0.9, '#5a3d16', .8) : ''}
         <!-- hollow recesses -->
@@ -1019,10 +1020,8 @@
         </g>
         <!-- raised brass body -->
         <g stroke="${INK}" stroke-width="1.6">
-          ${[1, -1].map(sd => `<path d="M${sd * 3},-19 Q${sd * 5},-36 ${sd * 16},-47 Q${sd * 13},-32 ${sd * 3},-19 Z" fill="url(#gBrass)" stroke-width="1"/>
-          <path d="M${sd * 3},-19 Q${sd * 6},-34 ${sd * 16},-47" stroke="#4a3210" stroke-width=".9" fill="none"/>
-          <path d="${[0.25, 0.4, 0.55, 0.7, 0.85].map(t => { const x = sd * (3 + 13 * t * t), y = -19 - 28 * t; return `M${x.toFixed(1)},${y.toFixed(1)} l${(sd * 4.5 * (1 - t * .5)).toFixed(1)},${(-1.5).toFixed(1)} M${x.toFixed(1)},${y.toFixed(1)} l${(-sd * 2.5 * (1 - t * .5)).toFixed(1)},${(-3.5 * (1 - t * .4)).toFixed(1)}`; }).join(' ')}" stroke="#c9a14f" stroke-width="1.1" fill="none" stroke-linecap="round"/>`).join('')}
-          <ellipse cy="16" rx="8.6" ry="19" fill="url(#gBrass)"/>
+          <g transform="scale(1.2)" stroke-width="1"><g opacity=".85" transform="translate(.6 .8)">${antenna(1).replace(/stroke="#[0-9a-f]+"/g, 'stroke="#1c140f"')}${antenna(-1).replace(/stroke="#[0-9a-f]+"/g, 'stroke="#1c140f"')}</g>${antenna(1).replace('#d8b96a', '#e7c476').replace('#a88442', '#b8893a')}${antenna(-1).replace('#d8b96a', '#e7c476').replace('#a88442', '#b8893a')}</g>
+          <ellipse cy="17" rx="10" ry="21" fill="url(#gBrass)"/>
           <path d="M-6,8 Q0,11 6,8 M-6.4,14 Q0,17 6.4,14 M-6,20 Q0,23 6,20 M-4.6,26 Q0,28.5 4.6,26" stroke="#6e4d1c" stroke-width="1" fill="none"/>
           <ellipse cy="-6" rx="11" ry="11.5" fill="url(#gBrass)"/>
           <path d="M-9,-10 Q0,-16 9,-10" stroke="#6e4d1c" stroke-width="1.4" fill="none"/>
@@ -1221,7 +1220,7 @@
       D.hot.style.display = open ? 'none' : '';
       const lit = !!G.get('hatched');
       D.plate.querySelector('.pl-fill').setAttribute('opacity', lit ? .85 : 0);
-      if (open) ensureOpenLight(1);
+      if (open) { ensureOpenLight(1); SW.roomOn = true; if (G.view() === 'north') startSwarm(); }
     },
     enter() { if (G.get('doorOpen')) startSwarm(); },
     exit() { stopSwarm(); },
@@ -1464,7 +1463,7 @@
       pool.setAttribute('opacity', (warmK * (0.8 + 0.2 * beat)).toFixed(3));
       requestAnimationFrame(jitter);
     })(t0);
-    await G.tween(1700, t => { warmK = t; tremble = t < 0.45 ? 0 : (t - 0.45) * 1.4; }, 'linear');
+    await G.tween(1300, t => { warmK = t; tremble = t < 0.45 ? 0 : (t - 0.45) * 1.4; }, 'linear');
     G.sfx('cocoonCrack');
     tremble = 1.6;
     await G.wait(260);
@@ -1498,7 +1497,7 @@
     }, 'out');
     flash.remove();
     // --- she crawls out: head first, wings still crumpled and wet
-    await G.tween(1300, t => {
+    await G.tween(1000, t => {
       m.y = lerp(ey + 10, ey - 26, t); m.x = lerp(ex, ex + 4, t);
       m.s = lerp(0.34, 0.62, t); m.rot = lerp(-8, -3, t);
       m.grow = lerp(0.5, 0.56, t); m.open = 0.1 + 0.08 * Math.sin(t * 9); m.hopen = m.open;
@@ -1507,7 +1506,7 @@
     }, 'inOut');
     mw.removeAttribute('clip-path'); cp.remove();
     // --- wings unfurl: pumped full, crumples smoothing out
-    await G.tween(1700, (t, raw) => {
+    await G.tween(1400, (t, raw) => {
       const pump = Math.sin(raw * Math.PI * 5) * (1 - raw) * 0.06;
       m.grow = clamp(lerp(0.56, 1, t) + pump, 0, 1.02);
       m.crumple(lerp(20, 0, smooth(raw)));
@@ -1518,7 +1517,7 @@
     }, 'out');
     m.crumple(0); m.grow = 1;
     // two slow, testing beats
-    await hover(m, 1300, { hz: 1.5, amp: t => 0.85 * Math.sin(Math.PI * Math.min(1, t * 1.02)) });
+    await hover(m, 950, { hz: 1.8, amp: t => 0.85 * Math.sin(Math.PI * Math.min(1, t * 1.02)) });
     // --- first flight: up to the flame, twice around the lamp, then away left
     G.sfx('mothFlutter');
     const mshadow = G.el('ellipse', { cx: m.x, cy: 576, rx: 30, ry: 4, fill: '#2a1206', opacity: 0, filter: 'url(#fnBlur3)' }, layer);
@@ -1530,7 +1529,7 @@
     pts.push([ox - 170, oy - 60], [ox - 330, oy - 120], [ox - 540, oy - 170]);
     const camOut = { started: false };
     await fly(m, pts, {
-      ms: 4600,
+      ms: 4000,
       hz: t => t < 0.08 ? 3.5 : 6.2,
       amp: t => Math.min(1, 0.7 + t * 4),
       ease: t => { const k = 0.12; return t < k ? (t * t) / (2 * k) / (1 - k / 2) : (t - k / 2) / (1 - k / 2); },
@@ -1557,24 +1556,34 @@
     c.warms.forEach(e => e.setAttribute('opacity', 0.25));
     c.halo.setAttribute('opacity', 0.1);
     pool.setAttribute('opacity', 0);
-    await G.go('north', { dur: 320 });
-    resetCam('south');
+    // whip-pan left out of the desk scene, dip briefly through black, whip in on the door
+    const sg = viewG('south'), wb = document.querySelector('.fn-whipb');
+    const c0 = cams.south || { s: 1, x: 800, y: 450 };
+    sg.setAttribute('filter', 'url(#fnWhip)');
+    await G.tween(380, t => { setCam('south', c0.s, c0.x - 380 * t, c0.y); wb.setAttribute('stdDeviation', `${(22 * t).toFixed(1)} 0`); }, 'in');
+    await G.go('north', { dur: 240 });
+    sg.removeAttribute('filter'); resetCam('south');
   }
 
   async function sceneNorth() {
     const L = topLayer('north');
-    resetCam('north');
     D.animating = true;
+    // whip in from the right, settling as the blur clears
+    const ng = viewG('north'), wb = document.querySelector('.fn-whipb');
+    ng.setAttribute('filter', 'url(#fnWhip)');
+    cams.north = { s: 1, x: 1180, y: 450 }; setCam('north', 1, 1180, 450);
+    G.tween(620, t => { setCam('north', 1, lerp(1180, 800, t), 450); wb.setAttribute('stdDeviation', `${(22 * (1 - t)).toFixed(1)} 0`); }, 'out')
+      .then(() => { ng.removeAttribute('filter'); resetCam('north'); });
     const m = makeMoth(L);
     Object.assign(m, { x: 1700, y: 170, s: 0.62, rot: -40, glow: 0.7, open: 1, hopen: 1 });
     m.apply();
     const plateGlow = G.el('circle', { cx: PX, cy: PY + 10, r: 120, fill: 'url(#fnGreenPool)', opacity: 0 }, L);
     L.insertBefore(plateGlow, m.g);
     // approach, gliding down to the door while the camera leans in
-    const camIn = cam('north', { s: 1.6, x: 800, y: 452 }, 2600, 'inOut');
+    const camIn = G.wait(660).then(() => cam('north', { s: 1.6, x: 800, y: 452 }, 2000, 'inOut'));
     G.sfx('mothFlutter');
     await fly(m, [[1700, 170], [1420, 120], [1160, 210], [1000, 300], [880, 330], [812, 368], [800, 392]], {
-      ms: 2700,
+      ms: 2400,
       ease: t => 1 - Math.pow(1 - t, 1.7),
       hz: t => lerp(6.2, 3.2, t),
       amp: t => lerp(1, 0.75, t),
@@ -1583,7 +1592,7 @@
     await camIn;
     // settle into the plate: wings spread flat and fill the hollows exactly
     const s0 = m.s, x0 = m.x, y0 = m.y, r0 = m.rot;
-    await hover(m, 1100, {
+    await hover(m, 950, {
       hz: t => lerp(3, 1.2, t),
       amp: t => 0.7 * (1 - smooth(t)),
       onFrame(t) {
@@ -1612,11 +1621,11 @@
     // the mechanism turns: rivets unscrew, the bolt rod draws back, the bar halves slide out of their keepers
     G.sfx('doorUnlock');
     const rivs = [...D.plate.querySelectorAll('.pl-riv')];
-    await G.tween(650, t => rivs.forEach((r, i) => r.setAttribute('transform', `translate(${r.dataset.x} ${r.dataset.y}) rotate(${((i % 2 ? -1 : 1) * 270 * t).toFixed(1)})`)), 'inOut');
+    await G.tween(520, t => rivs.forEach((r, i) => r.setAttribute('transform', `translate(${r.dataset.x} ${r.dataset.y}) rotate(${((i % 2 ? -1 : 1) * 270 * t).toFixed(1)})`)), 'inOut');
     G.sfx('lockClick');
     const camMech = cam('north', { s: 1.55, x: 850, y: 440 }, 700, 'inOut');
     let clicked = false;
-    await G.tween(1300, (t, raw) => {
+    await G.tween(1050, (t, raw) => {
       setMech(t);
       if (!clicked && raw > 0.5) { clicked = true; G.sfx('lockClick'); }
     }, 'linear');
@@ -1624,7 +1633,7 @@
     await G.tween(260, (t, raw) => setCam('north', 1.55, 850 + Math.sin(raw * 60) * 1.4 * (1 - raw), 440), 'linear');
     D.plate.querySelector('.pl-fill').setAttribute('opacity', 0.6);
     // she lifts from the plate as the door gives
-    const lift = hover(m, 900, {
+    const lift = hover(m, 750, {
       hz: 3.5, amp: t => smooth(t) * 0.9,
       onFrame(t) { m.y = lerp(PY, PY - 70, smooth(t)); m.s = lerp(PLATE_S, 1.0, smooth(t)); },
     });
@@ -1664,7 +1673,7 @@
     await flyOut;
     m.remove();
     plateGlow.remove();
-    await G.wait(1400);
+    await G.wait(900);
     letterbox(false, 900);
   }
 

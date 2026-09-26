@@ -50,16 +50,18 @@
       ],
       body: 'M100 29 C105 29 107 40 107 52 C107 70 106 96 103 118 C102 126 101 133 100 134 C99 133 98 126 97 118 C94 96 93 70 93 52 C93 40 95 29 100 29 Z',
     },
-    emperor: { // Saturnia: round fan wings, soft-angled apex, strongly scalloped margins on all wings
+    emperor: { // Saturnia: round fan wings, ANGLED forewing apex, strongly scalloped margins, stubby body, feathery antennae
       wings: [
-        [103, 50, ['C', 106, 32, 122, 18, 146, 14], ['C', 160, 12, 172, 14, 180, 18], ['Q', 186, 21, 184, 28]].concat(
-          scallop([[184, 28], [183, 40], [179, 51], [171, 62]], [140, 40], 5.5), [['C', 156, 70, 124, 68, 104, 60]]),
-        [104, 64, ['C', 126, 64, 158, 66, 170, 76]].concat(
-          scallop([[170, 76], [176, 88], [174, 100], [168, 111], [158, 120], [146, 126], [132, 126], [120, 120]], [140, 92], 6.5),
-          [['C', 110, 112, 105, 98, 104, 88], ['C', 103, 80, 103, 72, 104, 64]]),
-        [101, 44, ['C', 106, 35, 112, 28, 121, 23], ['C', 119, 31, 111, 39, 102, 46]],
+        [104, 56, ['C', 112, 42, 128, 22, 150, 16], ['L', 188, 12]].concat(
+          scallop([[188, 12], [186, 27], [183, 41], [177, 53], [168, 64]], [140, 40], 5), [['C', 154, 74, 124, 74, 104, 64]]),
+        [104, 60, ['C', 126, 58, 156, 58, 170, 66]].concat(
+          scallop([[170, 66], [177, 79], [177, 92], [172, 104], [164, 114], [152, 122], [138, 125], [124, 121]], [140, 90], 6),
+          [['C', 116, 116, 110, 104, 109, 92], ['C', 108, 82, 106, 70, 104, 60]]),
+        // bipectinate (feathery) antenna: a broad comb-like leaf
+        [101, 40, ['C', 101, 32, 103, 24, 106, 16], ['L', 110, 20], ['L', 107, 21], ['L', 111, 25], ['L', 107, 26], ['L', 110, 30],
+          ['L', 106, 31], ['C', 105, 35, 104, 38, 103, 41]],
       ],
-      body: 'M100 42 C106 42 108 56 108 70 C108 86 105 96 100 99 C95 96 92 86 92 70 C92 56 94 42 100 42 Z',
+      body: 'M100 34 C105 34 107 44 107 58 C108 76 106 94 100 106 C94 94 92 76 93 58 C93 44 95 34 100 34 Z',
     },
   };
   function subArea(sp) {
@@ -128,10 +130,10 @@
   // ================================================================== PROJECTION (south, behind)
   // Projection slots (arc, as thrown up by a round shade)
   const SLOTS = [
-    { k: 'atlas', x: 548, y: 238, s: 1.0, r: 0 },
-    { k: 'luna', x: 732, y: 202, s: 0.98, r: 0 },
-    { k: 'hawk', x: 914, y: 204, s: 0.96, r: 0 },
-    { k: 'emperor', x: 1094, y: 238, s: 1.0, r: 0 },
+    { k: 'atlas', x: 542, y: 238, s: 0.96, r: 0 },
+    { k: 'luna', x: 714, y: 202, s: 0.96, r: 0 },
+    { k: 'hawk', x: 882, y: 204, s: 0.88, r: 0 },
+    { k: 'emperor', x: 1054, y: 236, s: 0.94, r: 0 },
   ];
   // Projection layers are baked to bitmaps at load (blur/turbulence filters over large areas are far too
   // expensive to rasterise on the frame lampLit flips). Each layer is an <image>: first an SVG data-URL
@@ -143,7 +145,12 @@
     <radialGradient id="dkMothLight" cx="50%" cy="50%" r="60%">
       <stop offset="0" stop-color="#fff1c1"/><stop offset="0.55" stop-color="#ffd98e"/><stop offset="1" stop-color="#f0a24c"/>
     </radialGradient>
-    <filter id="dkSoft" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="1.1"/></filter>
+    <radialGradient id="dkMothFall" gradientUnits="userSpaceOnUse" cx="900" cy="380" r="560">
+      <stop offset="0" stop-color="#ffe9b4" stop-opacity="0.82"/><stop offset="0.45" stop-color="#ffd08a" stop-opacity="0.62"/><stop offset="1" stop-color="#e8964a" stop-opacity="0.36"/>
+    </radialGradient>
+    <filter id="dkSoft" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="1.8"/></filter>
+    <filter id="dkGlowB" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur in="SourceGraphic" stdDeviation="8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="dkB6" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="6"/></filter>
     <filter id="dkBleed" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="9"/></filter>
     <filter id="dkB20" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="20"/></filter>
     <filter id="dkWeave" x="0" y="0" width="100%" height="100%">
@@ -151,9 +158,9 @@
       <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -1.1 1.15" result="a"/>
       <feComposite in="SourceGraphic" in2="a" operator="in"/>
     </filter>`;
-  function bake(markup, x, y, w, h, scale, parent, attrs) {
+  function bake(markup, x, y, w, h, scale, parent, attrs, extraDefs) {
     const W = Math.round(w * scale), H = Math.round(h * scale);
-    const src = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="${x} ${y} ${w} ${h}"><defs>${PROJ_DEFS}</defs>${markup}</svg>`;
+    const src = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="${x} ${y} ${w} ${h}"><defs>${PROJ_DEFS}${extraDefs || ''}</defs>${markup}</svg>`;
     const url = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(src);
     const im = G.el('image', Object.assign({ x, y, width: w, height: h, href: url, preserveAspectRatio: 'none' }, attrs || {}), parent);
     const img = new Image();
@@ -185,27 +192,28 @@
       G.el('ellipse', { cx: 900, cy: 580, rx: 360, ry: 60, fill: 'url(#dkHalo)', opacity: 0.8 }, R.halo);
 
       // faint dark cone either side of the shade (baked)
-      R.cone = G.el('g', { opacity: 0, 'pointer-events': 'none', style: 'mix-blend-mode:multiply' }, g);
+      R.cone = G.el('g', { opacity: 0.002, 'pointer-events': 'none', style: 'mix-blend-mode:multiply' }, g);
       bake(`<path d="M852 360 L360 90 L330 470 L800 442 Z" fill="#1a1410" opacity="0.22" filter="url(#dkB20)"/>
             <path d="M948 360 L1440 90 L1470 470 L1000 442 Z" fill="#1a1410" opacity="0.22" filter="url(#dkB20)"/>`,
         260, 20, 1280, 520, 0.5, R.cone);
-      R.proj = G.el('g', { opacity: 0, 'pointer-events': 'none', style: 'mix-blend-mode:screen' }, g);
+      R.proj = G.el('g', { opacity: 0.002, 'pointer-events': 'none', style: 'mix-blend-mode:screen' }, g);
       // broad fan of light up the wall + bright rim of the shade's top opening (baked, one layer)
       R.wash = bake(`<path d="M852 362 L380 60 Q900 -30 1420 60 L948 362 Z" fill="url(#dkWash)" filter="url(#dkBleed)"/>
             <ellipse cx="900" cy="346" rx="190" ry="34" fill="#ffcf7a" opacity="0.1" filter="url(#dkB20)"/>`,
         300, -60, 1200, 480, 0.5, R.proj);
       R.moths = [];
       SLOTS.forEach((s) => {
-        const outer = G.el('g', { transform: `translate(${s.x} ${s.y})` }, R.proj);
+        const outer = G.el('g', {}, R.proj);
         const inner = G.el('g', {}, outer);
-        const loc = `transform="scale(${s.s})"`;
-        // penumbra + soft-edged core
-        bake(`<g ${loc}><path d="${SIL[s.k]}" transform="scale(1.05) translate(-100 -70)" fill="#f0a24c" opacity="0.45" filter="url(#dkBleed)"/>
-              <path d="${SIL[s.k]}" transform="translate(-100 -70)" fill="url(#dkMothLight)" opacity="0.92" filter="url(#dkSoft)"/></g>`,
-          -135, -105, 270, 210, 1.5, inner);
+        const loc = `transform="translate(${s.x} ${s.y}) scale(${s.s})"`;
+        const bx = s.x - 135 * s.s, by = s.y - 105 * s.s, bw = 270 * s.s, bh = 210 * s.s;
+        // penumbra + soft-edged core; falloff is in stage space (brightest near the lamp axis)
+        bake(`<g ${loc}><path d="${SIL[s.k]}" transform="scale(1.06) translate(-100 -70)" fill="#f0a24c" opacity="0.3" filter="url(#dkBleed)"/>
+              <path d="${SIL[s.k]}" transform="translate(-100 -70)" fill="url(#dkMothFall)" filter="url(#dkSoft)"/></g>`,
+          bx, by, bw, bh, 1.5, inner);
         // paper-grain shimmer layer (its opacity flickers)
         const weave = bake(`<g ${loc}><path d="${SIL[s.k]}" transform="translate(-100 -70)" fill="#fff6d8" filter="url(#dkWeave)"/></g>`,
-          -135, -105, 270, 210, 1.5, inner, { opacity: 0.35 });
+          bx, by, bw, bh, 1.5, inner, { opacity: 0.22 });
         R.moths.push({ outer, inner, s, weave });
       });
       // click target (only live when lit)
@@ -218,11 +226,11 @@
     update() {
       const lit = !!G.get('lampLit');
       R.projHot.setAttribute('pointer-events', lit ? 'all' : 'none');
-      if (lightingNow) return;
-      R.proj.setAttribute('opacity', lit ? 1 : 0);
-      R.halo.setAttribute('opacity', lit ? 1 : 0);
-      R.cone.setAttribute('opacity', lit ? 1 : 0);
+      if (lightingNow || lit === projShown) return;
       projShown = lit;
+      const animate = document.body.dataset.ready === '1' && G.view() === 'south';
+      if (animate) fadeProjection(lit ? 1 : 0, 1300);
+      else setProj(lit ? 1 : 0);
     },
   });
 
@@ -376,11 +384,13 @@
       R.bulbGlow = G.el('ellipse', { cx: 900, cy: 474, rx: 58, ry: 46, fill: 'url(#dkBulbGlow)', opacity: 0 }, L);
       R.glassLit = G.el('path', { d: CHIM_D, fill: 'url(#dkGlassLit)', opacity: 0 }, L);
       G.el('path', { d: 'M895 496 L896 488 L904 488 L905 496 Z', fill: '#2a1a10', stroke: INK, 'stroke-width': 1 }, L);
-      R.flameG = G.el('g', { opacity: 0, 'clip-path': 'url(#dkChimClip)' }, L);
+      R.flameG = G.el('g', { opacity: 0.002, 'clip-path': 'url(#dkChimClip)' }, L);
       R.flameInner = G.el('g', {}, R.flameG);
-      G.el('ellipse', { cx: 900, cy: 472, rx: 24, ry: 30, fill: '#ffb34d', opacity: 0.5, filter: 'url(#blur6)' }, R.flameInner);
-      G.el('path', { d: 'M900 446 C904 456 914 468 913 478 C912 486 906 490 900 490 C894 490 888 486 887 478 C886 468 896 456 900 446 Z', fill: 'url(#dkFlame)', filter: 'url(#glow)' }, R.flameInner);
-      G.el('path', { d: 'M900 464 C903 471 906 478 905 482 C904 486 896 486 895 482 C894 478 897 471 900 464 Z', fill: '#fffbe8', opacity: 0.9 }, R.flameInner);
+      bake(`<ellipse cx="900" cy="472" rx="24" ry="30" fill="#ffb34d" opacity="0.5" filter="url(#dkB6)"/>
+        <path d="M900 446 C904 456 914 468 913 478 C912 486 906 490 900 490 C894 490 888 486 887 478 C886 468 896 456 900 446 Z" fill="url(#dkFlame)" filter="url(#dkGlowB)"/>
+        <path d="M900 464 C903 471 906 478 905 482 C904 486 896 486 895 482 C894 478 897 471 900 464 Z" fill="#fffbe8" opacity="0.9"/>`,
+        850, 420, 100, 90, 3, R.flameInner, null,
+        `<radialGradient id="dkFlame" cx="50%" cy="78%" r="70%"><stop offset="0" stop-color="#fffbe8"/><stop offset="0.28" stop-color="#ffe7a6"/><stop offset="0.6" stop-color="#ffbf5c"/><stop offset="1" stop-color="#e0702a"/></radialGradient>`);
       G.svg(`
         <path d="${CHIM_D}" fill="url(#dkGlass)" stroke="${INK}" stroke-width="2" stroke-linejoin="round"/>
         <path d="M870 480 C866 470 868 460 876 452" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" opacity="0.55"/>
@@ -415,9 +425,8 @@
         G.el('path', { d: SIL[h[0]], transform: `translate(${h[1]} ${h[2]}) rotate(${h[4]}) scale(${h[3]} ${h[3] * 0.9}) translate(-100 -70)` }, R.holes);
       });
       R.holes.setAttribute('fill', '#15100c');
-      R.holesLit = R.holes.cloneNode(true);
-      R.holesLit.setAttribute('fill', '#fff6d8'); R.holesLit.setAttribute('filter', 'url(#glow)'); R.holesLit.setAttribute('opacity', 0);
-      inner.appendChild(R.holesLit);
+      R.holesLit = bake(`<g clip-path="url(#dkSC2)" fill="#fff6d8" filter="url(#dkGlowB)">${R.holes.innerHTML}</g>`,
+        790, 350, 220, 110, 2, inner, { opacity: 0.002 }, `<clipPath id="dkSC2"><path d="${SHADE_D}"/></clipPath>`);
       G.svg(`
         <path d="${SHADE_D}" fill="none" stroke="${INK}" stroke-width="2.6" stroke-linejoin="round" filter="url(#ink)"/>
         <path d="M852 358 C870 363 930 363 948 358" fill="none" stroke="${INK}" stroke-width="1.6"/>
@@ -464,14 +473,14 @@
   });
 
   function applyLit(k) {
-    R.flameG.setAttribute('opacity', k);
+    R.flameG.setAttribute('opacity', Math.max(0.002, k));
     R.bulbGlow.setAttribute('opacity', k);
     R.glassLit.setAttribute('opacity', 0.8 * k);
     R.shadeLit.setAttribute('opacity', k * 0.92);
     R.cold.setAttribute('opacity', 0.42 * (1 - k));
     R.brassLit.setAttribute('opacity', 0.35 * k);
     R.holes.setAttribute('opacity', 1 - k);
-    R.holesLit.setAttribute('opacity', k);
+    R.holesLit.setAttribute('opacity', Math.max(0.002, k));
   }
 
   async function lightLamp() {
@@ -505,36 +514,54 @@
     await G.wait(180);
     G.sfx('lampWhoosh');
     G.take('matches');
-    // bloom
+    G.set('lampLit');              // room lighting starts its ~1.2s cross-fade now
     R.projHot.setAttribute('pointer-events', 'all');
-    await G.tween(700, t => {
+    R.moths.forEach(mm => mm.inner.setAttribute('opacity', 0));
+    R.wash.setAttribute('opacity', 0);
+    setProj(0.002);
+    // bloom the flame while the wall projection fades up over the same ~1.3s
+    const bloom = G.tween(700, t => {
       applyLit(t);
       R.flameInner.setAttribute('transform', `translate(900 490) scale(${0.2 + 0.8 * t}) translate(-900 -490)`);
-      R.halo.setAttribute('opacity', t);
-      R.cone.setAttribute('opacity', t);
       m.setAttribute('opacity', 1 - t);
       place(904 + 76 * t, 488 + 40 * t, 16 + 30 * t);
     }, 'out');
-    R.flameInner.removeAttribute('transform');
-    // projection fades in, moths appear one by one
-    R.proj.setAttribute('opacity', 1);
-    R.moths.forEach(mm => mm.inner.setAttribute('opacity', 0));
-    R.wash.setAttribute('opacity', 0);
-    await G.tween(2200, t => {
-      R.wash.setAttribute('opacity', Math.min(1, t * 1.6));
+    const proj = G.tween(1400, t => {
+      setProj(G.ease.inOut(t));
+      R.wash.setAttribute('opacity', Math.min(1, t * 1.3).toFixed(3));
       R.moths.forEach((mm, i) => {
-        const u = Math.max(0, Math.min(1, (t - 0.12 - i * 0.14) / 0.42));
+        const u = Math.max(0, Math.min(1, (t - i * 0.06) / 0.82));
         const e = G.ease.inOut(u);
-        mm.inner.setAttribute('opacity', e);
-        mm.inner.setAttribute('transform', `scale(${1.12 - 0.12 * e})`);
+        mm.inner.setAttribute('opacity', e.toFixed(3));
+        const k = 1.05 - 0.05 * e;
+        mm.inner.setAttribute('transform', `translate(${mm.s.x} ${mm.s.y}) scale(${k.toFixed(4)}) translate(${-mm.s.x} ${-mm.s.y})`);
       });
     }, 'linear');
+    await Promise.all([bloom, proj]);
+    R.flameInner.removeAttribute('transform');
     R.moths.forEach(mm => { mm.inner.removeAttribute('transform'); mm.inner.setAttribute('opacity', 1); });
-    lightingNow = false;
     projShown = true;
-    G.set('lampLit');
+    lightingNow = false;
     G.busy(false);
     G.say('The wick takes. Warm light spills across the desk — and four moths bloom upon the wall.', { dur: 4200 });
+  }
+
+  // projection visibility. Hidden state is 0.002 (not 0) so the baked layers stay painted/decoded and
+  // nothing has to rasterise on the frame the lamp lights.
+  function setProj(v) {
+    const o = Math.max(0.002, v);
+    R.proj.setAttribute('opacity', o.toFixed(3));
+    R.cone.setAttribute('opacity', o.toFixed(3));
+    R.halo.setAttribute('opacity', v.toFixed(3));
+  }
+  let fadeId = 0, fadeEnd = 0;
+  const fadeDone = () => performance.now() > fadeEnd;
+  function fadeProjection(to, ms) {
+    const id = ++fadeId;
+    const from = +R.proj.getAttribute('opacity') || 0;
+    R.proj.removeAttribute('transform');
+    fadeEnd = performance.now() + ms;
+    return G.tween(ms, t => { if (id === fadeId) setProj(from + (to - from) * t); }, 'inOut');
   }
 
   // flicker loop
@@ -554,9 +581,9 @@
     R.bulbGlow.setAttribute('opacity', (0.85 + 0.12 * f).toFixed(3));
     R.shadeLit.setAttribute('opacity', (0.88 + 0.06 * f).toFixed(3));
     R.halo.setAttribute('opacity', (0.9 + 0.08 * f).toFixed(3));
-    if (projShown) {
+    if (projShown && fadeDone()) {
       R.proj.setAttribute('opacity', (0.93 + 0.06 * f).toFixed(3));
-      R.moths.forEach((mm, i) => mm.weave.setAttribute('opacity', (0.3 + 0.14 * flick(t * 0.9 + i * 1.7)).toFixed(3)));
+      R.moths.forEach((mm, i) => mm.weave.setAttribute('opacity', (0.2 + 0.1 * flick(t * 0.9 + i * 1.7)).toFixed(3)));
       const dx = (-f2 * 1.4).toFixed(2), dy = (-f * 1.2).toFixed(2), sc = (1 + 0.006 * f).toFixed(4);
       R.proj.setAttribute('transform', `translate(${dx} ${dy}) translate(900 372) scale(${sc}) translate(-900 -372)`);
     }

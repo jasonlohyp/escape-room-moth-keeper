@@ -290,18 +290,19 @@
 
   // resting moth, side/three-quarter view, wings folded like a tent. Feet at y = 0, head to the left.
   function restMothMarkup(tint) {
-    return `<ellipse cx="3" cy="1" rx="17" ry="2.6" fill="#03070a" opacity=".45"/>
-      <path d="M-7 -3L-10 0M-2 -3L-3 0M3 -3L5 0" stroke="#3b2e22" stroke-width=".8" stroke-linecap="round"/>
-      <ellipse cx="1" cy="-4.5" rx="9" ry="2.8" fill="#5c4b37"/>
-      <circle cx="-9" cy="-5" r="2.4" fill="#6b5842"/>
-      <path d="M-10 -6.5Q-15 -14 -8 -17M-9.5 -6.5Q-12 -13 -4 -15.5" stroke="#5c4b37" stroke-width=".8" fill="none" stroke-linecap="round"/>
-      <path d="M-6 -6C-2 -10 8 -12 17 -6.5L16 -3.4C8 -3.6 0 -4 -6 -6Z" fill="#b9ad8e" stroke="${INK}" stroke-width=".7" stroke-linejoin="round"/>
+    return `<ellipse cx="6" cy="1" rx="20" ry="2.6" fill="#03070a" opacity=".45"/>
+      <path d="M-6 -2.5L-9 0M-1 -2.5L-2 0M4 -2.5L6 0" stroke="#3b2e22" stroke-width=".7" stroke-linecap="round"/>
+      <path d="M-24 1C-18 -4 -10 -6 -6 -6.5M-23 -1C-18 -5 -11 -6.8 -7 -7" stroke="#6b5842" stroke-width=".7" fill="none" stroke-linecap="round"/>
+      <path d="M-5 -6.5C3 -7.5 16 -5 25 -1.2L24 0C14 -2 3 -2.5 -5 -3Z" fill="#a89c7c" stroke="${INK}" stroke-width=".6" stroke-linejoin="round"/>
       <g class="win-twitch">
-        <path d="M-6 -6.2C-3 -15 7 -17 18 -7L16.5 -4C8 -6 0 -5.8 -6 -6.2Z" fill="${tint}" stroke="${INK}" stroke-width=".8" stroke-linejoin="round"/>
-        <path d="M-2 -8.5C3 -11 9 -11.5 14 -8" stroke="#8a7a5e" stroke-width=".8" fill="none" opacity=".8"/>
-        <circle cx="6" cy="-10.4" r="1.3" fill="#8a7a5e" opacity=".7"/>
-        <path d="M-4 -9C0 -13 6 -14.2 12 -11.5" stroke="#fff6dc" stroke-width=".6" fill="none" opacity=".6"/>
-      </g>`;
+        <path d="M-6 -6.8C-2 -13 3 -16.5 7 -16.5C14 -14 21 -7 26 -1.5L22 -1C14 -3.5 3 -4.8 -6 -6.8Z" fill="${tint}" stroke="${INK}" stroke-width=".7" stroke-linejoin="round"/>
+        <path d="M6 -15.5C12 -12 18 -7 23 -2.2" stroke="#8a7a5e" stroke-width="1.6" fill="none" opacity=".55" stroke-linecap="round"/>
+        <path d="M-1 -8.5C5 -10 12 -8.6 17 -5.6" stroke="#8a7a5e" stroke-width=".7" fill="none" opacity=".75"/>
+        <circle cx="8" cy="-9.6" r="1.5" fill="none" stroke="#6d5e48" stroke-width=".7"/><circle cx="8" cy="-9.6" r=".6" fill="#6d5e48"/>
+        <path d="M-3 -9C0 -13 4 -15.2 7 -15.4" stroke="#fff6dc" stroke-width=".7" fill="none" opacity=".7"/>
+      </g>
+      <ellipse cx="-6.5" cy="-5.2" rx="3.4" ry="2.8" fill="#d8ccab" stroke="${INK}" stroke-width=".5"/>
+      <circle cx="-9.4" cy="-4.4" r="1.7" fill="#6b5842"/>`;
   }
 
   function mothMarkup(scale, tint) {
@@ -954,7 +955,7 @@
     setLever(RC, 0);
   }
 
-  const LAND = { x: 1040, y: 703, s: 1.7 };
+  const LAND = { x: 1040, y: 704, s: 2.1 };
   let landState = 'none';
   function placeMoth(x, y, s, rot) { RC.fly.setAttribute('transform', `translate(${f(x)} ${f(y)}) rotate(${f(rot)}) scale(${f(s)})`); }
   function showLanded() {
@@ -978,7 +979,7 @@
       await G.tween(3400, (e, t) => {
         const u = 1 - e, b = [0, 1].map(i => u * u * u * P0[i] + 3 * u * u * e * P1[i] + 3 * u * e * e * P2[i] + e * e * e * P3[i]);
         const wob = Math.sin(t * 22) * 10 * (1 - e);
-        placeMoth(b[0] + wob, b[1] + Math.cos(t * 17) * 8 * (1 - e), 0.8 + 0.9 * e, Math.sin(t * 9) * 25 * (1 - e));
+        placeMoth(b[0] + wob, b[1] + Math.cos(t * 17) * 8 * (1 - e), 0.8 + 1.3 * e, Math.sin(t * 9) * 25 * (1 - e));
       }, 'inOut');
       G.sfx('mothFlutter');
       // settle: drop onto the sill while the wings close
