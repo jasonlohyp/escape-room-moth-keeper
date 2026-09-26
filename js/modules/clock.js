@@ -356,11 +356,18 @@
     'M0,-127 C4,-119 11.5,-112 9.5,-105.5 C7.5,-100.5 3.5,-102.5 1.6,-103.5 L-1.6,-103.5 C-3.5,-102.5 -7.5,-100.5 -9.5,-105.5 C-11.5,-112 -4,-119 0,-127Z',
   ];
   const MIN_PATHS = [
-    'M0,48 C-6.5,48 -7.5,40 -4.2,34 L-2.2,12 L2.2,12 L4.2,34 C7.5,40 6.5,48 0,48Z M0,36 a3,3 0 1 0 0.01,0Z',
-    'M-3.6,14 L-2.9,-60 L2.9,-60 L3.6,14Z',
-    'M0,-57 L-8,-71.5 L0,-88 L8,-71.5Z M0,-64 L-3.8,-71.5 L0,-80 L3.8,-71.5Z',
-    'M-2.8,-86 L-1.9,-178 L1.9,-178 L2.8,-86Z',
-    'M0,-216 C6,-207 10.5,-195 6.5,-185 L2.4,-176 L-2.4,-176 L-6.5,-185 C-10.5,-195 -6,-207 0,-216Z M0,-203 C2,-198 2.6,-193 1,-189 L-1,-189 C-2.6,-193 -2,-198 0,-203Z',
+    // turned counterweight tail: bulb with a pierced ring, a collar bead and a ball finial
+    'M0,54 C-7.5,54 -9.5,46 -6.5,40 C-4.6,36.5 -3.4,33 -3,26 L3,26 C3.4,33 4.6,36.5 6.5,40 C9.5,46 7.5,54 0,54Z M0,42.5 a3.4,3.4 0 1 0 0.01,0Z',
+    'M-4.6,22 L4.6,22 L4,26.5 L-4,26.5Z', 'M0,55 a3,3 0 1 0 0.01,0Z',
+    'M-3.4,22 L-2.9,-48 L2.9,-48 L3.4,22Z',
+    // pierced filigree moth, about a third of the way out
+    'M0,-47 C-5,-49 -15,-55 -16,-66 C-16.5,-75 -10,-79 -4.5,-77 C-6.5,-84 -5,-92 0,-100 C5,-92 6.5,-84 4.5,-77 C10,-79 16.5,-75 16,-66 C15,-55 5,-49 0,-47Z ' +
+    'M-2.8,-55 C-8,-57 -11.5,-61 -11.5,-66.5 C-11.5,-71.5 -8,-73.5 -5,-71.5 L-2.8,-64.5Z M2.8,-55 C8,-57 11.5,-61 11.5,-66.5 C11.5,-71.5 8,-73.5 5,-71.5 L2.8,-64.5Z ' +
+    'M0,-80.5 L-2.2,-87.5 L0,-94 L2.2,-87.5Z',
+    'M-2.5,-98 L-1.8,-177 L1.8,-177 L2.5,-98Z',
+    'M-3.8,-136 L3.8,-136 L3,-141.5 L-3,-141.5Z',
+    // shaped leaf tip with a pierced slit
+    'M0,-217 C6.5,-208 11,-196 7,-186 L2.6,-176 L-2.6,-176 L-7,-186 C-11,-196 -6.5,-208 0,-217Z M0,-204 C1.8,-199 2.3,-194 0.9,-190.5 L-0.9,-190.5 C-2.3,-194 -1.8,-199 0,-204Z',
   ];
   function handMarkup(paths, fill, stroke, sw) {
     return paths.map(d => `<path d="${d}" fill-rule="evenodd" fill="${fill}" ${stroke ? `stroke="${stroke}" stroke-width="${sw}" stroke-linejoin="round"` : ''}/>`).join('');
@@ -744,13 +751,17 @@
       </g>
       <g class="ck-hour"><g transform="scale(1.35,0.88)">${handMarkup(HOUR_PATHS, 'none', '#f6efdc', 4.2)}${handMarkup(HOUR_PATHS, 'url(#ck-steelG)', INK, 1.2)}
         <path d="M0,10 L0,-40 M0,-88 L0,-102" stroke="#7fa0c4" stroke-width="1" opacity="0.7"/></g>
+        <circle r="13.5" fill="url(#ck-steelG)" stroke="${INK}" stroke-width="1.6"/>
         <g class="ck-rim" style="opacity:0"><g transform="scale(1.35,0.88)">${handMarkup(HOUR_PATHS, 'none', '#f3d27e', 2)}</g></g></g>
       <g class="ck-min">${handMarkup(MIN_PATHS, 'none', '#f6efdc', 4.4)}${handMarkup(MIN_PATHS, 'url(#ck-gildH)', INK, 1.3)}
-        <path d="M-0.6,8 L-0.4,-56 M-0.4,-90 L-0.3,-176" stroke="#fff4c8" stroke-width="0.9" opacity="0.8"/>
+        <path d="M0,20 L0,-46 M0,-101 L0,-134 M0,-143 L0,-175 M0,-192 L0,-210" stroke="#6e4d1c" stroke-width="0.8" opacity="0.9"/>
+        <path d="M-1.2,20 L-1,-46 M-0.9,-101 L-0.7,-175" stroke="#fff4c8" stroke-width="0.6" opacity="0.8"/>
+        <path d="M0,-215 C-5.5,-207 -9.5,-196 -6.2,-187 L-2.3,-178 L0,-178Z" fill="#fff4c8" opacity="0.4"/>
+        <path d="M-8,-60 C-12,-63 -13,-70 -9,-74" stroke="#fff4c8" stroke-width="0.8" fill="none" opacity="0.7"/>
+        <circle r="10" fill="url(#ck-bossG)" stroke="${INK}" stroke-width="1.4"/><circle r="10" fill="none" stroke="#6e4d1c" stroke-width="0.8" stroke-dasharray="1.6 1.6" transform="scale(0.75)"/>
         <g class="ck-rim" style="opacity:0">${handMarkup(MIN_PATHS, 'none', '#fff6d8', 2)}</g></g>
-      <circle cx="${CX}" cy="${CY}" r="14" fill="url(#ck-bossG)" stroke="${INK}" stroke-width="2"/>
-      <circle cx="${CX}" cy="${CY}" r="6.5" fill="#8a6424" stroke="${INK}" stroke-width="1.2"/>
-      <circle cx="${CX - 2}" cy="${CY - 2}" r="2.2" fill="#fff4cc" opacity="0.9"/>
+      <circle cx="${CX}" cy="${CY}" r="5.5" fill="#8a6424" stroke="${INK}" stroke-width="1.2"/>
+      <circle cx="${CX - 1.5}" cy="${CY - 1.5}" r="1.8" fill="#fff4cc" opacity="0.9"/>
       <g class="ck-ringFlash" style="opacity:0" filter="url(#glow)">
         <circle cx="${CX}" cy="${CY}" r="243" fill="none" stroke="#fff4c8" stroke-width="7" stroke-dasharray="260 1270" stroke-linecap="round" transform="rotate(-90 ${CX} ${CY})" class="ck-ringArc"/>
         <circle cx="${CX}" cy="${CY}" r="243" fill="none" stroke="#ffe39a" stroke-width="3" opacity="0.5"/>

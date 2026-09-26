@@ -1434,7 +1434,7 @@
     }
     const h0 = +LB.a.getAttribute('height'), h1 = on ? 58 : 0;
     return G.tween(ms || 900, t => {
-      const h = lerp(h0, h1, t);
+      const h = Math.max(0, lerp(h0, h1, t));
       LB.a.setAttribute('height', h.toFixed(1));
       LB.b.setAttribute('y', (900 - h).toFixed(1)); LB.b.setAttribute('height', h.toFixed(1));
     });
