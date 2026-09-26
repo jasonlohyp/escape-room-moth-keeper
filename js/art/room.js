@@ -1013,8 +1013,8 @@
     north: {
       cold: rad('lc_n', -200, 330, 1600, [[0, '#a3b9c9'], [0.45, '#7890a2'], [1, '#43566a']]),
       warm: rad('lw_n', 800, 1050, 1150, [[0, '#ffe6bf'], [0.35, '#e0bc94'], [0.7, '#a08070'], [1, '#5a5058']]),
-      softExtra: `<rect width="1600" height="900" fill="#ff9a40" opacity="0.28"/>`,
-      soft: rad('ls_n', 800, 980, 950, [[0, '#ffa040', 1], [0.5, '#ff9a40', 0.55], [1, '#ff9a40', 0.1]]),
+      softExtra: `<rect width="1600" height="900" fill="#ff9a40" opacity="0.16"/>`,
+      soft: rad('ls_n', 800, 980, 950, [[0, '#ffa040', 1], [0.5, '#ff9a40', 0.5], [1, '#ff9a40', 0.05]]),
       glow: rad('lg_n', 800, 1040, 760, [[0, '#ffcf7a', 0.34], [1, '#ffcf7a', 0]]) + rad('lf_n', 800, 910, 700, [[0, '#ffb45c', 0.42], [0.6, '#ffa040', 0.1], [1, '#ffa040', 0]], 'gradientTransform="translate(800 910) scale(1 0.2) translate(-800 -910)"'),
       noFlick: true,
       glowShapes: `<rect x="0" y="280" width="1600" height="620" fill="url(#lg_n)"/><rect x="100" y="780" width="1400" height="120" fill="url(#lf_n)"/>`,
@@ -1031,9 +1031,9 @@
     },
     east: {
       cold: rad('lc_e', 720, 330, 1300, [[0, '#b3c7d4'], [0.35, '#8aa1b2'], [1, '#43566a']]),
-      warm: rad('lw_e', 1800, 560, 1750, [[0, '#ffe2b8'], [0.3, '#e0b88e'], [0.65, '#a08476'], [1, '#5a5058']]),
+      warm: rad('lw_e', 1800, 560, 1750, [[0, '#ffe2b8'], [0.3, '#dcbc98'], [0.65, '#958a88'], [1, '#52525e']]),
       softExtra: `<rect width="1600" height="900" fill="url(#lsx_e)"/>`,
-      soft: rad('ls_e', 1800, 560, 1200, [[0, '#ffa040', 0.95], [0.45, '#ff9a40', 0.5], [1, '#ff9a40', 0.12]]) + lin('lsx_e', 0, 0, 1600, 0, [[0, '#ff9a40', 0.12], [1, '#ff9a40', 0.45]]),
+      soft: rad('ls_e', 1800, 560, 1250, [[0, '#ffa040', 0.9], [0.45, '#ff9a40', 0.4], [0.8, '#ff9a40', 0.08], [1, '#ff9a40', 0]]) + lin('lsx_e', 0, 0, 1600, 0, [[0, '#ff9a40', 0], [0.4, '#ff9a40', 0.06], [1, '#ff9a40', 0.4]]),
       glow: rad('lg_e', 1800, 560, 700, [[0, '#ffcf7a', 0.26], [1, '#ffcf7a', 0]]) + rad('lf_e', 1600, 880, 760, [[0, '#ffb45c', 0.32], [0.6, '#ffa040', 0.1], [1, '#ffa040', 0]], 'gradientTransform="translate(1600 880) scale(1 0.16) translate(-1600 -880)"'),
       glowShapes: `<rect x="1100" y="0" width="500" height="900" fill="url(#lg_e)"/><rect x="840" y="790" width="760" height="110" fill="url(#lf_e)"/>`,
       // the round window's light falls across this wall & the cabinet

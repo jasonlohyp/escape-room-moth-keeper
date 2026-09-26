@@ -870,7 +870,7 @@
       const darkD = [disc(x), half(x, 0), null, half(x, 1)][i];
       const mg = G.el('g', {}, refs.ink);
       // slate under-stroke separates the moon from the page
-      G.el('circle', { cx: x, cy: MY, r: RR, fill: 'none', stroke: '#1a2230', 'stroke-width': 5, opacity: 0.45 }, mg);
+      (refs.unders = refs.unders || []).push(G.el('circle', { cx: x, cy: MY, r: RR, fill: 'none', stroke: '#1a2230', 'stroke-width': 5, opacity: 0.45 }, mg));
       // diagonal wipe: the hatching is drawn in stroke by stroke
       const wc = G.el('clipPath', { id: 'dkMW' + i }, defs);
       const wr = G.el('rect', { x: x - 75, y: MY - 75, width: 150, height: 150, transform: `rotate(-28 ${x} ${MY})` }, wc);
@@ -919,6 +919,7 @@
   function inkFull(r) {
     const C = 2 * Math.PI * 50;
     r.wipes.forEach(w => w.setAttribute('width', 150));
+    r.unders.forEach(u => u.setAttribute('opacity', 0.45));
     r.halos.forEach(h => h.setAttribute('opacity', h.tagName === 'ellipse' ? 0.7 : 1));
     r.beam.setAttribute('opacity', 0.5);
     r.pen.setAttribute('opacity', 0);
@@ -1175,6 +1176,7 @@
     const penAt = (x, y, o) => { r.pen.setAttribute('transform', `translate(${x.toFixed(1)} ${y.toFixed(1)})`); r.pen.setAttribute('opacity', o); };
     r.outlines.forEach(o => { o.setAttribute('stroke-dasharray', C); o.setAttribute('stroke-dashoffset', C); });
     r.wipes.forEach(w => w.setAttribute('width', 0));
+    r.unders.forEach(u => u.setAttribute('opacity', 0));
     r.darks.concat(r.lits).forEach(f => f.setAttribute('opacity', 1));
     r.halos.forEach(h => h.setAttribute('opacity', 0));
     r.flour.setAttribute('opacity', 0);
@@ -1191,6 +1193,7 @@
       const o = r.outlines[i], x = r.XS[i];
       await G.tween(420, t => {
         o.setAttribute('stroke-dashoffset', C * (1 - t));
+        r.unders[i].setAttribute('opacity', (0.45 * t).toFixed(3));
         const a = t * Math.PI * 2;  // a circle's stroke starts at 3 o'clock, clockwise
         penAt(x + Math.cos(a) * r.RR, r.MY + Math.sin(a) * r.RR, 1);
         r.halos[i].setAttribute('opacity', (t * 0.6).toFixed(3));
