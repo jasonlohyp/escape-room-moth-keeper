@@ -187,16 +187,16 @@
           </radialGradient>
         </defs>`, g);
       // warm halo around lamp (desk pool + wall bloom) — plain gradients, cheap
-      R.halo = G.el('g', { opacity: 0, 'pointer-events': 'none' }, g);
+      R.halo = G.el('g', { opacity: 0.012, 'pointer-events': 'none' }, g);
       G.el('ellipse', { cx: 900, cy: 452, rx: 420, ry: 300, fill: 'url(#dkHalo)' }, R.halo);
       G.el('ellipse', { cx: 900, cy: 580, rx: 360, ry: 60, fill: 'url(#dkHalo)', opacity: 0.8 }, R.halo);
 
       // faint dark cone either side of the shade (baked)
-      R.cone = G.el('g', { opacity: 0.002, 'pointer-events': 'none', style: 'mix-blend-mode:multiply' }, g);
+      R.cone = G.el('g', { opacity: 0.012, 'pointer-events': 'none', style: 'mix-blend-mode:multiply' }, g);
       bake(`<path d="M852 360 L360 90 L330 470 L800 442 Z" fill="#1a1410" opacity="0.22" filter="url(#dkB20)"/>
             <path d="M948 360 L1440 90 L1470 470 L1000 442 Z" fill="#1a1410" opacity="0.22" filter="url(#dkB20)"/>`,
         260, 20, 1280, 520, 0.5, R.cone);
-      R.proj = G.el('g', { opacity: 0.002, 'pointer-events': 'none', style: 'mix-blend-mode:screen' }, g);
+      R.proj = G.el('g', { opacity: 0.012, 'pointer-events': 'none', style: 'mix-blend-mode:screen' }, g);
       // broad fan of light up the wall + bright rim of the shade's top opening (baked, one layer)
       R.wash = bake(`<path d="M852 362 L380 60 Q900 -30 1420 60 L948 362 Z" fill="url(#dkWash)" filter="url(#dkBleed)"/>
             <ellipse cx="900" cy="346" rx="190" ry="34" fill="#ffcf7a" opacity="0.1" filter="url(#dkB20)"/>`,
@@ -205,15 +205,24 @@
       SLOTS.forEach((s) => {
         const outer = G.el('g', {}, R.proj);
         const inner = G.el('g', {}, outer);
-        const loc = `transform="translate(${s.x} ${s.y}) scale(${s.s})"`;
-        const bx = s.x - 135 * s.s, by = s.y - 105 * s.s, bw = 270 * s.s, bh = 210 * s.s;
-        // penumbra + soft-edged core; falloff is in stage space (brightest near the lamp axis)
-        bake(`<g ${loc}><path d="${SIL[s.k]}" transform="scale(1.06) translate(-100 -70)" fill="#f0a24c" opacity="0.3" filter="url(#dkBleed)"/>
-              <path d="${SIL[s.k]}" transform="translate(-100 -70)" fill="url(#dkMothFall)" filter="url(#dkSoft)"/></g>`,
-          bx, by, bw, bh, 1.5, inner);
+        // keystone: further from the lamp axis -> slightly larger, softer and dimmer
+        const dist = Math.min(1, Math.abs(s.x - 900) / 360);
+        const sc = s.s * (1 + 0.06 * dist), soft = (1.3 + 1.5 * dist).toFixed(2), pen = (8 + 6 * dist).toFixed(1);
+        const hot = (0.98 - 0.2 * dist).toFixed(2), rim = (0.4 - 0.14 * dist).toFixed(2);
+        const loc = `transform="translate(${s.x} ${s.y}) scale(${sc.toFixed(4)})"`;
+        const bx = s.x - 140 * sc, by = s.y - 110 * sc, bw = 280 * sc, bh = 220 * sc;
+        const defs = `<radialGradient id="dkHot" cx="50%" cy="46%" r="58%">
+            <stop offset="0" stop-color="#fff3cc" stop-opacity="${hot}"/><stop offset="0.45" stop-color="#ffd690" stop-opacity="${(hot * 0.8).toFixed(2)}"/>
+            <stop offset="1" stop-color="#e98f44" stop-opacity="${rim}"/></radialGradient>
+          <filter id="dkS" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="${soft}"/></filter>
+          <filter id="dkP" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="${pen}"/></filter>`;
+        // penumbra spread + hot-cored, soft-edged light shape
+        bake(`<g ${loc}><path d="${SIL[s.k]}" transform="scale(1.07) translate(-100 -70)" fill="#f0a24c" opacity="${(0.34 - 0.08 * dist).toFixed(2)}" filter="url(#dkP)"/>
+              <path d="${SIL[s.k]}" transform="translate(-100 -70)" fill="url(#dkHot)" filter="url(#dkS)"/></g>`,
+          bx, by, bw, bh, 1.5, inner, null, defs);
         // paper-grain shimmer layer (its opacity flickers)
         const weave = bake(`<g ${loc}><path d="${SIL[s.k]}" transform="translate(-100 -70)" fill="#fff6d8" filter="url(#dkWeave)"/></g>`,
-          bx, by, bw, bh, 1.5, inner, { opacity: 0.22 });
+          bx, by, bw, bh, 1.5, inner, { opacity: 0.2 });
         R.moths.push({ outer, inner, s, weave });
       });
       // click target (only live when lit)
@@ -384,7 +393,7 @@
       R.bulbGlow = G.el('ellipse', { cx: 900, cy: 474, rx: 58, ry: 46, fill: 'url(#dkBulbGlow)', opacity: 0 }, L);
       R.glassLit = G.el('path', { d: CHIM_D, fill: 'url(#dkGlassLit)', opacity: 0 }, L);
       G.el('path', { d: 'M895 496 L896 488 L904 488 L905 496 Z', fill: '#2a1a10', stroke: INK, 'stroke-width': 1 }, L);
-      R.flameG = G.el('g', { opacity: 0.002, 'clip-path': 'url(#dkChimClip)' }, L);
+      R.flameG = G.el('g', { opacity: 0.012, 'clip-path': 'url(#dkChimClip)' }, L);
       R.flameInner = G.el('g', {}, R.flameG);
       bake(`<ellipse cx="900" cy="472" rx="24" ry="30" fill="#ffb34d" opacity="0.5" filter="url(#dkB6)"/>
         <path d="M900 446 C904 456 914 468 913 478 C912 486 906 490 900 490 C894 490 888 486 887 478 C886 468 896 456 900 446 Z" fill="url(#dkFlame)" filter="url(#dkGlowB)"/>
@@ -426,7 +435,7 @@
       });
       R.holes.setAttribute('fill', '#15100c');
       R.holesLit = bake(`<g clip-path="url(#dkSC2)" fill="#fff6d8" filter="url(#dkGlowB)">${R.holes.innerHTML}</g>`,
-        790, 350, 220, 110, 2, inner, { opacity: 0.002 }, `<clipPath id="dkSC2"><path d="${SHADE_D}"/></clipPath>`);
+        790, 350, 220, 110, 2, inner, { opacity: 0.012 }, `<clipPath id="dkSC2"><path d="${SHADE_D}"/></clipPath>`);
       G.svg(`
         <path d="${SHADE_D}" fill="none" stroke="${INK}" stroke-width="2.6" stroke-linejoin="round" filter="url(#ink)"/>
         <path d="M852 358 C870 363 930 363 948 358" fill="none" stroke="${INK}" stroke-width="1.6"/>
@@ -473,14 +482,15 @@
   });
 
   function applyLit(k) {
-    R.flameG.setAttribute('opacity', Math.max(0.002, k));
-    R.bulbGlow.setAttribute('opacity', k);
-    R.glassLit.setAttribute('opacity', 0.8 * k);
-    R.shadeLit.setAttribute('opacity', k * 0.92);
-    R.cold.setAttribute('opacity', 0.42 * (1 - k));
-    R.brassLit.setAttribute('opacity', 0.35 * k);
-    R.holes.setAttribute('opacity', 1 - k);
-    R.holesLit.setAttribute('opacity', Math.max(0.002, k));
+    const m = v => Math.max(0.012, v).toFixed(3); // never exactly 0: keeps layers painted so lighting costs no raster spike
+    R.flameG.setAttribute('opacity', m(k));
+    R.bulbGlow.setAttribute('opacity', m(k));
+    R.glassLit.setAttribute('opacity', m(0.8 * k));
+    R.shadeLit.setAttribute('opacity', m(k * 0.92));
+    R.cold.setAttribute('opacity', m(0.42 * (1 - k)));
+    R.brassLit.setAttribute('opacity', m(0.35 * k));
+    R.holes.setAttribute('opacity', m(1 - k));
+    R.holesLit.setAttribute('opacity', m(k));
   }
 
   async function lightLamp() {
@@ -518,7 +528,7 @@
     R.projHot.setAttribute('pointer-events', 'all');
     R.moths.forEach(mm => mm.inner.setAttribute('opacity', 0));
     R.wash.setAttribute('opacity', 0);
-    setProj(0.002);
+    setProj(0.012);
     // bloom the flame while the wall projection fades up over the same ~1.3s
     const bloom = G.tween(700, t => {
       applyLit(t);
@@ -546,13 +556,13 @@
     G.say('The wick takes. Warm light spills across the desk — and four moths bloom upon the wall.', { dur: 4200 });
   }
 
-  // projection visibility. Hidden state is 0.002 (not 0) so the baked layers stay painted/decoded and
+  // projection visibility. Hidden state is 0.012 (not 0) so the baked layers stay painted/decoded and
   // nothing has to rasterise on the frame the lamp lights.
   function setProj(v) {
-    const o = Math.max(0.002, v);
+    const o = Math.max(0.012, v);
     R.proj.setAttribute('opacity', o.toFixed(3));
     R.cone.setAttribute('opacity', o.toFixed(3));
-    R.halo.setAttribute('opacity', v.toFixed(3));
+    R.halo.setAttribute('opacity', o.toFixed(3));
   }
   let fadeId = 0, fadeEnd = 0;
   const fadeDone = () => performance.now() > fadeEnd;
@@ -582,7 +592,7 @@
     R.shadeLit.setAttribute('opacity', (0.88 + 0.06 * f).toFixed(3));
     R.halo.setAttribute('opacity', (0.9 + 0.08 * f).toFixed(3));
     if (projShown && fadeDone()) {
-      R.proj.setAttribute('opacity', (0.93 + 0.06 * f).toFixed(3));
+      R.proj.setAttribute('opacity', (0.9 + 0.1 * f).toFixed(3));
       R.moths.forEach((mm, i) => mm.weave.setAttribute('opacity', (0.2 + 0.1 * flick(t * 0.9 + i * 1.7)).toFixed(3)));
       const dx = (-f2 * 1.4).toFixed(2), dy = (-f * 1.2).toFixed(2), sc = (1 + 0.006 * f).toFixed(4);
       R.proj.setAttribute('transform', `translate(${dx} ${dy}) translate(900 372) scale(${sc}) translate(-900 -372)`);

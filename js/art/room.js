@@ -329,6 +329,7 @@
       ${lin('pJaw', 0, -8, 0, 8, [[0, '#5a3a2a', 0], [1, '#5a3a2a', 0.3]])}
       ${lin('pNeckShade', 0, 4, 0, 16, [[0, '#4a2e22', 0.45], [1, '#4a2e22', 0]])}
       ${rad('pCheek', 0, 0, 1, [[0, '#d98f86', 0.42], [1, '#d98f86', 0]], 'gradientUnits="objectBoundingBox" cx="0.5" cy="0.5" r="0.5"')}
+      ${rad('pShadowSoft', 0, 0, 1, [[0, '#5a3426', 0.34], [1, '#5a3426', 0]], 'gradientUnits="objectBoundingBox" cx="0.5" cy="0.5" r="0.5"')}
       ${rad('pBrow', 0, 0, 1, [[0, '#fff8ea', 0.45], [1, '#fff8ea', 0]], 'gradientUnits="objectBoundingBox" cx="0.5" cy="0.5" r="0.5"')}
       ${lin('pCollar', -18, 0, 18, 0, [[0, '#8a7e64'], [0.35, '#e8dfc4'], [0.7, '#d3c7a8'], [1, '#7a6e54']])}
       ${lin('pDress', -70, 40, 70, 110, [[0, '#2d4144'], [0.4, '#172326'], [1, '#0b1012']])}
@@ -362,12 +363,12 @@
         <!-- ears -->
         <path d="M-24,-26 C-29,-28 -30,-18 -25,-14 Z" fill="#c9ab92"/><path d="M24,-26 C29,-28 30,-18 25,-14 Z" fill="#b8987e"/>
         <!-- neck -->
-        <path d="M-14,-6 C-14,4 -15,9 -16,16 L16,16 C15,9 14,4 14,-6 Z" fill="url(#pNeck)"/><path d="M-14,-6 C-14,4 -15,9 -16,16 L16,16 C15,9 14,4 14,-6 Z" fill="url(#pNeckShade)"/>
+        <path d="M-10.5,-6 C-10.5,3 -11,8 -11.8,14 L11.8,14 C11,8 10.5,3 10.5,-6 Z" fill="url(#pNeck)"/><path d="M-10.5,-6 C-10.5,3 -11,8 -11.8,14 L11.8,14 C11,8 10.5,3 10.5,-6 Z" fill="url(#pNeckShade)"/><path d="M5,2 C7,6 9,10 12,13" stroke="#6a4a3a" stroke-width="2.2" opacity="0.22" fill="none"/><path d="M-6,4 C-7,7 -8,10 -10,13" stroke="#fff4e0" stroke-width="1.6" opacity="0.18" fill="none"/>
         
         <!-- lace collar (high, but short) -->
-        <path d="M-16,11 C-17,19 -17,27 -18,33 C-6,37 6,37 18,33 C17,27 17,19 16,11 C5,13.5 -5,13.5 -16,11 Z" fill="url(#pCollar)" ${K} stroke-width="0.7"/>
-        <path d="M-16,11 q2,-2.6 4,0 q1.75,-2.6 3.5,0 q1.75,-2.6 3.5,0 q1.75,-2.6 3.5,0 q1.75,-2.6 3.5,0 q1.75,-2.6 3.5,0 q1.75,-2.6 3.5,0 q1.75,-2.6 3.5,0 q1.75,-2.6 3.5,0" fill="#ece3c8" stroke="#9a8c6e" stroke-width="0.5"/>
-        <path d="M-11,15 L-11,34 M-5,15 L-5,35 M0,15 L0,36 M5,15 L5,35 M11,15 L11,34" stroke="#9a8c6e" stroke-width="0.6" opacity="0.6"/>
+        <path d="M-12,11 C-13,19 -14.5,27 -17,33 C-6,37 6,37 17,33 C14.5,27 13,19 12,11 C4,13 -4,13 -12,11 Z" fill="url(#pCollar)" ${K} stroke-width="0.7"/>
+        <path d="M-12,11 q1.5,-2.4 3,0 q1.5,-2.4 3,0 q1.5,-2.4 3,0 q1.5,-2.4 3,0 q1.5,-2.4 3,0 q1.5,-2.4 3,0 q1.5,-2.4 3,0 q1.5,-2.4 3,0" fill="#ece3c8" stroke="#9a8c6e" stroke-width="0.5"/>
+        <path d="M-8,15 L-10,34 M-4,15 L-5,35 M0,15 L0,36 M4,15 L5,35 M8,15 L10,34" stroke="#9a8c6e" stroke-width="0.6" opacity="0.6"/>
         <path d="M-17,33 C-6,37 6,37 17,33 L22,39 C7,45 -7,45 -22,39 Z" fill="#c9bb99" stroke="#8a7a5a" stroke-width="0.5"/>
         <path d="M-20,39 q2,3 4,0 q2,3 4,0 q2,3 4,0 q2,3 4,0 q2,3 4,0 q2,3 4,0 q2,3 4,0 q2,3 4,0 q2,3 4,0 q2,3 4,0" fill="none" stroke="#e9e0c4" stroke-width="0.7" opacity="0.8"/>
         <!-- moth brooch -->
@@ -385,6 +386,10 @@
         
         
         <ellipse cx="-13" cy="-13" rx="9" ry="6.5" fill="url(#pCheek)"/>
+        <ellipse cx="17" cy="-12" rx="6" ry="9" fill="url(#pShadowSoft)"/><ellipse cx="-17.5" cy="-12" rx="4.5" ry="8" fill="url(#pShadowSoft)" opacity="0.55"/>
+        <ellipse cx="13" cy="-2" rx="9" ry="5" transform="rotate(-38 13 -2)" fill="url(#pShadowSoft)"/><ellipse cx="-13" cy="-2" rx="8" ry="4" transform="rotate(38 -13 -2)" fill="url(#pShadowSoft)" opacity="0.6"/>
+        <ellipse cx="-12" cy="-19.5" rx="5" ry="2.6" fill="url(#pBrow)" opacity="0.7"/>
+        <ellipse cx="0" cy="1.8" rx="4" ry="1.6" fill="url(#pShadowSoft)" opacity="0.7"/>
         <ellipse cx="13" cy="-13" rx="8" ry="6" fill="url(#pCheek)" opacity="0.8"/>
         <ellipse cx="-5" cy="-43" rx="13" ry="7" fill="url(#pBrow)"/><ellipse cx="-9" cy="-20" rx="6" ry="4" fill="url(#pBrow)" opacity="0.6"/><ellipse cx="0" cy="3" rx="5" ry="2.5" fill="url(#pBrow)" opacity="0.5"/>
         <!-- eyes -->
@@ -404,22 +409,36 @@
           <path d="M-15,-23.6 C-12,-21.5 -7,-21.5 -5,-23.6" stroke="#8a6a7a" stroke-width="1.6" fill="none" opacity="0.35"/>
           <path d="M5,-23.6 C7,-21.5 12,-21.5 15,-23.6" stroke="#8a6a7a" stroke-width="1.6" fill="none" opacity="0.35"/>
         </g>
-        <path d="M-17,-34 C-13,-36.5 -8,-36.5 -4,-35" stroke="#2a1d17" stroke-width="1.5" fill="none"/>
-        <path d="M4,-35 C8,-36.5 13,-36.5 17,-34" stroke="#2a1d17" stroke-width="1.5" fill="none"/>
+        <path d="M-17,-34 C-13,-36 -8,-36.6 -4.2,-36" stroke="#2a1d17" stroke-width="1.5" fill="none"/>
+        <path d="M4.2,-36 C8,-36.6 13,-36 17,-34" stroke="#2a1d17" stroke-width="1.5" fill="none"/>
         <!-- nose -->
-        <path d="M-1.5,-24 C-1.5,-18 -0.5,-14 2.5,-11 C1,-9.8 -2,-9.8 -3.5,-11" stroke="#9a7862" stroke-width="1" fill="none" opacity="0.85"/>
-        <path d="M2,-22 C4,-17 5,-14 3,-11" stroke="#8a6a55" stroke-width="2.4" fill="none" opacity="0.2"/>
+        <path d="M1,-27 C3,-20 4.6,-15 4.2,-11.2 C2.8,-10.2 1.2,-10.6 0.6,-11.6 C1.6,-16 1.3,-22 1,-27 Z" fill="#7a5a45" opacity="0.32"/>
+        <path d="M-1.6,-25 C-1.9,-20 -2.1,-16 -3,-13" stroke="#fff2dc" stroke-width="1" opacity="0.35" fill="none"/>
+        <ellipse cx="-0.6" cy="-12.6" rx="2.2" ry="1.5" fill="url(#pBrow)"/>
+        <path d="M-3.8,-11.6 C-4.4,-10 -3.2,-9.2 -2,-9.7 M3.8,-11.4 C4.4,-9.9 3.4,-9.2 2.2,-9.6" stroke="#8a6250" stroke-width="0.7" fill="none" opacity="0.8"/>
+        <ellipse cx="-1.9" cy="-10" rx="1.05" ry="0.55" fill="#4a2e24" opacity="0.75"/><ellipse cx="2" cy="-10" rx="1.05" ry="0.55" fill="#4a2e24" opacity="0.75"/>
+        
         <!-- mouth -->
-        <path d="M-6,-3.2 C-3,-5.3 -1,-4.4 0,-3.8 C1,-4.4 3,-5.3 6,-3.2 C3,-2.2 -3,-2.2 -6,-3.2 Z" fill="#94494b"/>
+        <path d="M-5.8,-2.4 C-3,-5 -1,-4.4 0,-3.8 C1,-4.4 3,-5 5.8,-2.4 C3,-2.6 -3,-2.6 -5.8,-2.4 Z" fill="#94494b"/>
         <path d="M-5,-3 C-2,0.8 2,0.8 5,-3 Z" fill="#b0635f"/>
-        <path d="M-5.6,-3.1 C-2,-2.4 2,-2.4 5.6,-3.1" stroke="#4a1f1e" stroke-width="0.8" fill="none"/>
+        <path d="M-5.8,-2.3 C-3,-2.8 -1,-2.7 0,-2.6 C1,-2.7 3,-2.8 5.8,-2.3" stroke="#4a1f1e" stroke-width="0.8" fill="none"/>
         <ellipse cx="-1" cy="-1.3" rx="2" ry="0.7" fill="#fff" opacity="0.25"/>
         <!-- hair front: soft pompadour, centre parting, swept back over the ears -->
         <path d="M-31,-22 C-37,-52 -20,-71 0,-71 C20,-71 37,-52 31,-22 C28,-36 18,-47 4,-49 C1.5,-47 -1.5,-47 -4,-49 C-18,-47 -28,-36 -31,-22 Z" fill="url(#pHair)"/>
         <path d="M-31,-22 C-30,-30 -27,-34 -22,-36 C-24,-30 -24,-25 -21,-20 C-25,-19 -29,-20 -31,-22 Z M31,-22 C30,-30 27,-34 22,-36 C24,-30 24,-25 21,-20 C25,-19 29,-20 31,-22 Z" fill="#150e0b"/>
         <path d="M-33,-30 C-34,-50 -22,-66 -6,-69" stroke="#7a6050" stroke-width="1.6" fill="none" opacity="0.45"/>
-        <path d="M-3,-63 C-12,-60 -20,-51 -23,-38 M-7,-65 C-17,-61 -25,-51 -27,-36 M4,-63 C13,-60 20,-51 23,-38 M8,-65 C18,-61 25,-51 27,-36" stroke="#5a4232" stroke-width="0.9" opacity="0.35" fill="none"/>
-        <path d="M-20,-60 C-12,-66 -2,-67 4,-66" stroke="#6a5040" stroke-width="2" opacity="0.35" fill="none"/>
+        
+        <g fill="#2c1e16">
+          <path d="M-4,-49 C-14,-47 -24,-40 -28,-26 C-24,-35 -16,-42 -6,-45.5 Z"/><path d="M-5,-59 C-18,-57 -28,-47 -31,-30 C-26,-43 -18,-51 -7,-54 Z"/>
+          <path d="M4,-49 C14,-47 24,-40 28,-26 C24,-35 16,-42 6,-45.5 Z"/><path d="M5,-59 C18,-57 28,-47 31,-30 C26,-43 18,-51 7,-54 Z"/>
+        </g>
+        <g fill="none" stroke-linecap="round">
+          <path d="M-7,-64 C-18,-61 -27,-51 -30,-36 M-5,-52 C-14,-50 -22,-43 -25,-32" stroke="#8a6650" stroke-width="1.1" opacity="0.55"/>
+          <path d="M7,-64 C18,-61 27,-51 30,-36 M5,-52 C14,-50 22,-43 25,-32" stroke="#6a4c3a" stroke-width="1" opacity="0.4"/>
+          <path d="M-14,-66 C-8,-69 -2,-70 3,-69" stroke="#a07a5c" stroke-width="1.6" opacity="0.4"/>
+          <path d="M-4,-86 C0,-89 6,-89 10,-86" stroke="#8a6650" stroke-width="1.2" opacity="0.5"/>
+          <path d="M-27,-22 C-30,-15 -28,-8 -31,0 M26.5,-21 C29.5,-14 27.5,-7 29.5,1 M-3,-48 C-6,-44 -5,-40 -8,-36 M-22,-44 C-26,-46 -30,-44 -33,-40" stroke="#1a110d" stroke-width="0.6" opacity="0.85"/>
+        </g>
         <circle cx="25.5" cy="-11" r="1.7" fill="#efe6d6"/><circle cx="25" cy="-11.6" r="0.6" fill="#fff"/>
         </g>
         <!-- varnish sheen & craquelure -->
@@ -492,6 +511,12 @@
       <path d="M512,440 C500,452 486,474 478,504 C490,484 500,466 518,452 C516,446 514,442 512,440 Z" fill="#e9e0c4" ${K} stroke-width="1.2"/>
       <path d="M508,446 C498,462 490,478 484,494" stroke="#a89878" stroke-width="0.8" fill="none"/>
     </g>`;
+    // pale wing scale & dust fallen on the desk under the sketch wall (shown once the sketch moth is gone)
+    s += `<g class="sk-dust" style="display:none">
+      <path d="M396,571 C399,566 406,565 410,568 C407,570 404,573 402,576 C400,575 397,573 396,571 Z" fill="#e9e0c4" opacity="0.85"/>
+      <path d="M398,571 L408,567.6 M399,573 L405,569.6" stroke="#b8a888" stroke-width="0.5"/>
+      ${[[392, 578, 1.2], [404, 580, 0.9], [414, 574, 1.1], [420, 582, 0.8], [388, 584, 0.9], [411, 585, 1.3], [426, 577, 0.7], [399, 586, 0.8], [432, 583, 0.9]].map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r}" fill="#efe7cf" opacity="0.7"/>`).join('')}
+    </g>`;
     // spectacles folded on the desk (right of the lamp zone)
     s += `<g transform="translate(1188,572)" opacity="0.95"><ellipse cx="-8" cy="0" rx="9" ry="5" fill="#cfe3ff" fill-opacity="0.12" stroke="#b8893a" stroke-width="1.6"/><path d="M1,0 C3,-2 5,-2 7,0" stroke="#b8893a" stroke-width="1.4" fill="none"/></g>`;
     return s;
@@ -535,13 +560,18 @@
         <path d="M-20,-8 l3,2 M-18,-11 l3,2 M20,-8 l-3,2 M18,-11 l-3,2" opacity="0.7"/>
       </g></g>
       <g class="sk-gone" style="display:none">
-        <g transform="translate(0,-8) scale(1.9)" fill="none" stroke="#6a5a44" stroke-width="0.5" opacity="0.28" stroke-dasharray="1.2 1.6">
+        <g transform="translate(0,-8) scale(1.9)" fill="none" stroke="#6a5a44" stroke-width="0.55" opacity="0.4" stroke-dasharray="1.2 1.6">
           <path d="M0,-2 C-6,-14 -20,-18 -24,-8 C-25,-1 -15,3 0,2 M0,-2 C6,-14 20,-18 24,-8 C25,-1 15,3 0,2 M0,1 C-6,4 -16,8 -14,16 C-11,20 -4,13 0,4 M0,1 C6,4 16,8 14,16 C11,20 4,13 0,4"/>
         </g>
-        <path d="M-3,-14 C-1,-8 2,-4 1,6" stroke="#8a7a5a" stroke-width="0.6" fill="none" opacity="0.5"/>
-        <line x1="0" y1="-12" x2="1.5" y2="4" stroke="#6e6a64" stroke-width="0.9"/>
-        <circle cx="0" cy="-12" r="1.8" fill="#1c140f"/><circle cx="-0.5" cy="-12.5" r="0.5" fill="#fff" opacity="0.7"/>
-        <ellipse cx="3" cy="-4" rx="3" ry="6" fill="#5a4a30" opacity="0.08"/>
+        <!-- torn pinhole where the body was held -->
+        <path d="M-2.5,-1 C-3.5,-3 -1,-5 1,-4 C3,-4.5 4,-2 3,0 C3.5,2 1,3.5 -0.5,2.5 C-2.5,2.8 -3.5,1 -2.5,-1 Z" fill="#241a12"/>
+        <path d="M1,-4 C3,-7 6,-7 7,-5 C5,-4.5 3.5,-3.5 3,0 Z" fill="#e6dcc0" stroke="#8a7a5a" stroke-width="0.5"/>
+        <path d="M-2,2.5 l-2,3 M1,3 l0.5,3" stroke="#6a5a44" stroke-width="0.5"/>
+        <!-- the empty specimen pin, pushed through above the hole -->
+        <line x1="3" y1="-22" x2="6" y2="-4" stroke="#000" stroke-width="1.6" opacity="0.25"/>
+        <line x1="0" y1="-24" x2="1" y2="-6" stroke="#9a968e" stroke-width="1.1"/>
+        <line x1="-0.3" y1="-23" x2="0.6" y2="-7" stroke="#e8e6e0" stroke-width="0.4" opacity="0.8"/>
+        <circle cx="0" cy="-24.5" r="2.6" fill="#1c140f"/><circle cx="-0.8" cy="-25.3" r="0.8" fill="#fff" opacity="0.75"/>
       </g>
       <path d="M-38,48 q10,-4 20,0 t22,0 M-38,56 q14,-3 30,0" stroke="#3a2a1c" stroke-width="1" fill="none" opacity="0.7"/>`);
     s += papers(176, 200, 92, 112, 5, `
@@ -855,21 +885,27 @@
     </g>`;
     // sheet-draped dress form (left) — uncanny
     s += cshadow(300, 800, 90, 10);
-    s += `<g>
+    const SHEET = "M300,318 C318,318 334,330 346,344 C372,354 388,372 391,398 C397,452 399,522 410,592 C414,622 420,650 414,668 C408,660 402,664 396,672 C390,664 382,660 374,668 C366,676 358,672 352,664 C344,672 334,674 326,666 C318,672 312,666 308,656 C302,612 298,570 292,548 C278,552 256,548 240,540 C232,536 228,532 226,526 C222,474 214,434 214,400 C216,372 230,356 254,344 C266,330 282,318 300,318 Z";
+    s += `<defs>${lin('gSheet', 214, 0, 420, 0, [[0, '#8e8876'], [0.3, '#b3ab94'], [0.55, '#aaa28b'], [0.8, '#8f8772'], [1, '#6e6856']])}
+      ${lin('gSheetV', 0, 318, 0, 680, [[0, '#fff', 0.12], [0.4, '#000', 0], [1, '#000', 0.28]])}</defs>
+      <g opacity="0.22"><path d="${SHEET}" transform="translate(30,14)" fill="#000" opacity="0.35"/><path d="${SHEET}" transform="translate(24,10)" fill="#000" opacity="0.4"/><path d="${SHEET}" transform="translate(18,6)" fill="#000" opacity="0.5"/></g>
+      <g>
       <path d="M300,560 V788" stroke="${INK}" stroke-width="10" stroke-linecap="round"/><path d="M300,560 V788" stroke="#5a3824" stroke-width="6"/>
       <path d="M300,760 L246,796 M300,760 L354,796 M300,760 L304,802" stroke="${INK}" stroke-width="8" stroke-linecap="round"/>
       <path d="M300,760 L246,796 M300,760 L354,796 M300,760 L304,802" stroke="#5a3824" stroke-width="4.5" stroke-linecap="round"/>
-      <path d="M300,330 C284,330 280,338 280,346 C250,350 222,360 220,384 C218,420 236,450 246,480 C238,510 232,540 240,566 H360 C368,540 362,510 354,480 C364,450 382,420 380,384 C378,360 350,350 320,346 C320,338 316,330 300,330 Z" fill="#b5a888" ${K} stroke-width="2.4"/>
-      <path d="M254,470 C280,480 320,480 346,470" stroke="#8a7a5a" stroke-width="1.4" fill="none"/>
-      <path d="M300,346 V566" stroke="#8a7a5a" stroke-width="1" stroke-dasharray="4 4" opacity="0.7"/>
-      <ellipse cx="300" cy="328" rx="12" ry="6" fill="url(#gBrass)" ${K} stroke-width="1.4"/>
+      <path d="M244,540 C240,552 240,560 242,568 H358 C362,556 360,546 356,538 Z" fill="#8a7e64" ${K} stroke-width="2"/>
       <!-- the sheet, thrown over the whole form: a headless, shrouded figure -->
-      <path d="M300,318 C318,318 334,330 346,344 C372,354 388,372 391,398 C397,452 399,522 410,592 C414,622 420,650 414,668 L400,656 L388,674 L372,656 L356,678 L340,662 L322,676 L308,656 C302,612 298,570 292,546 L280,530 L266,544 L252,528 L240,538 L226,524 C222,474 214,434 214,400 C216,372 230,356 254,344 C266,330 282,318 300,318 Z" fill="#e2d9bf" ${K} stroke-width="2.2"/>
-      <path d="M300,318 C290,322 286,332 288,340 C296,336 306,336 314,340 C314,330 310,322 300,318 Z" fill="#f2ead4" opacity="0.8"/>
-      <path d="M312,346 C336,420 344,500 352,610 M336,352 C364,430 372,520 380,640 M362,368 C382,450 388,540 398,640 M300,344 C306,420 310,500 318,600" stroke="#a89878" stroke-width="1.6" fill="none" opacity="0.7"/>
-      <path d="M318,352 C342,426 350,506 358,616" stroke="#fff" stroke-width="2.4" fill="none" opacity="0.35"/>
-      <path d="M284,344 C270,400 262,460 262,520 M262,350 C244,396 236,450 238,510" stroke="#a89878" stroke-width="1.4" fill="none" opacity="0.6"/>
-      <path d="M292,546 C300,540 306,544 308,556" stroke="#a89878" stroke-width="1.2" fill="none" opacity="0.6"/>
+      <path d="${SHEET}" fill="url(#gSheet)" ${K} stroke-width="2.2"/>
+      <path d="${SHEET}" fill="url(#gSheetV)"/>
+      <g fill="#4a4436" opacity="0.28">
+        <path d="M322,352 C344,420 352,500 360,600 C364,630 366,650 360,670 C352,620 344,560 336,500 C330,450 324,400 316,356 Z"/>
+        <path d="M348,362 C372,430 380,520 388,620 C390,640 392,655 390,668 C382,620 374,540 364,470 C360,430 354,396 344,368 Z"/>
+        <path d="M280,344 C266,400 258,460 258,530 C252,470 252,410 268,350 Z"/>
+        <path d="M302,350 C304,420 306,500 314,600 C316,630 316,648 312,664 C306,620 300,540 298,470 C296,420 296,380 298,352 Z"/>
+      </g>
+      <path d="M316,350 C338,424 346,504 354,610 M340,360 C364,430 372,520 380,630" stroke="#d8d0b8" stroke-width="2" fill="none" opacity="0.35"/>
+      <path d="M300,318 C290,322 286,332 288,340 C296,336 306,336 314,340 C314,330 310,322 300,318 Z" fill="#c8c0a8" opacity="0.8"/>
+      <path d="M292,548 C300,544 306,548 308,558" stroke="#6a6250" stroke-width="1.2" fill="none" opacity="0.6"/>
     </g>`;
     // shelf with specimen jars (right, high)
     const jar = (x, w, h, fillC, inner) => `<g>
@@ -978,9 +1014,9 @@
       cold: rad('lc_n', -200, 330, 1600, [[0, '#a3b9c9'], [0.45, '#7890a2'], [1, '#43566a']]),
       warm: rad('lw_n', 800, 1120, 1150, [[0, '#f8dfb8'], [0.35, '#d2b394'], [0.7, '#8a8090'], [1, '#4d5566']]),
       soft: rad('ls_n', 800, 1000, 900, [[0, '#ffa040', 0.9], [0.45, '#ff9a40', 0.4], [1, '#ff9a40', 0]]),
-      glow: rad('lg_n', 800, 1040, 760, [[0, '#ffcf7a', 0.28], [1, '#ffcf7a', 0]]),
+      glow: rad('lg_n', 800, 1040, 760, [[0, '#ffcf7a', 0.28], [1, '#ffcf7a', 0]]) + rad('lf_n', 800, 910, 640, [[0, '#ffb45c', 0.3], [0.6, '#ffa040', 0.1], [1, '#ffa040', 0]], 'gradientTransform="translate(800 910) scale(1 0.2) translate(-800 -910)"'),
       noFlick: true,
-      glowShapes: `<rect x="0" y="280" width="1600" height="620" fill="url(#lg_n)"/>`,
+      glowShapes: `<rect x="0" y="280" width="1600" height="620" fill="url(#lg_n)"/><rect x="100" y="780" width="1400" height="120" fill="url(#lf_n)"/>`,
       moon: `${rad('lm2_n', -150, 300, 950, [[0, '#8fb3d9', 0.3], [1, '#8fb3d9', 0]])}
              ${lin('lm_n', 0, 150, 420, 900, [[0, '#cfe3ff', 0.24], [0.6, '#a8c6ea', 0.12], [1, '#8fb3d9', 0.08]])}
              ${rad('lp_n', 340, 856, 250, [[0, '#dcebff', 0.3], [0.6, '#cfe3ff', 0.18], [1, '#cfe3ff', 0]], 'gradientTransform="translate(340 856) scale(1 0.17) translate(-340 -856)"')}
@@ -996,8 +1032,8 @@
       cold: rad('lc_e', 720, 330, 1300, [[0, '#b3c7d4'], [0.35, '#8aa1b2'], [1, '#43566a']]),
       warm: rad('lw_e', 1850, 600, 1750, [[0, '#e8cca8'], [0.25, '#c8aa8e'], [0.6, '#8a8288'], [1, '#4d5566']]),
       soft: rad('ls_e', 1850, 600, 950, [[0, '#ff9a40', 0.65], [0.4, '#ff9a40', 0.3], [1, '#ff9a40', 0]]),
-      glow: rad('lg_e', 1800, 600, 540, [[0, '#ffcf7a', 0.18], [1, '#ffcf7a', 0]]),
-      glowShapes: `<rect x="1150" y="0" width="450" height="900" fill="url(#lg_e)"/>`,
+      glow: rad('lg_e', 1800, 600, 540, [[0, '#ffcf7a', 0.18], [1, '#ffcf7a', 0]]) + rad('lf_e', 1600, 880, 760, [[0, '#ffb45c', 0.32], [0.6, '#ffa040', 0.1], [1, '#ffa040', 0]], 'gradientTransform="translate(1600 880) scale(1 0.16) translate(-1600 -880)"'),
+      glowShapes: `<rect x="1150" y="0" width="450" height="900" fill="url(#lg_e)"/><rect x="840" y="790" width="760" height="110" fill="url(#lf_e)"/>`,
       // the round window's light falls across this wall & the cabinet
       moonBase: rad('lp_e', 1200, 330, 180, [[0, '#cfe3ff', 0.22], [0.72, '#a8c6ea', 0.16], [1, '#8fb3d9', 0]], 'gradientTransform="translate(1200 330) rotate(-8) scale(0.84 1) translate(-1200 -330)"'),
       moonBaseShapes: `<rect x="1000" y="130" width="400" height="400" fill="url(#lp_e)"/>
@@ -1089,7 +1125,8 @@
     if (!sketchGone && G.get('lampLit') && (leaving || G.view() !== 'south' || document.body.dataset.ready !== '1')) sketchGone = true;
     const b = state.south && state.south.base;
     if (!b) return;
-    const m = b.querySelector('.sk-moth'), g = b.querySelector('.sk-gone');
+    const m = b.querySelector('.sk-moth'), g = b.querySelector('.sk-gone'), dd = b.querySelector('.sk-dust');
+    if (dd) dd.style.display = sketchGone ? '' : 'none';
     if (m) m.style.display = sketchGone ? 'none' : '';
     if (g) g.style.display = sketchGone ? '' : 'none';
   }
@@ -1099,8 +1136,10 @@
   function eyesFrame(now) {
     if (!eyes.on) return;
     const dt = Math.min(100, now - (eyes.last || now)); eyes.last = now;
-    const k = 1 - Math.exp(-dt / 380);           // ~400ms lag
-    eyes.x += (eyes.tx - eyes.x) * k; eyes.y += (eyes.ty - eyes.y) * k;
+    const idle = now - (eyes.moved || 0) > 7000;   // cursor still for a while: her gaze drifts back to you
+    const k = 1 - Math.exp(-dt / (idle ? 1400 : 380));   // ~400ms lag while following
+    const gx = idle ? 0 : eyes.tx, gy = idle ? 0 : eyes.ty;
+    eyes.x += (gx - eyes.x) * k; eyes.y += (gy - eyes.y) * k;
     const t = `translate(${eyes.x.toFixed(2)},${eyes.y.toFixed(2)})`;
     const Lg = document.getElementById('edithEyeL'), Rg = document.getElementById('edithEyeR');
     if (Lg) { Lg.setAttribute('transform', t); Rg.setAttribute('transform', t); }
@@ -1127,7 +1166,7 @@
       const p = G.toStage(e);
       const dx = p.x - 1275, dy = p.y - 275, d = Math.hypot(dx, dy) || 1;
       const k = Math.min(1, d / 320);
-      eyes.tx = dx / d * 3.6 * k; eyes.ty = dy / d * 1.3 * k;
+      eyes.tx = dx / d * 3.6 * k; eyes.ty = dy / d * 1.3 * k; eyes.moved = performance.now();
     };
     stage.addEventListener('mousemove', eyes.handler);
     eyes.raf = requestAnimationFrame(eyesFrame);
@@ -1139,7 +1178,7 @@
     eyes.on = false; eyes.handler = null;
     cancelAnimationFrame(eyes.raf); clearTimeout(eyes.blinkT);
   }
-  ART.blinkEdith = () => { clearTimeout(eyes.blinkT); eyes.blinkT = setTimeout(() => {}, 0); const lids = document.querySelectorAll('#edithPortrait .edith-lid'); return G.tween(420, (e, t) => { const k = t < 0.45 ? t / 0.45 : Math.max(0, 1 - (t - 0.55) / 0.45); lids.forEach(l => l.setAttribute('transform', `translate(0,-29.5) scale(1,${Math.min(1, k).toFixed(3)}) translate(0,29.5)`)); }, 'linear'); };
+  ART.blinkEdith = () => { const lids = document.querySelectorAll('#edithPortrait .edith-lid'); return G.tween(420, (e, t) => { const k = t < 0.45 ? t / 0.45 : Math.max(0, 1 - (t - 0.55) / 0.45); lids.forEach(l => l.setAttribute('transform', `translate(0,-29.5) scale(1,${Math.min(1, k).toFixed(3)}) translate(0,29.5)`)); }, 'linear').then(() => { if (eyes.on) scheduleBlink(); }); };
 
   G.WALLS.forEach(w => {
     state[w] = { key: null };

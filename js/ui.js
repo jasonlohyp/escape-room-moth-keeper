@@ -52,13 +52,14 @@
     <circle class="halo" cx="50" cy="52" r="46" fill="url(#uiHintHalo)"/>
     <circle cx="50" cy="52" r="33" fill="none" stroke="#e7c476" stroke-opacity=".35" stroke-width="1"/>
     <g class="wings" fill="#efe6cf" stroke="#1c140f" stroke-width="1.2" stroke-linejoin="round">
-      <path d="M49 47 C 40 34, 27 30, 22 35 C 19 42, 27 52, 48 53 Z"/>
-      <path d="M51 47 C 60 34, 73 30, 78 35 C 81 42, 73 52, 52 53 Z"/>
-      <path d="M48.5 53 C 36 55, 30 63, 34 69 C 39 72, 46 64, 49 57 Z"/>
-      <path d="M51.5 53 C 64 55, 70 63, 66 69 C 61 72, 54 64, 51 57 Z"/>
+      <path d="M48 46 L18 38 C 16 46, 22 56, 47 57 Z"/>
+      <path d="M52 46 L82 38 C 84 46, 78 56, 53 57 Z"/>
+      <path d="M47.5 56 C 37 58, 33 65, 38 68 C 43 69, 47 63, 49 59 Z"/>
+      <path d="M52.5 56 C 63 58, 67 65, 62 68 C 57 69, 53 63, 51 59 Z"/>
     </g>
-    <ellipse cx="50" cy="53" rx="2.6" ry="10" fill="#d9ccaa" stroke="#1c140f" stroke-width="1"/>
-    <path d="M49 44 C 46 38, 42 35, 39 34 M51 44 C 54 38, 58 35, 61 34" fill="none" stroke="#efe6cf" stroke-width="1.2" stroke-linecap="round"/>
+    <ellipse cx="50" cy="55" rx="4.2" ry="11" fill="#d9ccaa" stroke="#1c140f" stroke-width="1"/>
+    <circle cx="50" cy="44" r="3.4" fill="#d9ccaa" stroke="#1c140f" stroke-width="1"/>
+    <path d="M48.5 41.5 C 45 36, 41 32, 36 30 C 41 30, 45.5 34, 48.5 41.5 Z M51.5 41.5 C 55 36, 59 32, 64 30 C 59 30, 54.5 34, 51.5 41.5 Z" fill="#efe6cf" stroke="#1c140f" stroke-width=".8"/>
   </svg>`;
   const MUTE_ICON = `<svg viewBox="0 0 40 40" aria-hidden="true" fill="none" stroke="#efe6cf" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
     <path d="M7 16 H12 L19 10 V30 L12 24 H7 Z" fill="#efe6cf" fill-opacity=".15"/>
@@ -89,12 +90,17 @@
     </defs>
     <g class="wl"><g transform="translate(200 0) scale(-1 1)">${lunaWing()}</g></g>
     <g class="wr">${lunaWing()}</g>
-    <path d="M98 80 C 94 68, 88 58, 80 52" fill="none" stroke="#d9cfae" stroke-width="1.4" stroke-linecap="round"/>
-    <path d="M102 80 C 106 68, 112 58, 120 52" fill="none" stroke="#d9cfae" stroke-width="1.4" stroke-linecap="round"/>
-    <path d="M97 76 C 91 66, 84 58, 78 54 C 86 57, 93 64, 97 76 Z M103 76 C 109 66, 116 58, 122 54 C 114 57, 107 64, 103 76 Z" fill="#e9dfbf" opacity=".55"/>
-    <ellipse cx="100" cy="106" rx="6.5" ry="24" fill="url(#lunaBody)" stroke="#3a3326" stroke-width="1.2"/>
-    <circle cx="100" cy="82" r="6" fill="url(#lunaBody)" stroke="#3a3326" stroke-width="1.2"/>
-    <path d="M95 96 H105 M94.5 104 H105.5 M95 112 H105 M96 120 H104" stroke="#b6a987" stroke-width=".9"/>
+    <g stroke="#d9cfae" stroke-width="1" stroke-linecap="round" fill="none">
+      <path d="M98 78 C 93 66, 87 57, 78 50"/><path d="M102 78 C 107 66, 113 57, 122 50"/>
+      <path d="M96.5 74 l-6 -1 M95 70 l-6.5 -.5 M93 66 l-6.5 0 M91 62 l-6 .5 M88.5 58.5 l-5.5 1 M86 55.5 l-4.5 1.5
+               M96.5 74 l1 -5.5 M95 70 l1.5 -5.5 M93 66 l2 -5 M91 62 l2 -4.5 M88.5 58.5 l2 -4 M86 55.5 l1.5 -3"/>
+      <path d="M103.5 74 l6 -1 M105 70 l6.5 -.5 M107 66 l6.5 0 M109 62 l6 .5 M111.5 58.5 l5.5 1 M114 55.5 l4.5 1.5
+               M103.5 74 l-1 -5.5 M105 70 l-1.5 -5.5 M107 66 l-2 -5 M109 62 l-2 -4.5 M111.5 58.5 l-2 -4 M114 55.5 l-1.5 -3"/>
+    </g>
+    <ellipse cx="100" cy="107" rx="9" ry="25" fill="url(#lunaBody)" stroke="#3a3326" stroke-width="1.2"/>
+    <ellipse cx="100" cy="91" rx="10.5" ry="9" fill="#f4eedb" stroke="#3a3326" stroke-width="1.1"/>
+    <circle cx="100" cy="80" r="6.5" fill="url(#lunaBody)" stroke="#3a3326" stroke-width="1.2"/>
+    <path d="M92.5 101 H107.5 M92 109 H108 M93 117 H107 M95 125 H105" stroke="#b6a987" stroke-width=".9"/>
   </svg>`;
   const RULE = '<svg viewBox="0 0 320 14" preserveAspectRatio="none" aria-hidden="true"><path d="M0 7 H136 M184 7 H320" stroke="#e7c476" stroke-width="1" opacity=".6"/><path d="M160 1 L166 7 L160 13 L154 7 Z" fill="none" stroke="#e7c476" stroke-width="1"/><circle cx="143" cy="7" r="1.4" fill="#e7c476"/><circle cx="177" cy="7" r="1.4" fill="#e7c476"/></svg>';
   const GRAIN = 'url("data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="220" height="220"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="3" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 .5  0 0 0 0 .5  0 0 0 0 .5  0 0 0 .9 0"/></filter><rect width="100%" height="100%" filter="url(#n)"/></svg>') + '")';
@@ -123,18 +129,18 @@
   // ---------------------------------------------------------------- ambient canvas (rain + drifting moths)
   function Ambient(canvas, mode) {
     const ctx = canvas.getContext('2d');
-    let raf = 0, W = 0, H = 0, u = 1, dpr = 1, last = 0, moths = [], drops = [], running = false;
+    let raf = 0, W = 0, H = 0, u = 1, Hu = 900, dpr = 1, last = 0, moths = [], drops = [], running = false;
     const R = (a, b) => a + Math.random() * (b - a);
     function resize() {
       const r = canvas.getBoundingClientRect();
       dpr = Math.min(2, window.devicePixelRatio || 1);
-      W = Math.max(1, r.width); H = Math.max(1, r.height); u = W / 1600;
+      W = Math.max(1, r.width); H = Math.max(1, r.height); u = W / 1600; Hu = H / u;
       canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
     }
     function newMoth(init) {
       const end = mode === 'end';
       return {
-        x: R(0, 1600), y: init ? R(0, 900) : (end ? 940 : R(0, 900)),
+        x: R(0, 1600), y: init ? R(0, Hu) : (end ? Hu + 40 : R(0, 900)),
         s: R(.55, 1.2), ph: R(0, 6.28), fr: R(5, 8), a: R(.25, .6),
         ang: R(0, 6.28), sp: end ? R(22, 46) : R(14, 30), turn: R(-.4, .4),
         tint: Math.random() < (end ? .35 : .2) ? 'l' : 'p',
@@ -205,7 +211,7 @@
         const sp = m.sp * slow * (.75 + .25 * Math.sin(t * 1.3 + m.ph));
         m.x += Math.cos(m.ang) * sp * dt; m.y += Math.sin(m.ang) * sp * dt;
         m.heading = m.ang;
-        if (m.x < -60 || m.x > 1660 || m.y < -60 || m.y > 960) {
+        if (m.x < -60 || m.x > 1660 || m.y < -60 || m.y > Hu + 60) {
           Object.assign(m, newMoth(false));
           if (mode !== 'end') { const e = Math.floor(R(0, 4)); m.x = e === 0 ? -40 : e === 1 ? 1640 : R(0, 1600); m.y = e === 2 ? -40 : e === 3 ? 940 : R(0, 900); m.ang = Math.atan2(450 - m.y, 800 - m.x); }
         }
@@ -262,9 +268,11 @@
     E.scrim.addEventListener('click', closeHint);
     E.hint = h('div', { id: 'ui-hint', class: 'ui-hud', role: 'dialog', 'aria-label': 'Hint', 'aria-hidden': 'true' },
       '<div class="hp-head"><span>From the margins</span><span class="hp-pips"></span></div><div class="hp-text"></div><div class="hp-actions"></div>', overlay);
-    const x = h('button', { class: 'hp-close', 'aria-label': 'Close hint' }, '&times;', E.hint);
+    const x = h('button', { class: 'hp-close', 'aria-label': 'Close hint' }, '&times;', E.hint.querySelector('.hp-head'));
     x.addEventListener('click', closeHint);
 
+    E.bandfx = h('div', { id: 'ui-bandfx', class: 'ui-passive', 'aria-hidden': 'true' }, '<canvas></canvas>', overlay);
+    E.bandAmb = Ambient(E.bandfx.querySelector('canvas'), 'end');
     E.held = h('div', { id: 'ui-held', class: 'ui-passive', 'aria-hidden': 'true' }, null, overlay);
   }
 
@@ -335,13 +343,20 @@
     const it = item(id) || {};
     E.label.querySelector('.n').textContent = it.name || id;
     E.label.querySelector('.d').textContent = it.desc || '';
+    E.label.classList.remove('lift');
     E.label.classList.add('show');
-    fitCaption();
-    if (autohide) S.labelTimer = setTimeout(() => { E.label.classList.remove('show'); fitCaptionLater(); }, autohide);
+    // a caption already on screen keeps its width; if the plate would cover it, the plate lifts above the caption line
+    if (E.caption.classList.contains('show')) {
+      const lr = E.label.getBoundingClientRect(), cr = E.caption.querySelector('span').getBoundingClientRect();
+      const u = unit();
+      if (lr.top < cr.bottom && lr.bottom > cr.top && lr.left - 10 * u < cr.right) E.label.classList.add('lift');
+    }
+    if (autohide) S.labelTimer = setTimeout(() => { E.label.classList.remove('show'); unliftLater(); }, autohide);
   }
+  function unliftLater() { setTimeout(() => { if (!E.label.classList.contains('show')) E.label.classList.remove('lift'); }, 450); }
   // the item plate must never cover caption text: while it shows, the caption ends before the plate
   function fitCaption() {
-    const on = E.label.classList.contains('show');
+    const on = E.label.classList.contains('show') && !E.label.classList.contains('lift');
     E.caption.style.width = '';
     if (!on) return;
     const lr = E.label.getBoundingClientRect(), cr = E.caption.getBoundingClientRect();
@@ -351,14 +366,13 @@
     if (!vOverlap || plateLeft >= cr.right) return;
     E.caption.style.width = Math.max(120, plateLeft - cr.left - 24 * u) + 'px';
   }
-  function fitCaptionLater() { setTimeout(() => { if (!E.label.classList.contains('show')) E.caption.style.width = ''; }, 450); }
   function hideLabel(delay) {
     clearTimeout(S.labelTimer);
     S.labelTimer = setTimeout(() => {
       const sel = G.selected(), hov = E.slots.find(s => s.matches(':hover') && s.dataset.item);
       if (hov) return;
       E.label.classList.remove('show');
-      fitCaptionLater();
+      unliftLater();
       void sel;
     }, delay || 0);
   }
@@ -430,6 +444,7 @@
     clearTimeout(S.capTimer);
     const dur = opts.dur || Math.max(3500, Math.min(9000, 1600 + String(text).length * 42));
     const put = () => {
+      fitCaption(); // width decided once, when the caption appears
       span.textContent = text;
       E.caption.classList.add('show');
       S.capTimer = setTimeout(hideCaption, dur);
@@ -439,7 +454,10 @@
       S.capTimer = setTimeout(put, 260);
     } else put();
   }
-  function hideCaption() { clearTimeout(S.capTimer); E.caption.classList.remove('show'); }
+  function hideCaption() {
+    clearTimeout(S.capTimer); E.caption.classList.remove('show');
+    setTimeout(() => { if (!E.caption.classList.contains('show')) E.caption.style.width = ''; }, 700);
+  }
 
   // ---------------------------------------------------------------- hints
   function openHint() {
@@ -685,6 +703,7 @@
       const on = !!force || !!G.get('hatched');
       document.body.classList.toggle('finale', on);
       if (on) { closeHint(); hideLabel(0); if (G.selected()) G.select(null); }
+      if (on && getComputedStyle(E.bandfx).display !== 'none') E.bandAmb.start(); else if (!on) E.bandAmb.stop();
     };
     G.on('flag', k => { if (k === 'hatched') finaleHud(); });
     // the finale starts by taking the cocoon (before 'hatched' is set) — hide the HUD from that moment
