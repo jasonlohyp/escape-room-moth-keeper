@@ -335,8 +335,6 @@
     const it = item(id) || {};
     E.label.querySelector('.n').textContent = it.name || id;
     E.label.querySelector('.d').textContent = it.desc || '';
-    const wr = stageRect(), r = slot.getBoundingClientRect();
-    E.label.style.top = ((r.top + r.height / 2 - wr.top) / wr.height * 100) + '%';
     E.label.classList.add('show');
     if (autohide) S.labelTimer = setTimeout(() => E.label.classList.remove('show'), autohide);
   }

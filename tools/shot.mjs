@@ -58,7 +58,7 @@ const browser = await puppeteer.launch({
 });
 try {
   const page = await browser.newPage();
-  page.on('console', m => { if (m.type() === 'error' || m.type() === 'warning') console.log(`[console.${m.type()}]`, m.text()); });
+  page.on('console', m => { if (m.type() === 'error' || m.type() === 'warn' || m.type() === 'warning') console.log(`[console.${m.type()}]`, m.text()); });
   page.on('pageerror', e => console.log('[pageerror]', e.message));
   await page.goto(url, { waitUntil: 'load' });
   await page.waitForFunction(() => document.body.dataset.ready === '1', { timeout: 15000 }).catch(() => console.log('[warn] ready flag not set'));
