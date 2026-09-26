@@ -936,7 +936,7 @@
    */
   const PHR = {
     A:  { n: [[-3, 1], [2, 2], [2, 0.5], [1, 0.5], [2, 0.5], [3, 0.5], [2, 1], [0, 2], [-1, 1, 1], [-1, 2], [-2, 1], [-3, 3]],
-          ch: [[0, 0], [3, 5], [6, 0], [8, 4, 'M'], [9, 2], [12, 4, 'M']] },
+          ch: [[0, 0], [3, 5], [6, 0], [8, 4, 'M'], [9, 2], [12, 4, 'M']], fixed: true },
     B:  { n: [[0, 1], [5, 2], [5, 0.5], [4, 0.5], [5, 0.5], [6, 0.5], [5, 1], [4, 1], [3, 1], [2, 1], [1, 2], [null, 1]],
           ch: [[0, 3], [3, 5], [6, 0], [9, 4, 'M']] },
     A2: { n: [[-3, 1], [2, 2], [2, 0.5], [1, 0.5], [2, 0.5], [3, 0.5], [2, 1], [0, 1], [-2, 1], [-3, 1], [1, 2], [-1, 1, 1], [0, 3]],
@@ -950,7 +950,7 @@
     F:  { n: [[0, 1], [2, 1], [4, 1], [5, 2, 1], [4, 1], [3, 1], [2, 1], [1, 1], [0, 3]],
           ch: [[0, 0], [3, 3, 'M'], [6, 6], [9, 0]], cad: true },
     Z:  { n: [[-3, 1], [2, 2], [2, 0.5], [1, 0.5], [2, 0.5], [3, 0.5], [2, 1], [4, 1.5], [3, 0.5], [1, 1], [0, 3]],
-          ch: [[0, 0], [3, 5], [6, 4], [9, 0]], cad: true, finale: true },
+          ch: [[0, 0], [3, 5], [6, 4], [9, 0]], cad: true, finale: true, fixed: true },
   };
   const PNAMES = Object.keys(PHR);
   const M = { stage: -1, timer: null, last: null, recent: [], voices: null, bass: null };
@@ -1091,10 +1091,23 @@
       const hi = Math.max(...PHR[name].n.map(x => x[0] == null ? -99 : x[0]));
       o.oct = M.stage < 1 && R() < 0.22 ? -1 : (hi <= 5 && M.stage < 3 && R() < 0.12 ? 1 : 0);
     }
+    if (PHR[name].fixed) Object.assign(o, { displace: false, grace: false, fragment: !!(extra && extra.fragment), oct: 0, vel: 1, beat: M.stage >= 3 ? 1.12 : 1.02 });
     if (o.oct === -1) o.vel = 1.25; else if (o.oct === 1) o.vel = 0.75;
     M.last = name;
     M.recent.push(name); if (M.recent.length > 3) M.recent.shift();
-    return playPhrase(KM, KM.out, name, t0, o);
+    const dur = playPhrase(KM, KM.out, name, t0, o);
+    M.busyUntil = t0 + dur;
+    return dur;
+  }
+  // After each puzzle solve: a short, always-identical 2-bar quote of the moth theme (A4 F5 | F E F G F).
+  const SOLVES = ['clockSolved', 'lampLit', 'drawerOpen', 'windowOpen', 'inkSeen', 'boxOpen'];
+  function themeQuote(flag) {
+    if (!A.on || A.finished || !SOLVES.includes(flag) || !running()) return;
+    const t0 = Math.max(ctx.currentTime + 1.6, (M.busyUntil || 0) + 1);
+    if (t0 - ctx.currentTime > 6) return; // a phrase is playing; the theme will come round anyway
+    const last = M.last, rec = M.recent.slice();
+    schedulePhrase('A', t0, { fragment: true });
+    M.last = last; M.recent = rec;
   }
   function seqNext(delay) {
     clearTimeout(M.timer);
@@ -1163,7 +1176,7 @@
   });
   if (window.G && G.on) {
     G.on('start', () => { try { if (A.on) stopAmbience(0.3); A.started = true; A.cracked = false; A.hatchHeard = false; M.last = null; M.recent = []; M.voices = null; M.bass = null; A.win = false; A.lamp = false; setTimeout(maybeStartAmb, A.on ? 600 : 0); } catch (e) { } });
-    G.on('flag', (k) => { try { if (k !== 'finished') sync(false); } catch (e) { } });
+    G.on('flag', (k, v) => { try { if (k !== 'finished') sync(false); if (v) themeQuote(k); } catch (e) { } });
     G.on('view', (id) => { try { onView(id); } catch (e) { } });
     G.on('finish', () => { try { onFinish(); } catch (e) { } });
   }
