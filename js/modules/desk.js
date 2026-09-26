@@ -1227,11 +1227,11 @@
     G.busy(true);
     // 1. the blank page catches the moonbeam
     G.sfx('magic');
-    await G.tween(900, t => r.beam.setAttribute('opacity', (1.3 * Math.sin(t * Math.PI * 0.75)).toFixed(3)), 'out');
+    await G.tween(450, t => r.beam.setAttribute('opacity', (1.3 * Math.sin(t * Math.PI * 0.75)).toFixed(3)), 'out');
     // 2. each moon's outline draws itself, a glint riding the nib; its glow wakes as it closes
     for (let i = 0; i < 4; i++) {
       const o = r.outlines[i], x = r.XS[i];
-      await G.tween(420, t => {
+      await G.tween(290, t => {
         o.setAttribute('stroke-dashoffset', C * (1 - t));
         r.unders[i].setAttribute('opacity', (0.45 * t).toFixed(3));
         const a = t * Math.PI * 2;  // a circle's stroke starts at 3 o'clock, clockwise
@@ -1240,7 +1240,7 @@
       }, 'inOut');
     }
     // 3. the hatching sweeps in stroke by stroke (diagonal wipe), moons brighten to full glow
-    await G.tween(1300, t => {
+    await G.tween(1000, t => {
       r.wipes.forEach((w, i) => {
         const u = Math.max(0, Math.min(1, (t - i * 0.12) / 0.64));
         w.setAttribute('width', (150 * G.ease.inOut(u)).toFixed(1));
@@ -1249,7 +1249,7 @@
       });
     }, 'linear');
     // 4. the flourish and the words are written out, left to right
-    await G.tween(1400, t => {
+    await G.tween(1000, t => {
       r.flour.setAttribute('opacity', (0.85 * Math.min(1, t * 2)).toFixed(3));
       r.wordsClipRect.setAttribute('width', (500 * t).toFixed(1));
       r.halos[4].setAttribute('opacity', (0.7 * t).toFixed(3));
