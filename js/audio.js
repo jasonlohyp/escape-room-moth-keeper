@@ -275,6 +275,47 @@
     pwCache.set(c, w);
     return w;
   }
+  // Felt piano: hammer thump through felt, slightly inharmonic partials, detuned unison pair, dark and short.
+  function pianoNote(K, dest, t, f, v, o) {
+    o = o || {};
+    const c = K.c, lp = c.createBiquadFilter(), out = c.createGain();
+    lp.type = 'lowpass'; lp.Q.value = 0.5;
+    lp.frequency.setValueAtTime(Math.min(4000, 900 + f * 2.2), t);
+    lp.frequency.exponentialRampToValueAtTime(Math.min(1800, 300 + f), t + 1.2);
+    out.gain.value = 1; lp.connect(out); out.connect(dest);
+    const dec = (o.decay || 3.2) * Math.pow(262 / f, 0.3), B = 0.0004;
+    for (let n = 1; n <= 6; n++) {
+      const fn = f * n * Math.sqrt(1 + B * n * n);
+      if (fn > 12000) break;
+      const a = v * 0.42 / Math.pow(n, 1.25);
+      tone(K, lp, { f: fn, t, a: 0.004, d: dec / Math.pow(n, 0.7), g: a, detune: rr(-2, 2) });
+      if (n <= 2) tone(K, lp, { f: fn, t, a: 0.004, d: dec * 0.8 / n, g: a * 0.4, detune: rr(3, 6) }); // unison string
+    }
+    noise(K, lp, { t, a: 0.001, d: 0.03, g: v * 0.25, buf: 'pink', filters: [{ type: 'lowpass', f: 600 + f }] }); // felt hammer
+    setTimeout(() => { try { lp.disconnect(); out.disconnect(); } catch (e) { } }, (t - c.currentTime + dec + 0.5) * 1000);
+  }
+  // Glass harmonica / bowed saw: slow-swelling pure tone, beating pair, tremolo; the saw slides and wavers.
+  function glassNote(K, dest, t, f, dur, v, saw) {
+    const c = K.c, g = c.createGain(), end = t + dur + 1.8;
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t + 0.45);
+    g.gain.setValueAtTime(v, t + dur); g.gain.exponentialRampToValueAtTime(0.0001, t + dur + 1.7);
+    const trem = c.createOscillator(), tg = c.createGain(), amp = c.createGain();
+    trem.frequency.value = saw ? 4.2 : 5.6; tg.gain.value = 0.25; amp.gain.value = 0.75;
+    trem.connect(tg); tg.connect(amp.gain); g.connect(amp); amp.connect(dest);
+    const vib = c.createOscillator(), vg = c.createGain();
+    vib.frequency.value = saw ? 5 : 0.3; vg.gain.value = saw ? 22 : 4; vib.connect(vg);
+    const srcs = [trem, vib];
+    [[1, 0.8, 0], [1, 0.5, 1.5], [2, 0.12, 0], [3.01, 0.05, 0]].forEach(([mul, gg, beat]) => {
+      const o = c.createOscillator(), og = c.createGain();
+      o.frequency.setValueAtTime(f * mul * (saw ? 0.94 : 1) + beat, t);
+      if (saw) o.frequency.exponentialRampToValueAtTime(f * mul + beat, t + 0.6);
+      vg.connect(o.detune); og.gain.value = gg; o.connect(og); og.connect(g);
+      o.start(t); o.stop(end); srcs.push(o);
+    });
+    trem.start(t); trem.stop(end); vib.start(t); vib.stop(end);
+    const done = track(dest);
+    srcs[2].onended = () => { try { srcs.forEach(x => x.disconnect()); vg.disconnect(); tg.disconnect(); g.disconnect(); amp.disconnect(); } catch (e) { } if (done) done(); };
+  }
   // Body: a fixed bank of narrow wood resonances (one "instrument"); vibrato sweeps the harmonics across them.
   const BODY = [[196, 12, 7], [275, 10, 8], [392, 14, 6], [520, 12, 7], [705, 14, 6], [985, 12, 6], [1350, 14, 5], [1880, 12, 5], [2750, 10, 4]];
   function padNote(K, dest, t, f, dur, v, bright, atk, rel) {
@@ -895,6 +936,13 @@
       });
       noise(K, g, { t, buf: 'pink', a: 1.6, d: 0.05, g: 0.3, filters: [{ type: 'bandpass', f: 800, q: 0.7, pts: [[1.7, 4000]] }] });
       setTimeout(() => { try { g.disconnect(); lp.disconnect(); } catch (e) { } }, 2600);
+      glassNote(K, K.out, t + 1.72, mtof(81), 2.2, 0.05, false);   // the light rings on in glass
+      glassNote(K, K.out, t + 1.9, mtof(86), 1.8, 0.03, false);
+    } else if (kind === 'ink') { // moon ink: bowed saw sliding up the theme's minor 6th, A -> F
+      glassNote(K, K.out, t, mtof(69), 1.6, 0.05, true);
+      glassNote(K, K.out, t + 1.3, mtof(77), 2.4, 0.05, true);
+    } else if (kind === 'hatch') { // hatching: glass harmonica cluster that opens into the major third
+      [[74, 0], [81, 0.5], [89, 1.0], [90, 1.6]].forEach(([m, dt]) => glassNote(K, K.out, t + dt, mtof(m), 2.4 - dt * 0.5, 0.03, false));
     } else if (kind === 'window') {
       (L.droneOscs || []).forEach(o => { o.detune.setTargetAtTime(-45, t, 0.5); o.detune.setTargetAtTime(0, t + 2.2, 1.2); });
       L.thirdOsc.detune.setTargetAtTime(-45, t, 0.5); L.thirdOsc.detune.setTargetAtTime(0, t + 2.2, 1.2);
@@ -935,21 +983,21 @@
    * ch: [beat offset, root degree, quality: 'M' major triad, 'N' Neapolitan (bII)]
    */
   const PHR = {
-    A:  { n: [[-3, 1], [2, 2], [2, 0.5], [1, 0.5], [2, 0.5], [3, 0.5], [2, 1], [0, 2], [-1, 1, 1], [-1, 2], [-2, 1], [-3, 3]],
+    A:  { inst: 'box', n: [[-3, 1], [2, 2], [2, 0.5], [1, 0.5], [2, 0.5], [3, 0.5], [2, 1], [0, 2], [-1, 1, 1], [-1, 2], [-2, 1], [-3, 3]],
           ch: [[0, 0], [3, 5], [6, 0], [8, 4, 'M'], [9, 2], [12, 4, 'M']], fixed: true },
-    B:  { n: [[0, 1], [5, 2], [5, 0.5], [4, 0.5], [5, 0.5], [6, 0.5], [5, 1], [4, 1], [3, 1], [2, 1], [1, 2], [null, 1]],
+    B:  { inst: 'piano', n: [[0, 1], [5, 2], [5, 0.5], [4, 0.5], [5, 0.5], [6, 0.5], [5, 1], [4, 1], [3, 1], [2, 1], [1, 2], [null, 1]],
           ch: [[0, 3], [3, 5], [6, 0], [9, 4, 'M']] },
-    A2: { n: [[-3, 1], [2, 2], [2, 0.5], [1, 0.5], [2, 0.5], [3, 0.5], [2, 1], [0, 1], [-2, 1], [-3, 1], [1, 2], [-1, 1, 1], [0, 3]],
+    A2: { inst: 'box', n: [[-3, 1], [2, 2], [2, 0.5], [1, 0.5], [2, 0.5], [3, 0.5], [2, 1], [0, 1], [-2, 1], [-3, 1], [1, 2], [-1, 1, 1], [0, 3]],
           ch: [[0, 0], [3, 5], [6, 3], [9, 4, 'M'], [12, 0]], cad: true },
-    C:  { n: [[2, 2], [1, 1], [1, 2, -1], [0, 1], [-1, 3, 1], [0, 3]],
+    C:  { inst: 'cello', n: [[2, 2], [1, 1], [1, 2, -1], [0, 1], [-1, 3, 1], [0, 3]],
           ch: [[0, 0], [3, 1, 'N'], [6, 4, 'M'], [9, 0]], cad: true },
-    D:  { n: [[2, 1], [-3, 2], [-2, 1], [-3, 1], [-4, 1], [-3, 2], [-5, 1], [-7, 3]],
+    D:  { inst: 'cello', n: [[2, 1], [-3, 2], [-2, 1], [-3, 1], [-4, 1], [-3, 2], [-5, 1], [-7, 3]],
           ch: [[0, 0], [3, 5], [6, 0], [9, 0]], cad: true },
-    E:  { n: [[2, 0.5], [1, 0.5], [2, 0.5], [3, 0.5], [2, 1], [4, 0.5], [3, 0.5], [4, 0.5], [5, 0.5], [4, 1], [7, 2], [2, 1], [1, 2], [-1, 1, 1], [0, 3]],
+    E:  { inst: 'piano', n: [[2, 0.5], [1, 0.5], [2, 0.5], [3, 0.5], [2, 1], [4, 0.5], [3, 0.5], [4, 0.5], [5, 0.5], [4, 1], [7, 2], [2, 1], [1, 2], [-1, 1, 1], [0, 3]],
           ch: [[0, 0], [3, 2], [6, 3], [9, 4, 'M'], [12, 0]], cad: true },
-    F:  { n: [[0, 1], [2, 1], [4, 1], [5, 2, 1], [4, 1], [3, 1], [2, 1], [1, 1], [0, 3]],
+    F:  { inst: 'piano', n: [[0, 1], [2, 1], [4, 1], [5, 2, 1], [4, 1], [3, 1], [2, 1], [1, 1], [0, 3]],
           ch: [[0, 0], [3, 3, 'M'], [6, 6], [9, 0]], cad: true },
-    Z:  { n: [[-3, 1], [2, 2], [2, 0.5], [1, 0.5], [2, 0.5], [3, 0.5], [2, 1], [4, 1.5], [3, 0.5], [1, 1], [0, 3]],
+    Z:  { inst: 'box', n: [[-3, 1], [2, 2], [2, 0.5], [1, 0.5], [2, 0.5], [3, 0.5], [2, 1], [4, 1.5], [3, 0.5], [1, 1], [0, 3]],
           ch: [[0, 0], [3, 5], [6, 4], [9, 0]], cad: true, finale: true, fixed: true },
   };
   const PNAMES = Object.keys(PHR);
@@ -1035,7 +1083,7 @@
   }
   // Schedules a phrase in K starting at t0; returns its length in seconds.
   function playPhrase(K, dest, name, t0, o) {
-    const ph = PHR[name], mode = o.stage >= 2 ? 'major' : 'minor', beat = o.beat || 1.02, oct = o.oct || 0;
+    const ph = PHR[name], mode = o.stage >= 2 ? 'major' : 'minor', beat = o.beat || 1.02, oct = o.oct || 0, inst = ph.inst || 'box';
     const st = o.st || M;
     let notes = varyNotes(ph.n, o);
     let total = notes.reduce((a, x) => a + x[1], 0);
@@ -1051,9 +1099,15 @@
         const m = degMidi(d, mode, acc) + 12 * oct;
         const vel = (pos % 3 === 0 ? 0.42 : 0.33) * rr(0.85, 1.1) * (o.vel || 1);
         const tt = t + rr(-0.012, 0.025);
-        if (o.grace && pos % 3 === 0 && len >= 1 && R() < 0.3) mbNote(K, dest, tt - 0.07, mtof(degMidi(d + 1, mode) + 12 * oct), vel * 0.4, { decay: 0.8 });
-        mbNote(K, dest, tt, mtof(m), vel, { decay: o.stage >= 3 ? 3.4 : 2.6 });
-        if (o.stage >= 3) mbNote(K, dest, tt + 0.01, mtof(m + 12), vel * 0.3, { decay: 2 });
+        if (o.grace && pos % 3 === 0 && len >= 1 && R() < 0.3) {
+          const gm = mtof(degMidi(d + 1, mode) + 12 * oct);
+          if (inst === 'piano') pianoNote(K, dest, tt - 0.07, gm, vel * 0.35, { decay: 0.8 }); else mbNote(K, dest, tt - 0.07, gm, vel * 0.4, { decay: 0.8 });
+        }
+        if (inst === 'piano') pianoNote(K, dest, tt, mtof(m), vel);
+        else if (inst === 'cello') padNote(K, dest, tt, mtof(m - 12), len * beat * rit * 0.97, vel * 0.13, false, Math.min(0.3, len * beat * 0.3), 1.1);
+        else mbNote(K, dest, tt, mtof(m), vel, { decay: o.stage >= 3 ? 3.4 : 2.6 });
+        if (o.stage >= 3 && inst === 'box') mbNote(K, dest, tt + 0.01, mtof(m + 12), vel * 0.3, { decay: 2 });
+        if (name === 'Z') padNote(K, dest, tt, mtof(m - 12), len * beat * rit, vel * 0.06, true, 0.25, 1.4); // strings double the tune
       }
       pos += len; t += len * beat * rit;
     });
@@ -1062,7 +1116,15 @@
       const tb = t0 + c[0] * beat, nextB = i + 1 < chords.length ? chords[i + 1][0] : Math.max(total, c[0] + 3);
       const len = (nextB - c[0]) * beat;
       const vc = voiceChord(chordPcs(c[1], c[2], mode), st, melAt(notes, c[0], mode, oct));
-      if (o.stage >= 1) {
+      if (name === 'Z') { // finale bloom: rolled piano chord under the strings
+        [vc.bs].concat(vc.v).forEach((m, k) => pianoNote(K, dest, tb + k * 0.06, mtof(m), 0.2 - k * 0.02, { decay: 4 }));
+      }
+      if (inst === 'cello') { // the lament: solo cello over a bass line only
+        if (o.stage >= 1 || i === 0) padNote(K, dest, tb, mtof(vc.bs), len, 0.035, false, 0.4, 2);
+      } else if (inst === 'piano') { // developments: felt piano, soft rolled left hand
+        if (o.stage >= 1) [vc.bs].concat(vc.v).forEach((m, k) => pianoNote(K, dest, tb + k * rr(0.04, 0.07), mtof(m), 0.13 - k * 0.015, { decay: 3 }));
+        else if (i === 0) pianoNote(K, dest, tb, mtof(vc.bs), 0.16, { decay: 3.5 });
+      } else if (o.stage >= 1) {
         vc.v.forEach(m => padNote(K, dest, tb, mtof(m), len, o.stage >= 3 ? 0.032 : 0.024, o.stage >= 2, Math.min(0.9, len * 0.5), 2.4));
         padNote(K, dest, tb, mtof(vc.bs), len, 0.04, false, 0.35, 2);
       } else if (i === 0 || (i === chords.length - 1 && R() < 0.5)) {
@@ -1176,7 +1238,7 @@
   });
   if (window.G && G.on) {
     G.on('start', () => { try { if (A.on) stopAmbience(0.3); A.started = true; A.cracked = false; A.hatchHeard = false; M.last = null; M.recent = []; M.voices = null; M.bass = null; A.win = false; A.lamp = false; setTimeout(maybeStartAmb, A.on ? 600 : 0); } catch (e) { } });
-    G.on('flag', (k, v) => { try { if (k !== 'finished') sync(false); if (v) themeQuote(k); } catch (e) { } });
+    G.on('flag', (k, v) => { try { if (k !== 'finished') sync(false); if (v) themeQuote(k); if (v && A.on && (k === 'inkSeen' || k === 'hatched')) uncanny(k === 'inkSeen' ? 'ink' : 'hatch'); } catch (e) { } });
     G.on('view', (id) => { try { onView(id); } catch (e) { } });
     G.on('finish', () => { try { onFinish(); } catch (e) { } });
   }
