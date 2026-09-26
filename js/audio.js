@@ -1117,7 +1117,7 @@
       const len = (nextB - c[0]) * beat;
       const vc = voiceChord(chordPcs(c[1], c[2], mode), st, melAt(notes, c[0], mode, oct));
       if (name === 'Z') { // finale bloom: rolled piano chord under the strings
-        [vc.bs].concat(vc.v).forEach((m, k) => pianoNote(K, dest, tb + k * 0.06, mtof(m), 0.2 - k * 0.02, { decay: 4 }));
+        [vc.bs].concat(vc.v).forEach((m, k) => pianoNote(K, dest, tb + k * 0.06, mtof(m), 0.15 - k * 0.015, { decay: 4 }));
       }
       if (inst === 'cello') { // the lament: solo cello over a bass line only
         if (o.stage >= 1 || i === 0) padNote(K, dest, tb, mtof(vc.bs), len, 0.035, false, 0.4, 2);
