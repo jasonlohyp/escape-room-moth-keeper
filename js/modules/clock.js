@@ -11,7 +11,8 @@
   const HOUR_LEN = 126, MIN_LEN = 212;
   const SOL_H = 8, SOL_M = 3, START_H = 10, START_M = 6;
   const DOOR = { x: 654, y: 602, w: 292, h: 230 };   // close-up case door
-  const LEN = { x: 800, y: 674, r: 38 };              // lenticle (pendulum window)
+  const LEN = { x: 800, y: 652, r: 38 };
+  const SHELF_Y = 764;                                // inner shelf the matchbox rests on (kept above the HUD strip)              // lenticle (pendulum window)
   const OPEN_DEG = 112;
   const W = { cx: 400, dialY: 250, dialR: 60 };      // wall-object geometry
 
@@ -167,6 +168,12 @@
     <linearGradient id="ck-moonL" gradientUnits="userSpaceOnUse" x1="0" y1="200" x2="900" y2="600">
       <stop offset="0" stop-color="#8fb3d9" stop-opacity="0.3"/><stop offset="1" stop-color="#8fb3d9" stop-opacity="0"/>
     </linearGradient>
+    <linearGradient id="ck-moonShaftG" gradientUnits="userSpaceOnUse" x1="200" y1="0" x2="1000" y2="900">
+      <stop offset="0" stop-color="#cfe3ff" stop-opacity="0.34"/><stop offset="0.55" stop-color="#a9c6ea" stop-opacity="0.2"/><stop offset="1" stop-color="#8fb3d9" stop-opacity="0.04"/>
+    </linearGradient>
+    <radialGradient id="ck-mothGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#fdf6dc" stop-opacity="0.55"/><stop offset="1" stop-color="#fdf6dc" stop-opacity="0"/>
+    </radialGradient>
     <pattern id="ck-damask" width="140" height="180" patternUnits="userSpaceOnUse">
       <g fill="#2f3a2e">
         <path d="M70,18 C84,40 98,58 88,80 C82,94 74,98 70,112 C66,98 58,94 52,80 C42,58 56,40 70,18Z"/>
@@ -614,11 +621,12 @@
           <path d="M${LEN.x - 17},${LEN.y - 13} a21,21 0 0 1 15,-11" stroke="#fff6d6" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.8"/>
         </g>
         <g class="ck-rewardLight" style="opacity:0;transition:opacity 1.4s ease">
-          <path d="M${D.x},${D.y} L${D.x + 90},${D.y} L${D.x + 250},${D.y + D.h - 22} L${D.x + 40},${D.y + D.h - 22}Z" fill="url(#ck-shaft)" style="mix-blend-mode:screen"/>
-          <ellipse cx="806" cy="${D.y + D.h - 22}" rx="130" ry="22" fill="url(#ck-pool)" style="mix-blend-mode:screen"/>
+          <path d="M${D.x},${D.y} L${D.x + 90},${D.y} L${D.x + 250},${SHELF_Y} L${D.x + 40},${SHELF_Y}Z" fill="url(#ck-shaft)" style="mix-blend-mode:screen"/>
+          <ellipse cx="812" cy="${SHELF_Y}" rx="130" ry="20" fill="url(#ck-pool)" style="mix-blend-mode:screen"/>
         </g>
-        <path d="M${D.x},${D.y + D.h - 22} h${D.w} v22 h-${D.w}Z" fill="#4a2e1e" stroke="${INK}" stroke-width="1.5"/>
-        <path d="M${D.x},${D.y + D.h - 22} h${D.w}" stroke="#8a5a37" stroke-width="2"/>
+        <path d="M${D.x},${SHELF_Y} h${D.w} v18 h-${D.w}Z" fill="#4a2e1e" stroke="${INK}" stroke-width="1.5"/>
+        <path d="M${D.x},${SHELF_Y} h${D.w}" stroke="#8a5a37" stroke-width="2"/>
+        <rect x="${D.x}" y="${SHELF_Y + 18}" width="${D.w}" height="14" fill="#000" opacity="0.55" filter="url(#ck-blur3)"/>
         <rect x="${D.x}" y="${D.y}" width="${D.w}" height="18" fill="#000" opacity="0.5" filter="url(#ck-blur3)"/>
         <g class="ck-matchbox"></g>
       </g>
@@ -746,6 +754,10 @@
         <rect class="ck-warmL" x="0" y="0" width="1600" height="900" fill="url(#ck-lampR)" style="mix-blend-mode:soft-light;opacity:0;transition:opacity 1.2s ease"/>
         <rect class="ck-warmG" x="0" y="0" width="1600" height="900" fill="url(#ck-lampR2)" style="mix-blend-mode:screen;opacity:0;transition:opacity 1.2s ease"/>
         <rect class="ck-moonL" x="0" y="0" width="1600" height="900" fill="url(#ck-moonL)" style="mix-blend-mode:screen;opacity:0;transition:opacity 1.2s ease"/>
+        <g class="ck-moonShaft" style="mix-blend-mode:screen;opacity:0;transition:opacity 1.6s ease">
+          <path d="M120,-40 L470,-40 L1180,940 L760,940Z" fill="url(#ck-moonShaftG)" filter="url(#ck-blur12)"/>
+          <path d="M250,-40 L360,-40 L1010,940 L880,940Z" fill="#cfe3ff" opacity="0.07" filter="url(#ck-blur12)"/>
+        </g>
         <rect x="0" y="0" width="1600" height="900" fill="url(#ck-vign)"/>
       </g>
     `, g);
@@ -763,10 +775,13 @@
     V.warm = q('.ck-warm');
     V.lits = Array.from(root.querySelectorAll('.ck-lit'));
     V.rewardLight = q('.ck-rewardLight');
-    V.light = { cold: q('.ck-cold'), dim: q('.ck-dim'), warmL: q('.ck-warmL'), warmG: q('.ck-warmG'), moon: q('.ck-moonL') };
+    V.light = { shaft: q('.ck-moonShaft'), cold: q('.ck-cold'), dim: q('.ck-dim'), warmL: q('.ck-warmL'), warmG: q('.ck-warmG'), moon: q('.ck-moonL') };
     V.mbWrap = q('.ck-matchbox');
 
     V.matchbox = G.svg(matchboxScene(), V.mbWrap);
+    V.matchbox.style.transition = 'transform .22s ease, filter .22s ease';
+    V.matchbox.addEventListener('pointerenter', () => { V.matchbox.style.transform = 'translateY(-6px)'; V.matchbox.style.filter = 'drop-shadow(0 0 8px rgba(255,214,140,0.9))'; });
+    V.matchbox.addEventListener('pointerleave', () => { V.matchbox.style.transform = ''; V.matchbox.style.filter = ''; });
     G.hotspot(V.matchbox, {
       cursor: 'take',
       click() {
@@ -784,7 +799,7 @@
       },
     });
     V.lenHit = lenHit;
-    V.doorHit = G.el('rect', { x: D.x, y: D.y, width: D.w, height: D.h, fill: 'transparent', 'pointer-events': 'all' }, root);
+    V.doorHit = G.el('rect', { x: D.x, y: D.y, width: D.w, height: 796 - D.y, fill: 'transparent', 'pointer-events': 'all' }, root);
     root.insertBefore(V.doorHit, lenHit);
     G.hotspot(V.doorHit, { cursor: 'look', click() { G.sfx('lockFail'); G.say('The case door is shut fast. Something inside the clock must release it.'); } });
 
@@ -801,7 +816,7 @@
 
   function matchboxScene() {
     // lying on the ledge inside the case, 3/4 view
-    return `<g transform="translate(724,${DOOR.y + DOOR.h - 22 - 76}) scale(1.58)">
+    return `<g transform="translate(742,${SHELF_Y - 66}) scale(1.36)">
       <ellipse cx="50" cy="48" rx="52" ry="6" fill="#000" opacity="0.55" filter="url(#ck-blur3)"/>
       ${matchboxBody()}
       <path d="M26,8 L90,0" stroke="#ffe0a0" stroke-width="1.6" opacity="0.7"/>
@@ -1067,25 +1082,34 @@
   }
   function mothFlight() {
     const m = G.svg(`<g class="ck-moth" opacity="0">
-        <g class="ck-mw" fill="#e9e0c4" stroke="${INK}" stroke-width="1.2" stroke-linejoin="round">
-          <path d="M-1,-2 C-8,-12 -22,-14 -24,-6 C-24,0 -14,4 -2,2Z"/><path d="M1,-2 C8,-12 22,-14 24,-6 C24,0 14,4 2,2Z"/>
-          <path d="M-1,2 C-8,4 -16,10 -14,16 C-10,19 -4,12 -1,6Z" fill="#d8ccaa"/><path d="M1,2 C8,4 16,10 14,16 C10,19 4,12 1,6Z" fill="#d8ccaa"/>
+        <circle r="30" fill="url(#ck-mothGlow)" class="ck-mhalo"/>
+        <g class="ck-mw" stroke="#5a4a36" stroke-width="0.9" stroke-linejoin="round">
+          <path d="M-1,-3 C-9,-12 -22,-16 -25,-13 C-25,-6 -20,1 -2,2Z" fill="#f6f0dc"/><path d="M1,-3 C9,-12 22,-16 25,-13 C25,-6 20,1 2,2Z" fill="#f6f0dc"/>
+          <path d="M-1,2 C-9,4 -16,9 -15,15 C-11,19 -4,13 -1,6Z" fill="#e9e0c4"/><path d="M1,2 C9,4 16,9 15,15 C11,19 4,13 1,6Z" fill="#e9e0c4"/>
+          <path d="M-4,-3 C-12,-8 -18,-11 -22,-12 M4,-3 C12,-8 18,-11 22,-12" fill="none" stroke="#b8a888" stroke-width="0.7"/>
+          <circle cx="-14" cy="-6" r="1.6" fill="#b8a888" stroke="none"/><circle cx="14" cy="-6" r="1.6" fill="#b8a888" stroke="none"/>
         </g>
-        <ellipse rx="2.6" ry="8" cy="2" fill="#bfae86" stroke="${INK}" stroke-width="1"/>
-        <path d="M-1,-6 q-3,-6 -7,-7 M1,-6 q3,-6 7,-7" fill="none" stroke="${INK}" stroke-width="0.9"/>
+        <ellipse rx="2.8" ry="8" cy="2" fill="#e3d6b2" stroke="#5a4a36" stroke-width="0.8"/>
+        <path d="M-1,-6 q-3,-6 -8,-8 M1,-6 q3,-6 8,-8" fill="none" stroke="#5a4a36" stroke-width="0.8"/>
       </g>`, V.fx);
     const mg = m.firstElementChild, wings = m.querySelector('.ck-mw');
-    const P = [[820, 780], [900, 600], [1060, 520], [1500, 120]];
+    const S0 = 2.2;
+    // phase 1: rises out of the case and hovers in the light shaft over the pendulum
+    const hover = G.tween(800, t => {
+      const x = 812 + Math.sin(t * 9) * 6, y = 720 - 90 * G.ease.out(t) + Math.cos(t * 13) * 4;
+      wings.setAttribute('transform', `scale(${(0.35 + 0.65 * Math.abs(Math.sin(t * 34))).toFixed(2)},1)`);
+      mg.setAttribute('transform', `translate(${f1(x)},${f1(y)}) rotate(${f1(Math.sin(t * 7) * 8)}) scale(${S0})`);
+      mg.setAttribute('opacity', Math.min(1, t * 3).toFixed(2));
+    }, 'linear');
+    // phase 2: drifts slowly up and away across the dial
+    const P = [[812, 630], [880, 520], [1080, 360], [1380, 60]];
     const bez = (t, i) => { const u = 1 - t; return u * u * u * P[0][i] + 3 * u * u * t * P[1][i] + 3 * u * t * t * P[2][i] + t * t * t * P[3][i]; };
-    let px = P[0][0], py = P[0][1];
-    return G.tween(2600, t => {
-      const x = bez(t, 0) + Math.sin(t * 22) * 10, y = bez(t, 1) + Math.cos(t * 17) * 8;
-      const hd = Math.atan2(x - px, -(y - py)) * 180 / Math.PI; px = x; py = y;
-      const flap = 0.25 + 0.75 * Math.abs(Math.sin(t * 60));
-      wings.setAttribute('transform', `scale(${flap.toFixed(2)},1)`);
-      mg.setAttribute('transform', `translate(${f1(x)},${f1(y)}) rotate(${f1(hd * 0.6)}) scale(${(1.4 + t * 0.6).toFixed(2)})`);
-      mg.setAttribute('opacity', (Math.min(1, t * 6) * Math.min(1, (1 - t) * 4)).toFixed(2));
-    }, 'inOut').then(() => m.remove());
+    return hover.then(() => G.tween(3000, t => {
+      const x = bez(t, 0) + Math.sin(t * 18) * 12, y = bez(t, 1) + Math.cos(t * 14) * 9;
+      wings.setAttribute('transform', `scale(${(0.3 + 0.7 * Math.abs(Math.sin(t * 70))).toFixed(2)},1)`);
+      mg.setAttribute('transform', `translate(${f1(x)},${f1(y)}) rotate(${f1(20 + Math.sin(t * 9) * 12)}) scale(${(S0 - t * 0.9).toFixed(2)})`);
+      mg.setAttribute('opacity', Math.min(1, (1 - t) * 3).toFixed(2));
+    }, 'inOut')).then(() => m.remove());
   }
   function glowIcons(on) {
     [SOL_H, SOL_M].forEach(i => { const l = V.lits[i]; l.dataset.hold = on ? '1' : ''; l.style.transition = on ? 'opacity .25s ease' : 'opacity 1.2s ease'; l.style.opacity = on ? 1 : 0; });
@@ -1179,6 +1203,7 @@
     V.light.warmL.style.opacity = lit ? 1 : 0;
     V.light.warmG.style.opacity = lit ? 1 : 0;
     V.light.moon.style.opacity = open ? 1 : 0;
+    V.light.shaft.style.opacity = open ? 1 : 0;
     ensureLoop();
   }
   // ------------------------------------------------------------------ registration
