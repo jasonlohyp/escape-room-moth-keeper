@@ -5,7 +5,8 @@
 (function () {
   'use strict';
 
-  const OPENING = "You wake on the floorboards of an attic you don't remember. The door has no handle.";
+  const OPENING = "You wake on the floorboards of an attic that isn't yours. Rain on a round window. The door has no handle, only a brass plate shaped like a moth.";
+  const OPENING2 = "Someone's journal lies open on the desk. It might say how to get out.";
   const NO_HINT = 'Nothing more to find here… or is there?';
   const MUTE_KEY = 'mothkeeper.muted';
   const TIME_KEY = 'mothkeeper.elapsed';
@@ -581,7 +582,10 @@
     G.sfx('click');
     G.start({ continue: !!cont });
     hideTitle(false);
-    if (!cont) setTimeout(() => G.say(OPENING, { dur: 7000 }), 1900);
+    if (!cont) {
+      setTimeout(() => G.say(OPENING, { dur: 4600 }), 1900);
+      setTimeout(() => G.say(OPENING2, { dur: 4600 }), 6700);
+    }
   }
   function hideTitle(instant) {
     S.title = false;

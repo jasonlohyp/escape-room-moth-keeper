@@ -28,7 +28,8 @@
     if (!document.getElementById('ck-css')) {
       const st = document.createElement('style');
       st.id = 'ck-css';
-      st.textContent = '.ck-breathe{animation:ckBreathe 1.2s ease-in-out infinite}@keyframes ckBreathe{0%,100%{opacity:.12}50%{opacity:.95}}.ck-tgtPulse .ck-tgtRing{transform-box:fill-box;transform-origin:center;animation:ckTgt .45s ease-out}@keyframes ckTgt{0%{transform:scale(1);stroke-width:2.6}35%{transform:scale(1.18);stroke-width:5}100%{transform:scale(1);stroke-width:2.6}}';
+      st.textContent = '.ck-breathe{animation:ckBreathe 1.2s ease-in-out infinite}@keyframes ckBreathe{0%,100%{opacity:.12}50%{opacity:.95}}.ck-tgtPulse .ck-tgtRing{transform-box:fill-box;transform-origin:center;animation:ckTgt .45s ease-out}@keyframes ckTgt{0%{transform:scale(1);stroke-width:2.6}35%{transform:scale(1.18);stroke-width:5}100%{transform:scale(1);stroke-width:2.6}}' +
+        '.ck-tgtRight .ck-tgtRing{transform-box:fill-box;transform-origin:center;animation:ckTgtRight .8s ease-out}@keyframes ckTgtRight{0%{transform:scale(1);stroke-width:2.6;filter:none}30%{transform:scale(1.32);stroke-width:6;filter:drop-shadow(0 0 9px #ffe089)}100%{transform:scale(1);stroke-width:2.6;filter:none}}';
       document.head.appendChild(st);
     }
     const d = document.getElementById('defs');
@@ -914,10 +915,11 @@
       V.tgt[w].forEach((g, i) => { g.style.opacity = i === idx ? op : 0; });
     });
   }
-  function pulseTarget(w) {
+  function pulseTarget(w, right) {
     if (!V.tgt) return;
     const g = V.tgt[w][mod(Math.round(ang[w] / 30), 12)];
-    g.classList.remove('ck-tgtPulse'); void g.getBBox(); g.classList.add('ck-tgtPulse');
+    const cls = right ? 'ck-tgtRight' : 'ck-tgtPulse';
+    g.classList.remove('ck-tgtPulse', 'ck-tgtRight'); void g.getBBox(); g.classList.add(cls);
   }
   function renderHands() {
     if (!V.hour) return;
@@ -955,7 +957,7 @@
     if (active !== w) {
       const first = !active;
       active = w; G.sfx('click', { vol: 0.5 });
-      if (first && !saidWhere) { saidWhere = true; G.say('Now — where should it point?'); }
+      if (first && !saidWhere) { saidWhere = true; G.say('Now, where should it point?'); }
     }
     updateRims();
     pulse(w);
@@ -1014,7 +1016,7 @@
     if (!drag.which || drag.queued) return;
     if (!drag.moved && Math.hypot(p.x - drag.start.x, p.y - drag.start.y) > 6) {
       drag.moved = true;
-      if (!active && !saidWhere) { saidWhere = true; G.say('Now — where should it point?'); }
+      if (!active && !saidWhere) { saidWhere = true; G.say('Now, where should it point?'); }
       active = drag.which;
       setHoverIcon(null);
       liftTo(drag.which, 1, 130);
@@ -1070,7 +1072,7 @@
       }
     } else if (icon != null && !active) {
       pulse('h'); pulse('m');
-      if (performance.now() - askedWhichAt > 8000) { askedWhichAt = performance.now(); G.say('Which hand — the short or the long?'); }
+      if (performance.now() - askedWhichAt > 8000) { askedWhichAt = performance.now(); G.say('Which hand, the short or the long?'); }
     } else if (icon != null) {
       const cur = posOf(active);
       if (icon === cur) await nudge(active);
@@ -1109,9 +1111,10 @@
   async function settle(which, from, target, ms) {
     animating = true;
     await G.tween(ms, t => { ang[which] = from + (target - from) * t; renderHands(); }, 'outBack');
-    G.sfx('tick');
     const pos = mod(Math.round(target / 30), 12);
-    ang[which] = pos * 30; renderHands(); pulseTarget(which);
+    const solvedNow = !G.get('clockSolved') && pos === (which === 'h' ? SOL_H : SOL_M);
+    G.sfx(solvedNow ? 'chime' : 'tick', solvedNow ? { vol: 0.4 } : undefined);
+    ang[which] = pos * 30; renderHands(); pulseTarget(which, solvedNow);
     await liftTo(which, 0, 140);
     animating = false;
     G.set(which === 'h' ? 'clockH' : 'clockM', pos);

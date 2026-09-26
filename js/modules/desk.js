@@ -20,10 +20,11 @@
     return out;
   }
   const HALF = {
-    atlas: { // broad; forewing apex is a big "snake-head" lobe curling DOWN
+    atlas: { // broad; forewing apex draws out into a long hooked spur, unmistakable even blurred (unlike emperor's plain round fan)
       wings: [
-        [103, 48, ['C', 122, 34, 148, 24, 166, 20], ['C', 176, 15, 186, 5, 194, 3], ['C', 202, 2, 203, 16, 197, 22],
-          ['C', 191, 28, 182, 27, 176, 30], ['C', 175, 44, 172, 58, 166, 70], ['C', 150, 76, 126, 74, 104, 66]],
+        [103, 48, ['C', 118, 36, 132, 28, 145, 24], ['C', 162, 18, 176, 4, 190, -6],
+          ['C', 200, -13, 209, -8, 206, 3], ['C', 204, 14, 193, 15, 182, 11],
+          ['C', 173, 18, 168, 27, 166, 38], ['C', 172, 50, 170, 60, 166, 70], ['C', 150, 76, 126, 74, 104, 66]],
         // square-cut hindwing: flat outer edge, squared corner, flat lower margin (wide & low overall)
         [104, 66, ['C', 130, 67, 166, 69, 179, 77], ['C', 183, 88, 181, 100, 177, 109], ['C', 160, 115, 136, 117, 118, 114],
           ['C', 110, 108, 105, 96, 103, 82]],
@@ -63,8 +64,9 @@
           ['L', 106, 31], ['C', 105, 35, 104, 38, 103, 41]],
       ],
       body: 'M100 34 C105 34 107 44 107 58 C108 76 106 94 100 106 C94 94 92 76 93 58 C93 44 95 34 100 34 Z',
-      // compact & round: pull the wings in horizontally, stretch a little vertically (width ~ height)
-      xform: (x, y) => [100 + (x - 100) * 0.74, 70 + (y - 70) * 1.08],
+      // compact & round, no jutting tip anywhere: pulled in well past atlas's spread so the two never
+      // read as the same blurred blob (emperor stays a plain round fan; atlas gets the long hooked spur)
+      xform: (x, y) => [100 + (x - 100) * 0.62, 70 + (y - 70) * 1.02],
     },
   };
   function subArea(sp) {
@@ -127,7 +129,7 @@
   DESK.lampUseHandlers = DESK.lampUseHandlers || [];
   DESK.onLampUse = fn => DESK.lampUseHandlers.push(fn);
 
-  const HAND = `'Patrick Hand', 'IM Fell English', cursive`;
+  const HAND = `'Caveat', 'IM Fell English', cursive`;
   const FELL = `'IM Fell English', 'Cormorant Garamond', Georgia, serif`;
   const INK = '#1c140f';
 
@@ -562,7 +564,7 @@
     projShown = true;
     lightingNow = false;
     G.busy(false);
-    G.say('The wick takes. Warm light spills across the desk — and four moths bloom upon the wall.', { dur: 4200 });
+    G.say('The wick takes. Warm light spills across the desk, and four moths bloom upon the wall.', { dur: 4200 });
   }
 
   // projection visibility. Hidden state is 0.012 (not 0) so the baked layers stay painted/decoded and
@@ -626,7 +628,7 @@
     const size = opts.size || 22, lh = opts.lh || size * 2.05, n = opts.chars || 34;
     const lines = opts.lines || wrap(text, n);
     const t = G.el('text', {
-      x, y, 'font-family': HAND, 'font-size': size, fill: opts.fill || '#2b1d13', opacity: opts.opacity == null ? 0.9 : opts.opacity,
+      x, y, 'font-family': HAND, 'font-weight': 600, 'font-size': size, fill: opts.fill || '#2b1d13', opacity: opts.opacity == null ? 0.9 : opts.opacity,
       'data-maxw': opts.maxw || 480,
     }, g);
     lines.forEach((ln, i) => {
@@ -665,7 +667,7 @@
       x: side === 'L' ? 500 : 1100, y: 762, 'font-family': FELL, 'font-size': 18, fill: '#5a4430', opacity: 0.7,
       'text-anchor': 'middle',
     }, g);
-    t.textContent = '— ' + n + ' —';
+    t.textContent = '· ' + n + ' ·';
   }
 
   // --- sketches -----------------------------------------------------------
@@ -760,23 +762,23 @@
       pageBase(g, 'L');
       handText(g, 262, 176, '', { lines: ['14th October.'], size: 26, maxw: 470 });
       G.el('path', { d: 'M262 196 C330 190 420 194 470 190', stroke: '#3a2a1e', 'stroke-width': 1.3, fill: 'none', opacity: 0.6 }, g);
-      handText(g, 262, 262, 'They took Father to the asylum today. I keep his clocks wound for him — all but the tall one. That one I stopped at the very minute she first came to my window: the short hand upon the crescent moon, the long hand upon the candle.', { chars: 33, maxw: 480 });
+      handText(g, 262, 262, 'They came for Father this morning, two men and a cart, quite polite about it. I have wound his clocks every week since, all but the tall one. That one stopped itself in August, the night she first landed on the sill: hour hand on the crescent moon, minute hand on the candle.', { chars: 33, maxw: 480 });
       G.svg(mothSketch('luna', 660, 700, 0.28, -14), g);
       pageNum(g, 'L', 1);
     }, g => {
       pageBase(g, 'R');
       G.svg(clockSketch(1100, 340, 150), g);
       G.svg(crescentDoodle(866, 150, 1.0) + candleDoodle(868, 240, 0.95), g);
-      const cap = handText(g, 1100, 598, '', { lines: ['Father’s tall clock.', 'Pictures, not numbers —', '“hours one can hold.”'], size: 18, lh: 38, maxw: 330, opacity: 0.8 });
+      const cap = handText(g, 1100, 598, '', { lines: ['Father’s tall clock.', 'No numbers on the face,', 'only things to hold onto.'], size: 18, lh: 38, maxw: 330, opacity: 0.8 });
       cap.setAttribute('text-anchor', 'middle'); cap.querySelectorAll('tspan').forEach(t => t.setAttribute('x', 1100));
       pageNum(g, 'R', 2);
     }],
     // spread 2
     [g => {
       pageBase(g, 'L');
-      handText(g, 262, 180, 'Father cut my lampshade by hand, so the lamp throws my four dearest onto the wall. When I count them, I count their eyes — every eye, on every wing.', { chars: 33, maxw: 480 });
+      handText(g, 262, 180, 'Father cut my lampshade by hand, so the lamp throws my four dearest onto the wall. When I count them, I count their eyes, every eye, on every wing.', { chars: 33, maxw: 480 });
       G.svg(eyeSketch(380, 500, 1.3), g);
-      handText(g, 440, 500, '', { lines: ['an eye — ring', 'within ring'], size: 16, lh: 34, maxw: 260, opacity: 0.75 });
+      handText(g, 440, 500, '', { lines: ['a moth’s eye,', 'ring within ring'], size: 16, lh: 34, maxw: 260, opacity: 0.75 });
       pageNum(g, 'L', 3);
     }, g => {
       pageBase(g, 'R');
@@ -812,8 +814,8 @@
     // spread 4
     [g => {
       pageBase(g, 'L');
-      handText(g, 262, 200, 'They are calling me now, every night, at the glass. I think I am ready to go.', { chars: 30, maxw: 480, size: 23 });
-      handText(g, 560, 420, '', { lines: ['— E.'], size: 26 });
+      handText(g, 262, 200, 'They come to the glass again most nights now. I no longer count how many. Tonight I mean to answer them.', { chars: 30, maxw: 480, size: 23 });
+      handText(g, 560, 420, '', { lines: ['E.'], size: 26 });
       G.svg(`<g filter="url(#ink)" stroke="#3a2a1e" stroke-linecap="round" stroke-linejoin="round">
         <path d="M330 500 C400 492 470 496 540 490" fill="none" stroke-width="1.8"/>
         <path d="M430 494 L432 516" fill="none" stroke-width="1.2"/>
@@ -1278,7 +1280,7 @@
 
   // ================================================================== hints & debug steps
   G.registerHint({ id: 'journal', order: 5, when: () => !G.get('journalRead'), lines: ['There is a journal lying on the desk.', 'Edith’s journal is on the desk, by the lamp. Read it.', 'Edith’s journal lies on the writing desk. Open it and read.'] });
-  G.registerHint({ id: 'lamp', order: 20, when: () => G.get('gotMatches') && !G.get('lampLit'), lines: ['It is so dark in here. Something on the desk could give light.', 'The oil lamp on the desk has a dry wick — and you have matches.', 'Take up the matches and bring a flame to the lamp’s wick.'] });
+  G.registerHint({ id: 'lamp', order: 20, when: () => G.get('gotMatches') && !G.get('lampLit'), lines: ['It is so dark in here. Something on the desk could give light.', 'The oil lamp on the desk has a dry wick, and you have matches.', 'Take up the matches and bring a flame to the lamp’s wick.'] });
   G.registerHint({ id: 'ink', order: 50, when: () => G.get('windowOpen') && !G.get('inkSeen'), lines: ['The moonlight is falling across the desk now.', 'One of the journal’s pages was blank. “Some words I write only for the moon.”', 'Open the journal to its third spread. In the moonlight, four moons appear.'] });
   G.registerStep(5, 'journal', () => G.set('journalRead'));
   G.registerStep(20, 'lamp', () => { G.take('matches'); G.set('lampLit'); });
