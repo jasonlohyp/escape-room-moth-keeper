@@ -381,7 +381,7 @@
           <circle cx="-2" cy="-4" r="1.6" fill="#fff"/>
         </g>
         <!-- face -->
-        <path d="M0,-56 C15,-56 23.5,-44 23.5,-28 C23.5,-13 17,-1 6,5.5 C2.5,7.5 -2.5,7.5 -6,5.5 C-17,-1 -23.5,-13 -23.5,-28 C-23.5,-44 -15,-56 0,-56 Z" fill="url(#pSkin)"/>
+        <path d="M0,-56 C15,-56 23.5,-44 23.5,-28 C23.5,-14 18,-3 8,4 C4,7 -4,7 -8,4 C-18,-3 -23.5,-14 -23.5,-28 C-23.5,-44 -15,-56 0,-56 Z" fill="url(#pSkin)"/><path d="M0,-56 C15,-56 23.5,-44 23.5,-28 C23.5,-14 18,-3 8,4 C4,7 -4,7 -8,4 C-18,-3 -23.5,-14 -23.5,-28 C-23.5,-44 -15,-56 0,-56 Z" fill="url(#pFaceShade)"/><path d="M0,-56 C15,-56 23.5,-44 23.5,-28 C23.5,-14 18,-3 8,4 C4,7 -4,7 -8,4 C-18,-3 -23.5,-14 -23.5,-28 C-23.5,-44 -15,-56 0,-56 Z" fill="url(#pJaw)"/>
         
         
         <ellipse cx="-13" cy="-13" rx="9" ry="6.5" fill="url(#pCheek)"/>
@@ -395,6 +395,8 @@
           <clipPath id="pEyeClipR"><path d="M4,-26 C7,-29.5 13,-29.5 16,-26 C13,-23.5 7,-23.5 4,-26 Z"/></clipPath>
           <g clip-path="url(#pEyeClipL)"><g id="edithEyeL"><circle cx="-10" cy="-26.2" r="2.9" fill="#3f5446"/><circle cx="-10" cy="-26.2" r="1.35" fill="#0b0806"/><circle cx="-10.9" cy="-27.1" r="0.7" fill="#fff" opacity="0.9"/></g></g>
           <g clip-path="url(#pEyeClipR)"><g id="edithEyeR"><circle cx="10" cy="-26.2" r="2.9" fill="#3f5446"/><circle cx="10" cy="-26.2" r="1.35" fill="#0b0806"/><circle cx="9.1" cy="-27.1" r="0.7" fill="#fff" opacity="0.9"/></g></g>
+          <g class="edith-lid" transform="translate(0,-29.5) scale(1,0) translate(0,29.5)"><path d="M-16.6,-26 C-13,-30.4 -7,-30.4 -3.4,-26 C-7,-23 -13,-23 -16.6,-26 Z" fill="#dcc6ac"/><path d="M-16,-25 C-12,-23.6 -8,-23.6 -4,-25" stroke="#5a3a2a" stroke-width="0.9" fill="none"/></g>
+          <g class="edith-lid" transform="translate(0,-29.5) scale(1,0) translate(0,29.5)"><path d="M3.4,-26 C7,-30.4 13,-30.4 16.6,-26 C13,-23 7,-23 3.4,-26 Z" fill="#d6bea4"/><path d="M4,-25 C8,-23.6 12,-23.6 16,-25" stroke="#5a3a2a" stroke-width="0.9" fill="none"/></g>
           <path d="M-16.5,-25.8 C-13,-30.2 -7,-30.2 -3.6,-25.8" stroke="#1c120d" stroke-width="1.3" fill="none"/>
           <path d="M3.6,-25.8 C7,-30.2 13,-30.2 16.5,-25.8" stroke="#1c120d" stroke-width="1.3" fill="none"/>
           <path d="M-15,-29.8 C-12,-32 -8,-32 -5,-30" stroke="#8a6a55" stroke-width="0.8" fill="none" opacity="0.7"/>
@@ -1070,28 +1072,52 @@
     st.top.querySelectorAll('.rl-flick,.rl-flick2').forEach(e => e.classList.toggle('on', lit));
   }
 
-  // portrait: her eyes follow the cursor, very slightly
-  let eyeHandler = null;
+  // portrait: her eyes follow the cursor with a slow, lagging catch-up, and she very rarely blinks
+  const eyes = { on: false, tx: 0, ty: 0, x: 0, y: 0, raf: 0, last: 0, blinkT: 0, handler: null };
+  function eyesFrame(now) {
+    if (!eyes.on) return;
+    const dt = Math.min(100, now - (eyes.last || now)); eyes.last = now;
+    const k = 1 - Math.exp(-dt / 380);           // ~400ms lag
+    eyes.x += (eyes.tx - eyes.x) * k; eyes.y += (eyes.ty - eyes.y) * k;
+    const t = `translate(${eyes.x.toFixed(2)},${eyes.y.toFixed(2)})`;
+    const Lg = document.getElementById('edithEyeL'), Rg = document.getElementById('edithEyeR');
+    if (Lg) { Lg.setAttribute('transform', t); Rg.setAttribute('transform', t); }
+    eyes.raf = requestAnimationFrame(eyesFrame);
+  }
+  function scheduleBlink() {
+    clearTimeout(eyes.blinkT);
+    eyes.blinkT = setTimeout(() => {
+      if (!eyes.on || G.view() !== 'south') return;
+      const lids = document.querySelectorAll('#edithPortrait .edith-lid');
+      G.tween(420, (e, t) => {
+        const k = t < 0.45 ? t / 0.45 : Math.max(0, 1 - (t - 0.55) / 0.45);
+        const v = Math.min(1, k).toFixed(3);
+        lids.forEach(l => l.setAttribute('transform', `translate(0,-29.5) scale(1,${v}) translate(0,29.5)`));
+      }, 'linear').then(scheduleBlink);
+    }, 40000 + Math.random() * 50000);
+  }
   function eyesOn() {
     const stage = document.getElementById('stage');
-    const L_ = document.getElementById('edithEyeL'), R_ = document.getElementById('edithEyeR');
-    if (!stage || !L_ || !R_ || eyeHandler) return;
-    eyeHandler = (e) => {
+    if (!stage || eyes.on) return;
+    eyes.on = true; eyes.last = 0;
+    eyes.handler = (e) => {
       if (G.view() !== 'south') return;
       const p = G.toStage(e);
       const dx = p.x - 1275, dy = p.y - 275, d = Math.hypot(dx, dy) || 1;
-      const k = Math.min(1, d / 260);
-      const tx = r1(dx / d * 1.5 * k), ty = r1(dy / d * 0.9 * k);
-      L_.setAttribute('transform', `translate(${tx},${ty})`);
-      R_.setAttribute('transform', `translate(${tx},${ty})`);
+      const k = Math.min(1, d / 320);
+      eyes.tx = dx / d * 3.6 * k; eyes.ty = dy / d * 1.3 * k;
     };
-    stage.addEventListener('mousemove', eyeHandler);
+    stage.addEventListener('mousemove', eyes.handler);
+    eyes.raf = requestAnimationFrame(eyesFrame);
+    scheduleBlink();
   }
   function eyesOff() {
     const stage = document.getElementById('stage');
-    if (stage && eyeHandler) stage.removeEventListener('mousemove', eyeHandler);
-    eyeHandler = null;
+    if (stage && eyes.handler) stage.removeEventListener('mousemove', eyes.handler);
+    eyes.on = false; eyes.handler = null;
+    cancelAnimationFrame(eyes.raf); clearTimeout(eyes.blinkT);
   }
+  ART.blinkEdith = () => { clearTimeout(eyes.blinkT); eyes.blinkT = setTimeout(() => {}, 0); const lids = document.querySelectorAll('#edithPortrait .edith-lid'); return G.tween(420, (e, t) => { const k = t < 0.45 ? t / 0.45 : Math.max(0, 1 - (t - 0.55) / 0.45); lids.forEach(l => l.setAttribute('transform', `translate(0,-29.5) scale(1,${Math.min(1, k).toFixed(3)}) translate(0,29.5)`)); }, 'linear'); };
 
   G.WALLS.forEach(w => {
     state[w] = { key: null };

@@ -1037,7 +1037,8 @@
           // hold the light back from a rectangle (feathered by stacked steps), so clues painted there keep their contrast
           const [x, y, w, h, keep] = maskRect, mid = 'win-bmask-' + wall;
           let steps = '';
-          for (let i = 0; i < 6; i++) { const e = 36 - i * 7; steps += `<rect x="${x - e}" y="${y - e}" width="${w + 2 * e}" height="${h + 2 * e}" rx="${e + 6}" fill="#000" opacity="${f((1 - keep) / 6)}"/>`; }
+          for (let i = 0; i < 6; i++) { const e = 42 - i * 7; steps += `<rect x="${x - e}" y="${y - e}" width="${w + 2 * e}" height="${h + 2 * e}" rx="${e + 6}" fill="#000" opacity=".22"/>`; }
+          steps += `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="6" fill="#000" opacity="${1 - keep}"/>`;
           G.svg(`<mask id="${mid}" maskUnits="userSpaceOnUse" x="0" y="0" width="1600" height="900"><rect width="1600" height="900" fill="#fff"/>${steps}</mask>`, B.g);
           inner.setAttribute('mask', `url(#${mid})`);
         }
