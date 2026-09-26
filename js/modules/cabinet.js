@@ -224,7 +224,7 @@
   const MOTHS = {
     atlas: {
       label: 'Attacus atlas', loc: 'Ceylon · 3.iii.1891', no: 'No. 7',
-      say: 'Attacus atlas. The atlas moth, its wingtips curling like a snake’s head.',
+      say: 'Attacus atlas. The atlas moth: broad wings, the tips curling like a snake’s head.',
       fw: 'M7,-24 C46,-54 104,-76 150,-84 C166,-88 180,-98 188,-110 C198,-114 206,-102 200,-88 C194,-76 184,-66 174,-60 C160,-52 146,-30 144,-12 C142,2 138,10 132,16 C96,18 52,12 9,2 Z',
       hw: 'M7,0 C52,4 116,10 150,34 C166,58 150,96 118,122 C92,142 56,146 34,124 C16,104 8,64 6,20 Z',
       fwGrad: { r: 190, stops: [[0, '#4a1a0e'], [0.25, '#8a3a1c'], [0.62, '#b4562a'], [0.85, '#c9803e'], [1, '#d8a060']] },
@@ -274,7 +274,7 @@
     },
     hawk: {
       label: 'Sphinx ligustri', loc: 'Kent · 22.vii.1896', no: 'No. 11',
-      say: 'Sphinx ligustri. The privet hawk-moth, built for speed.',
+      say: 'Sphinx ligustri. The privet hawk-moth: narrow swept-back wings, built for speed.',
       fw: 'M8,-26 C62,-34 132,-18 186,16 C197,23 195,31 182,30 C150,26 118,24 88,27 C56,27 30,16 9,0 Z',
       hw: 'M8,4 C44,8 88,24 110,42 C118,60 100,78 72,82 C46,86 22,68 8,34 Z',
       fwGrad: { r: 200, stops: [[0, '#4a3424'], [0.3, '#7a6048'], [0.7, '#9a8062'], [1, '#b09878']] },
@@ -300,7 +300,7 @@
     },
     emperor: {
       label: 'Saturnia pavonia', loc: 'Yorkshire moor · 9.iv.1897', no: 'No. 19',
-      say: 'Saturnia pavonia. The emperor moth, broad round fans with scalloped edges.',
+      say: 'Saturnia pavonia. The emperor moth: round, fan-shaped wings with no points at all.',
       fw: 'M8,-22 C36,-64 96,-90 148,-86 L154,-80' + scallop([[154, -80], [160, -62], [160, -44], [156, -26], [150, -8], [138, 14]], [60, -30], 9) + ' C110,22 50,14 8,2 Z',
       hw: 'M8,4 C54,6 110,12 138,34' + scallop([[138, 34], [152, 56], [154, 80], [144, 102], [124, 120], [100, 130], [74, 132], [50, 122], [34, 106]], [60, 60], 9) + ' C16,90 8,50 6,10 Z',
       fwGrad: { r: 170, stops: [[0, '#4a3a3e'], [0.3, '#7a6a70'], [0.65, '#a8969a'], [0.85, '#c8a8a0'], [1, '#d8a07c']] },

@@ -237,10 +237,23 @@
         R.moths.push({ outer, inner, s, weave });
       });
       // click target (only live when lit)
-      R.projHot = G.el('path', { d: 'M440 110 H1160 V330 H440 Z', fill: 'transparent', 'pointer-events': 'none' }, g);
-      G.hotspot(R.projHot, {
+      // each shadow is its own hotspot, described in the same words as its specimen in the cabinet
+      const SHAPE_SAY = {
+        atlas: 'The first shadow: broad wings, their tips drawn out into curling hooks, like a snake’s head.',
+        luna: 'The second shadow: two long tails trailing from the hindwings.',
+        hawk: 'The third shadow: narrow swept-back wings and a long body. Built for speed.',
+        emperor: 'The fourth shadow: round, plain fan-shaped wings with no points at all.',
+      };
+      R.projHot = G.el('g', { 'pointer-events': 'none' }, g);
+      SLOTS.forEach(sl => {
+        const e = G.el('ellipse', { cx: sl.x, cy: sl.y, rx: 104 * sl.s, ry: 78 * sl.s, fill: 'transparent' }, R.projHot);
+        G.hotspot(e, { cursor: 'look', click() { G.say(SHAPE_SAY[sl.k], { dur: 5200 }); } });
+      });
+      const rest = G.el('path', { d: 'M440 110 H1160 V330 H440 Z', fill: 'transparent' }, R.projHot);
+      R.projHot.insertBefore(rest, R.projHot.firstChild);
+      G.hotspot(rest, {
         cursor: 'look',
-        click() { G.say("Four moths, cast by the lampshade. Edith’s four dearest."); },
+        click() { G.say('Four moths, cast by the lampshade. Edith’s four dearest.'); },
       });
     },
     update() {
