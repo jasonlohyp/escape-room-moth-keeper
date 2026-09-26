@@ -28,7 +28,7 @@
     if (!document.getElementById('ck-css')) {
       const st = document.createElement('style');
       st.id = 'ck-css';
-      st.textContent = '.ck-breathe{animation:ckBreathe 1.2s ease-in-out infinite}@keyframes ckBreathe{0%,100%{opacity:.12}50%{opacity:.95}}';
+      st.textContent = '.ck-breathe{animation:ckBreathe 1.2s ease-in-out infinite}@keyframes ckBreathe{0%,100%{opacity:.12}50%{opacity:.95}}.ck-tgtPulse .ck-tgtRing{transform-box:fill-box;transform-origin:center;animation:ckTgt .45s ease-out}@keyframes ckTgt{0%{transform:scale(1);stroke-width:2.6}35%{transform:scale(1.18);stroke-width:5}100%{transform:scale(1);stroke-width:2.6}}';
       document.head.appendChild(st);
     }
     const d = document.getElementById('defs');
@@ -579,6 +579,12 @@
                  <circle cx="${X}" cy="${Y}" r="60" fill="url(#ck-iconGlow)"/>
                  <circle cx="${X}" cy="${Y}" r="33" fill="#ffe2a0" fill-opacity="0.55" stroke="#d9982e" stroke-width="3.2"/>
                </g>`;
+      for (const [w, col, glow] of [['h', '#3f6690', '#8fb3d9'], ['m', '#d9a23a', '#ffd98a']]) {
+        lits += `<g class="ck-tgt ck-tgt-${w}" data-i="${i}" style="opacity:0;transition:opacity .25s ease">
+                 <circle cx="${X}" cy="${Y}" r="${w === 'h' ? 36.5 : 38.5}" fill="none" stroke="${glow}" stroke-width="7" opacity="0.55" filter="url(#ck-blur3)"/>
+                 <circle class="ck-tgtRing" cx="${X}" cy="${Y}" r="${w === 'h' ? 36.5 : 38.5}" fill="none" stroke="${col}" stroke-width="2.6"/>
+               </g>`;
+      }
       icons += `<g class="ck-icon" data-i="${i}" transform="translate(${X},${Y}) scale(1.1)">${ICONS[i]()}</g>`;
       const q = pol(R_ICON + 2, i * 30 + 15, CX, CY);
       florets += `<g transform="translate(${f1(q[0])},${f1(q[1])}) rotate(${i * 30 + 15})"><path d="M0,-6 L2,0 L0,6 L-2,0Z" fill="#b8893a" stroke="#6e4d1c" stroke-width="0.6"/><circle r="1.4" fill="#6e4d1c"/></g>`;
@@ -811,6 +817,7 @@
     V.doorR = { front: q('.ck-doorFront'), back: q('.ck-doorBack'), edge: q('.ck-doorEdge'), fshade: q('.ck-doorFrontShade') };
     V.warm = q('.ck-warm');
     V.lits = Array.from(root.querySelectorAll('.ck-lit'));
+    V.tgt = { h: Array.from(root.querySelectorAll('.ck-tgt-h')), m: Array.from(root.querySelectorAll('.ck-tgt-m')) };
     V.rewardLight = q('.ck-rewardLight');
     V.light = { glass: q('.ck-moonGlass'), rim: q('.ck-lampRim'), shaft: q('.ck-moonShaft'), cold: q('.ck-cold'), dim: q('.ck-dim'), warmL: q('.ck-warmL'), warmG: q('.ck-warmG'), moon: q('.ck-moonL') };
     V.mbWrap = q('.ck-matchbox');
@@ -894,8 +901,27 @@
 
   // ------------------------------------------------------------------ hands rendering + interaction
   let jolt = 0;
+  const tgtState = { h: null, m: null };
+  function updateTargets(force) {
+    if (!V.tgt) return;
+    const solved = !!G.get('clockSolved') || swinging;
+    ['h', 'm'].forEach(w => {
+      const idx = mod(Math.round(ang[w] / 30), 12);
+      const op = solved ? 1 : (active === w || (drag && drag.which === w && drag.moved)) ? 1 : 0.5;
+      const key = idx + ':' + op;
+      if (!force && tgtState[w] === key) return;
+      tgtState[w] = key;
+      V.tgt[w].forEach((g, i) => { g.style.opacity = i === idx ? op : 0; });
+    });
+  }
+  function pulseTarget(w) {
+    if (!V.tgt) return;
+    const g = V.tgt[w][mod(Math.round(ang[w] / 30), 12)];
+    g.classList.remove('ck-tgtPulse'); void g.getBBox(); g.classList.add('ck-tgtPulse');
+  }
   function renderHands() {
     if (!V.hour) return;
+    updateTargets();
     const parts = [['h', V.hour, V.hsh, 6, 9], ['m', V.min, V.msh, 8, 11]];
     for (const [w, el, sh, ox, oy] of parts) {
       const L = Math.min(1, lift[w] + (active === w && !G.get('clockSolved') && !swinging ? 0.4 : 0)), a = f1(ang[w] + jolt * (w === 'h' ? 1 : -1.4)), sc = (1 + 0.06 * L).toFixed(3);
@@ -905,6 +931,7 @@
   }
   function updateRims() {
     if (!V.rim) return;
+    updateTargets();
     const solvedOrBusy = !!G.get('clockSolved') || swinging || G.isBusy();
     ['h', 'm'].forEach(w => {
       const grabbed = !solvedOrBusy && ((drag && drag.which === w && drag.moved) || lift[w] > 0.5);
@@ -1084,7 +1111,7 @@
     await G.tween(ms, t => { ang[which] = from + (target - from) * t; renderHands(); }, 'outBack');
     G.sfx('tick');
     const pos = mod(Math.round(target / 30), 12);
-    ang[which] = pos * 30; renderHands();
+    ang[which] = pos * 30; renderHands(); pulseTarget(which);
     await liftTo(which, 0, 140);
     animating = false;
     G.set(which === 'h' ? 'clockH' : 'clockM', pos);
