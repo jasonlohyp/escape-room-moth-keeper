@@ -24,8 +24,9 @@
       wings: [
         [103, 48, ['C', 122, 34, 148, 24, 166, 20], ['C', 176, 15, 186, 5, 194, 3], ['C', 202, 2, 203, 16, 197, 22],
           ['C', 191, 28, 182, 27, 176, 30], ['C', 175, 44, 172, 58, 166, 70], ['C', 150, 76, 126, 74, 104, 66]],
-        [104, 67, ['C', 132, 70, 164, 72, 177, 84], ['C', 184, 98, 176, 114, 162, 122], ['C', 148, 130, 130, 129, 120, 120],
-          ['C', 111, 111, 105, 97, 103, 82]],
+        // square-cut hindwing: flat outer edge, squared corner, flat lower margin (wide & low overall)
+        [104, 66, ['C', 130, 67, 166, 69, 179, 77], ['C', 183, 88, 181, 100, 177, 109], ['C', 160, 115, 136, 117, 118, 114],
+          ['C', 110, 108, 105, 96, 103, 82]],
         [101, 44, ['C', 106, 34, 112, 26, 121, 19], ['C', 119, 28, 111, 38, 102, 46]],
       ],
       body: 'M100 40 C106 40 108 56 107 72 C106 90 104 100 100 104 C96 100 94 90 93 72 C92 56 94 40 100 40 Z',
@@ -62,6 +63,8 @@
           ['L', 106, 31], ['C', 105, 35, 104, 38, 103, 41]],
       ],
       body: 'M100 34 C105 34 107 44 107 58 C108 76 106 94 100 106 C94 94 92 76 93 58 C93 44 95 34 100 34 Z',
+      // compact & round: pull the wings in horizontally, stretch a little vertically (width ~ height)
+      xform: (x, y) => [100 + (x - 100) * 0.74, 70 + (y - 70) * 1.08],
     },
   };
   function subArea(sp) {
@@ -106,8 +109,14 @@
   Object.keys(HALF).forEach(k => {
     const h = HALF[k];
     const parts = [];
-    h.wings.forEach(w => { parts.push(subToD(w)); parts.push(subToD(mirrorSub(w))); });
-    parts.push(bodyD(h.body));
+    const X = h.xform;
+    const tx = sp => !X ? sp : [...X(sp[0], sp[1])].concat(sp.slice(2).map(seg => {
+      const o = [seg[0]];
+      for (let i = 1; i < seg.length; i += 2) o.push(...X(seg[i], seg[i + 1]));
+      return o;
+    }));
+    h.wings.forEach(w0 => { const w = tx(w0); parts.push(subToD(w)); parts.push(subToD(mirrorSub(w))); });
+    parts.push(bodyD(!X ? h.body : h.body.replace(/(-?\d+(?:\.\d+)?) (-?\d+(?:\.\d+)?)/g, (m, a, b) => X(+a, +b).map(v => Math.round(v * 10) / 10).join(' '))));
     SIL[k] = parts.join(' ');
   });
   window.MOTHS = window.MOTHS || {};
@@ -133,7 +142,7 @@
     { k: 'atlas', x: 542, y: 238, s: 0.96, r: 0 },
     { k: 'luna', x: 714, y: 202, s: 0.96, r: 0 },
     { k: 'hawk', x: 882, y: 204, s: 0.88, r: 0 },
-    { k: 'emperor', x: 1054, y: 236, s: 0.94, r: 0 },
+    { k: 'emperor', x: 1058, y: 232, s: 1.02, r: 0 },
   ];
   // Projection layers are baked to bitmaps at load (blur/turbulence filters over large areas are far too
   // expensive to rasterise on the frame lampLit flips). Each layer is an <image>: first an SVG data-URL
@@ -207,7 +216,7 @@
         const inner = G.el('g', {}, outer);
         // keystone: further from the lamp axis -> slightly larger, softer and dimmer
         const dist = Math.min(1, Math.abs(s.x - 900) / 360);
-        const sc = s.s * (1 + 0.06 * dist), soft = (1.3 + 1.5 * dist).toFixed(2), pen = (8 + 6 * dist).toFixed(1);
+        const sc = s.s * (1 + 0.06 * dist), soft = (1.1 + 0.8 * dist).toFixed(2), pen = (8 + 6 * dist).toFixed(1);
         const hot = (0.98 - 0.2 * dist).toFixed(2), rim = (0.4 - 0.14 * dist).toFixed(2);
         const loc = `transform="translate(${s.x} ${s.y}) scale(${sc.toFixed(4)})"`;
         const bx = s.x - 140 * sc, by = s.y - 110 * sc, bw = 280 * sc, bh = 220 * sc;

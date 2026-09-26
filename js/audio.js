@@ -1103,8 +1103,8 @@
           const gm = mtof(degMidi(d + 1, mode) + 12 * oct);
           if (inst === 'piano') pianoNote(K, dest, tt - 0.07, gm, vel * 0.35, { decay: 0.8 }); else mbNote(K, dest, tt - 0.07, gm, vel * 0.4, { decay: 0.8 });
         }
-        if (inst === 'piano') pianoNote(K, dest, tt, mtof(m), vel);
-        else if (inst === 'cello') padNote(K, dest, tt, mtof(m - 12), len * beat * rit * 0.97, vel * 0.13, false, Math.min(0.3, len * beat * 0.3), 1.1);
+        if (inst === 'piano') pianoNote(K, dest, tt, mtof(m), vel * 0.8);
+        else if (inst === 'cello') padNote(K, dest, tt, mtof(m - 12), len * beat * rit * 0.97, vel * 0.75, false, Math.min(0.3, len * beat * 0.3), 1.1);
         else mbNote(K, dest, tt, mtof(m), vel, { decay: o.stage >= 3 ? 3.4 : 2.6 });
         if (o.stage >= 3 && inst === 'box') mbNote(K, dest, tt + 0.01, mtof(m + 12), vel * 0.3, { decay: 2 });
         if (name === 'Z') padNote(K, dest, tt, mtof(m - 12), len * beat * rit, vel * 0.06, true, 0.25, 1.4); // strings double the tune
