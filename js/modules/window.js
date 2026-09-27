@@ -603,6 +603,7 @@
       rimHi: mk('path', { fill: 'none', stroke: '#6f8578', 'stroke-opacity': .5 }),
       glint: mk('path', { fill: 'none', stroke: '#eef6ff', 'stroke-linecap': 'round', 'stroke-opacity': .2, filter: 'url(#blur2)' }),
       glint2: mk('path', { fill: 'none', stroke: '#eef6ff', 'stroke-linecap': 'round', 'stroke-opacity': .1, filter: 'url(#blur6)' }),
+      shade: mk('path', { fill: '#050a0e', 'fill-rule': 'nonzero', opacity: 0 }),
       rimLight: mk('path', { fill: 'none', stroke: '#dcebff', 'stroke-linecap': 'round', 'stroke-opacity': .75 }),
     };
   }
@@ -639,6 +640,11 @@
     let rl = '';
     for (let i = 0; i <= 20; i++) { const a = (-55 + i * 5.5) * Math.PI / 180, q = P(R_SASH * Math.cos(a), R_SASH * Math.sin(a)); rl += (i ? 'L' : 'M') + f(q[0]) + ' ' + f(q[1]); }
     Pp.rimLight.setAttribute('d', rl); Pp.rimLight.setAttribute('stroke-width', w(2.6));
+    // turning away from the lamp-lit room, the sash face falls into shadow while its free edge catches the moon
+    const turn = Math.sin(Math.min(th, Math.PI / 2));
+    Pp.shade.setAttribute('d', ringD(P, R_SASH));
+    Pp.shade.setAttribute('opacity', f(0.5 * turn));
+    Pp.rimLight.setAttribute('stroke-opacity', f(0.35 + 0.6 * turn));
     let md = ringD(P, 130, 0, 44) + ringD(P, 58, 0, 28);
     for (let k = 0; k < 8; k++) { const a = (-90 + k * 45) * Math.PI / 180, p0 = P(56 * Math.cos(a), 56 * Math.sin(a)), p1 = P(R_GLASS * Math.cos(a), R_GLASS * Math.sin(a)); md += `M${f(p0[0])} ${f(p0[1])}L${f(p1[0])} ${f(p1[1])}`; }
     for (let k = 0; k < 8; k++) { const a = (-67.5 + k * 45) * Math.PI / 180, p0 = P(128 * Math.cos(a), 128 * Math.sin(a)), p1 = P(R_GLASS * Math.cos(a), R_GLASS * Math.sin(a)); md += `M${f(p0[0])} ${f(p0[1])}L${f(p1[0])} ${f(p1[1])}`; }
