@@ -601,8 +601,8 @@
       mull: mk('path', { fill: 'none', stroke: '#27342e', 'stroke-linecap': 'butt' }),
       rim: mk('path', { fill: '#2b3831', 'fill-rule': 'evenodd', stroke: INK, 'stroke-linejoin': 'round' }),
       rimHi: mk('path', { fill: 'none', stroke: '#6f8578', 'stroke-opacity': .5 }),
-      glint: mk('path', { fill: 'none', stroke: '#eef6ff', 'stroke-linecap': 'round', 'stroke-opacity': .5 }),
-      glint2: mk('path', { fill: 'none', stroke: '#eef6ff', 'stroke-linecap': 'round', 'stroke-opacity': .16 }),
+      glint: mk('path', { fill: 'none', stroke: '#eef6ff', 'stroke-linecap': 'round', 'stroke-opacity': .2, filter: 'url(#blur2)' }),
+      glint2: mk('path', { fill: 'none', stroke: '#eef6ff', 'stroke-linecap': 'round', 'stroke-opacity': .1, filter: 'url(#blur6)' }),
       rimLight: mk('path', { fill: 'none', stroke: '#dcebff', 'stroke-linecap': 'round', 'stroke-opacity': .75 }),
     };
   }
@@ -649,9 +649,9 @@
     Pp.rimHi.setAttribute('d', ringD(P, R_SASH - 3)); Pp.rimHi.setAttribute('stroke-width', w(1.4));
     const seg = (pts) => pts.map((q, i) => { const p = P(q[0], q[1]); return (i ? 'L' : 'M') + f(p[0]) + ' ' + f(p[1]); }).join('');
     Pp.glint.setAttribute('d', seg([[-150, -40], [-60, -120], [20, -160]]) + seg([[-120, 40], [-40, -30]]));
-    Pp.glint.setAttribute('stroke-width', w(3.2));
+    Pp.glint.setAttribute('stroke-width', w(7));
     Pp.glint2.setAttribute('d', seg([[-170, 10], [-40, -110], [60, -170]]));
-    Pp.glint2.setAttribute('stroke-width', w(9));
+    Pp.glint2.setAttribute('stroke-width', w(22));
     // latch (plate, lever, key) follows the sash: local affine fit of the projection around the keyhole
     const X = 0, Y = 196, p0 = P(X, Y), px = P(X + 1, Y), py = P(X, Y + 1);
     const a = px[0] - p0[0], b = px[1] - p0[1], cc = py[0] - p0[0], d = py[1] - p0[1];
