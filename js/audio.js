@@ -542,6 +542,12 @@
         const fb = flutterBuf(K.c, d, rr(15, 23)), gg = rr(0.35, 0.55) * 1.8;   // +5 dB: the hero sound
         noise(K, v, { t: tt, buf: fb, flat: true, g: gg, filters: [{ type: 'bandpass', f: rr(900, 1500), q: 0.6 }, { type: 'highpass', f: 250 }, { type: 'lowpass', f: 3200 }] });
         noise(K, v, { t: tt, buf: fb, flat: true, g: gg * 1.4, filters: [{ type: 'bandpass', f: rr(380, 520), q: 1.3 }, { type: 'lowpass', f: 700 }] }); // wing thumps
+        // a faint glassy shimmer riding each wing-beat (in-key chord tones, slightly detuned pairs)
+        const sf = mtof(km([14, 16, 18][i % 3]));
+        for (let k = 0; k < 3; k++) {
+          tone(K, v, { f: sf, t: tt + k * d / 3, a: 0.03, d: d * 0.6, g: 0.02 });
+          tone(K, v, { f: sf * 1.004, t: tt + k * d / 3 + 0.01, a: 0.03, d: d * 0.6, g: 0.014 });
+        }
         tt += d + rr(0.12, 0.4);
       }
     },
