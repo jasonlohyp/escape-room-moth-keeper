@@ -1037,6 +1037,7 @@
       RC.land.style.display = ''; RC.fly.style.display = ''; RC.rest.style.display = 'none';
       const P0 = [1230, 250], P1 = [560, 260], P2 = [760, 560], P3 = [LAND.x, LAND.y - 60];
       RC.fly.style.opacity = 1; RC.rest.style.opacity = 0;
+      G.sfx('mothFlutter', { vol: 0.5 });
       await G.tween(3400 * landSlow, (e, t) => {
         const u = 1 - e, b = [0, 1].map(i => u * u * u * P0[i] + 3 * u * u * e * P1[i] + 3 * u * e * e * P2[i] + e * e * e * P3[i]);
         const wob = Math.sin(t * 22) * 10 * (1 - e);
@@ -1059,6 +1060,7 @@
       RC.rest.setAttribute('transform', `translate(${LAND.x} ${LAND.y}) scale(${LAND.s})`);
       landState = 'landed';
       showLanded();
+      G.say('A pale moth drifts in out of the rain and settles on the sill, as if it had been waiting for this.', { dur: 5600 });
     }, ms);
   }
 
