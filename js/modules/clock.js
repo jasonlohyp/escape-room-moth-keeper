@@ -1113,7 +1113,7 @@
     await G.tween(ms, t => { ang[which] = from + (target - from) * t; renderHands(); }, 'outBack');
     const pos = mod(Math.round(target / 30), 12);
     const solvedNow = !G.get('clockSolved') && pos === (which === 'h' ? SOL_H : SOL_M);
-    G.sfx(solvedNow ? 'chime' : 'tick', solvedNow ? { vol: 0.4 } : undefined);
+    G.sfx(solvedNow ? 'handRight' : 'tick');
     ang[which] = pos * 30; renderHands(); pulseTarget(which, solvedNow);
     await liftTo(which, 0, 140);
     animating = false;

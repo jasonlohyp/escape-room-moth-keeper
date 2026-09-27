@@ -420,6 +420,12 @@
       thud(K, v, t + 0.55, 180, 0.12, 0.06);
       [-3, -5, -7].forEach((d, i) => bell(K, v, t + 0.7 + i * rr(1.25, 1.4), mtof(km(d)), 0.3, 5.5));
     },
+    handRight(K, t, o) {
+      // a single soft bell: the hand has found its picture (much quieter and shorter than the strike)
+      const v = voice(K, o, 0.12);
+      metalTick(K, v, t, 0.18, 1.05);
+      bell(K, v, t + 0.04, mtof(km(-5)), 0.14, 1.6);
+    },
     clockOpen(K, t, o) {
       const v = voice(K, o, 0.3);
       metalTick(K, v, t, 0.3, 0.9);
