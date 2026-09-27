@@ -423,11 +423,13 @@
     handRight(K, t, o) {
       // a single soft bell: the hand has found its picture (much quieter and shorter than the strike)
       const v = voice(K, o, 0.12);
-      // two high glassy notes, a fifth apart, short and bright: nothing like the clock's low strike
+      // two high glassy notes: the key's tonic, then its dominant a perfect fifth (x1.5) above.
+      // Tonic + dominant are in key in both minor and major stages; nothing like the clock's low strike.
+      const f0 = mtof(km(7));
       metalTick(K, v, t, 0.14, 1.3);
-      tone(K, v, { f: mtof(km(9)), t: t + 0.03, a: 0.004, d: 0.55, g: 0.26 });
-      tone(K, v, { f: mtof(km(9)) * 2.76, t: t + 0.03, a: 0.002, d: 0.18, g: 0.06 });
-      tone(K, v, { f: mtof(km(13)), t: t + 0.14, a: 0.004, d: 0.7, g: 0.2 });
+      tone(K, v, { f: f0, t: t + 0.03, a: 0.004, d: 0.55, g: 0.26 });
+      tone(K, v, { f: f0 * 2.76, t: t + 0.03, a: 0.002, d: 0.18, g: 0.06 });
+      tone(K, v, { f: f0 * 1.5, t: t + 0.14, a: 0.004, d: 0.7, g: 0.2 });
     },
     clockOpen(K, t, o) {
       const v = voice(K, o, 0.3);
