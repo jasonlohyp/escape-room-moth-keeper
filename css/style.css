@@ -332,7 +332,6 @@ body.busy .ui-hintbtn { pointer-events: none !important; opacity: .4; }
 .t-btn:hover, .t-btn:focus-visible { color: #fff6de !important; text-shadow: 0 0 calc(var(--u) * 16) rgba(255, 220, 150, .7);
   background: radial-gradient(ellipse closest-side, rgba(255, 214, 150, .16), rgba(255, 214, 150, .05) 60%, rgba(255, 214, 150, 0)) !important; }
 .t-btn:hover::before, .t-btn:hover::after, .t-btn:focus-visible::before, .t-btn:focus-visible::after { opacity: .85; width: max(calc(var(--u) * 56), 22px); }
-.t-btn.secondary { font-size: max(calc(var(--u) * 27), 14px) !important; color: rgba(239, 230, 205, .55) !important; }
 .t-foot { position: absolute; left: 0; right: 0; bottom: calc(var(--u) * 26); text-align: center; font-style: italic; font-size: max(calc(var(--u) * 19), 13px); color: rgba(222, 214, 190, .6); letter-spacing: .06em; pointer-events: none; }
 /* staggered reveal */
 #ui-title .rv { opacity: 0; transition: opacity 2.4s ease, transform 2.4s var(--slow); transform: translateY(calc(var(--u) * 10)); }
@@ -436,7 +435,6 @@ body.ending #stage { filter: blur(.8px) brightness(.86) saturate(.92); }
   .t-sub { font-size: max(4.4cqw, 16px); }
   .t-buttons { margin-top: 9cqw; gap: 2cqw; }
   .t-btn { font-size: max(6cqw, 22px) !important; min-height: 52px; }
-  .t-btn.secondary { font-size: max(4.6cqw, 18px) !important; }
   .t-foot { font-size: max(3.2cqw, 14px); bottom: 4cqw; }
   #ui-hint .hp-text { font-size: max(4cqw, 15px); }
   .e-shade-top { display: none; }

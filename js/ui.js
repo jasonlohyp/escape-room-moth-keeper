@@ -12,7 +12,6 @@
   ];
   const NO_HINT = 'Nothing more to find here… or is there?';
   const MUTE_KEY = 'mothkeeper.muted';
-  const TIME_KEY = 'mothkeeper.elapsed';
   const SLOTS = 5;
   const reduced = () => window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -571,12 +570,9 @@
   }
 
   // ---------------------------------------------------------------- timing
-  function elapsed() { return S.carry + (S.t0 ? Date.now() - S.t0 : 0); }
-  function persistTime() { if (G.debugMode || !S.t0 || S.ending) return; try { localStorage.setItem(TIME_KEY, String(elapsed())); } catch (e) { } }
-  function onStart(cont) {
+  function elapsed() { return S.t0 ? Date.now() - S.t0 : 0; }
+  function onStart() {
     S.t0 = Date.now();
-    S.carry = 0;
-    if (cont) { try { S.carry = +localStorage.getItem(TIME_KEY) || 0; } catch (e) { } }
     S.hintEvents = 0;
     renderInv(true);
     updateHUD();
@@ -599,34 +595,31 @@
     h('p', { class: 't-sub rv d2' }, 'an attic, a lamp, a letter unread', st);
     const b = h('div', { class: 't-buttons rv d3' }, null, st);
     E.begin = h('button', { class: 't-btn', 'aria-label': 'Begin a new game', text: 'Begin' }, null, b);
-    E.cont = h('button', { class: 't-btn secondary', 'aria-label': 'Continue saved game', text: 'Continue' }, null, b);
     h('div', { class: 't-foot rv d4', 'aria-hidden': 'true', text: 'best played with sound, in a dark room' }, null, t);
     const gr = h('div', { class: 'ui-grain anim', 'aria-hidden': 'true' }, null, t); gr.style.backgroundImage = GRAIN;
     h('div', { class: 'ui-vig', 'aria-hidden': 'true' }, null, t);
     E.titleAmb = Ambient(cv, 'title');
-    E.begin.addEventListener('click', () => begin(false));
-    E.cont.addEventListener('click', () => begin(true));
+    E.begin.addEventListener('click', begin);
   }
   function showTitle() {
     if (!E.title) return;
     S.title = true;
     document.body.classList.add('title-open');
-    E.cont.style.display = safe(() => G.hasSave()) ? '' : 'none';
     E.title.classList.remove('leaving', 'ready');
     E.title.classList.add('show');
     E.titleAmb.start();
     requestAnimationFrame(() => requestAnimationFrame(() => E.title.classList.add('ready')));
     updateHUD();
   }
-  function begin(cont) {
+  function begin() {
     if (S.starting || !S.title) return;
     S.starting = true;
     safe(() => window.Audio2 && Audio2.unlock && Audio2.unlock());
     safe(() => window.Audio2 && Audio2.setMuted && Audio2.setMuted(S.muted));
     G.sfx('click');
-    G.start({ continue: !!cont });
+    G.start();
     hideTitle(false);
-    if (!cont) playIntro();
+    playIntro();
   }
   function hideTitle(instant) {
     S.title = false;
@@ -651,7 +644,6 @@
     try { hints = Object.values(G.state.hint || {}).reduce((a, b) => a + (+b || 0), 0); } catch (e) { }
     hints = Math.max(hints, S.hintEvents);
     S.ending = true;
-    try { localStorage.removeItem(TIME_KEY); } catch (e) { }
     closeHint(); hideCaption(); hideLabel(0);
     if (G.selected()) G.select(null);
     document.body.classList.add('ending');
@@ -667,7 +659,7 @@
     const m1 = h('div', { class: 'e-title fx', text: 'The Moth Keeper' }, null, meta);
     const m2 = h('div', { class: 'e-stats fx', text: `${fmtTime(time)}  ·  ${hints === 0 ? 'no hints' : hints === 1 ? '1 hint' : hints + ' hints'}` }, null, meta);
     const again = h('button', { class: 't-btn e-again fx', text: 'Play again', 'aria-label': 'Play again' }, null, meta);
-    again.addEventListener('click', () => { safe(() => G.resetSave()); try { localStorage.removeItem(TIME_KEY); } catch (err) { } location.reload(); });
+    again.addEventListener('click', () => location.reload());
     E.endAmb = Ambient(cv, 'end');
     requestAnimationFrame(() => requestAnimationFrame(() => { e.classList.add('show'); E.endAmb.start(); }));
     const r = reduced() ? .3 : 1;
@@ -716,9 +708,6 @@
     wrap.addEventListener('pointerdown', ev => {
       if (E.caption.classList.contains('show') && !E.hint.contains(ev.target)) hideCaption();
     }, true);
-    window.addEventListener('pagehide', persistTime);
-    document.addEventListener('visibilitychange', () => { if (document.hidden) persistTime(); });
-    setInterval(persistTime, 5000);
   }
 
   // ---------------------------------------------------------------- init
@@ -745,7 +734,7 @@
       else if (G.selected() && S.inside) E.held.classList.add('on');
       updateHUD();
     });
-    G.on('start', () => onStart(!!(G.state.flags && Object.keys(G.state.flags).length)));
+    G.on('start', onStart);
     G.on('refresh', () => renderInv(false));
     G.on('hint', () => { S.hintEvents++; });
     G.on('finish', () => { document.body.classList.add('finale'); showEnding(); });

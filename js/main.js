@@ -7,7 +7,7 @@
     G.init();
     if (window.UI && UI.init) UI.init();
     if (P.get('skip') === '1') {
-      G.start({ continue: false });
+      G.start();
       if (window.UI && UI.hideTitle) UI.hideTitle(true);
       (async () => {
         if (P.get('solve')) await G.debug.solveTo(+P.get('solve'));
