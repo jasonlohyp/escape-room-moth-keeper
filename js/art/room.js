@@ -1215,3 +1215,53 @@
     rebuildGrade() { const g = document.getElementById('roomGrade'); if (g) g.remove(); ensureGrade(); },
   };
 })();
+
+// ---- look-at captions for the room's decor (lowest wall layer, so every puzzle hotspot stays on top)
+(function () {
+  'use strict';
+  const LOOKS = {
+    north: [
+      [120, 225, 170, 180, 'Two paper silhouettes: a man with a clockmaker’s loupe, and a girl with a ribbon in her hair. Father and Edith, years ago.'],
+      [540, 300, 70, 115, 'A wall sconce. The candle burned down to a stub long ago.'],
+      [1020, 190, 180, 230, 'Digitalis purpurea. Foxglove. The moths come to it at dusk.'],
+      [1270, 125, 125, 220, 'An empty birdcage. Its door hangs open, as if whatever lived here simply left.'],
+      [1230, 410, 120, 190, 'Dried roses under glass. Dead a long time, and kept very carefully.'],
+      [90, 670, 205, 130, 'An old travelling trunk. It is locked, and so light it must be nearly empty.'],
+    ],
+    south: [
+      [120, 115, 245, 160, 'Edith’s sketches: a wing, a moth, notes in pencil. Her hand grows less steady from one to the next.'],
+      [365, 365, 90, 105, 'A drawing of a cocoon, pinned apart from the others. Beneath it, one word: “mine”.'],
+      [110, 350, 95, 240, 'A shawl, left on its peg. It still smells faintly of lavender.'],
+      [245, 345, 110, 60, 'A summer hat with a red ribbon. Summer seems a long way off.'],
+      [1160, 140, 230, 300, 'Edith Vane. Her eyes seem to follow you about the room.'],
+      [1230, 440, 140, 100, 'A pressed violet, dated the spring before Father was taken away.'],
+      [1255, 690, 95, 110, 'Crumpled pages. Every one begins “Dear Father” and goes no further.'],
+      [435, 430, 70, 145, 'The ink has dried to a crust in the well.'],
+    ],
+    west: [
+      [210, 320, 210, 460, 'A dress form under a dust sheet. For a moment, in the dark, it looked like someone standing there.'],
+      [1150, 225, 230, 130, 'Specimen jars: pins, paper labels, and a few pale cocoons that never hatched.'],
+      [1080, 580, 250, 210, 'A fern in a clay pot, still green. Someone has been watering it.'],
+      [510, 610, 570, 180, 'A window seat with two faded cushions. The best place in the attic to watch for moths.'],
+    ],
+    east: [
+      [200, 40, 160, 175, 'Lavender and yarrow, hung to dry. Lavender keeps the clothes moths off, Mother used to say.'],
+      [365, 250, 100, 520, 'A butterfly net, its mesh mended many times over.'],
+      [1165, 205, 170, 150, 'Common moths from the garden, pinned in tidy rows.'],
+      [1185, 385, 150, 135, 'Beetles. Father’s collection, not hers. She never cared for them.'],
+      [105, 625, 200, 175, 'Natural histories and moth keys, their spines cracked from use.'],
+      [1195, 685, 175, 115, 'Two boxes marked LEPIDOPTERA. Empty setting boards inside.'],
+    ],
+  };
+  Object.keys(LOOKS).forEach(wall => {
+    G.registerWallObject(wall, {
+      z: -1000,
+      build(g) {
+        LOOKS[wall].forEach(([x, y, w, h, text]) => {
+          const r = G.el('rect', { x, y, width: w, height: h, fill: 'transparent' }, g);
+          G.hotspot(r, { cursor: 'look', click() { G.say(text); } });
+        });
+      },
+    });
+  });
+})();
