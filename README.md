@@ -52,6 +52,13 @@ All puzzle chains, the intro, and the ending have been through repeated critique
 passes and pass automated playthrough tests. The one open item is subjective: the
 synthesized instrument timbres in `js/audio.js` haven't been judged by a human ear yet.
 
+Built in two passes: an open-ended brief that fanned out many parallel sub-agents
+(quality was good, but cost was not — parallel agents each re-pay the cost of
+their own context), then a second pass that switched to a one-at-a-time
+critic/builder loop — a single disposable critic sub-agent scores each item in
+four lines, the main thread fixes what it flags, repeat until it passes. See
+`prompt.md` for both prompts and why the strategy changed.
+
 ## Tech
 
 - No dependencies to play. `puppeteer-core` is a devDependency for the QA harness only.
