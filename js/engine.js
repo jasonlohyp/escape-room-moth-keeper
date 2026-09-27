@@ -25,7 +25,7 @@
   'use strict';
   const NS = 'http://www.w3.org/2000/svg';
   const WALLS = ['north', 'east', 'south', 'west'];
-  const SAVE_KEY = 'mothkeeper.save.v1';
+  const SAVE_KEY = 'mothkeeper.save.v1'; // legacy key, only ever cleared
 
   const state = { flags: {}, inv: [], sel: null, view: 'north', hint: {}, started: false };
   const views = {};
@@ -128,7 +128,6 @@
     state.flags[k] = v;
     emit('flag', k, v);
     refresh();
-    save();
   }
   function has(id) { return state.inv.includes(id); }
   function give(id, fromEl) {
@@ -136,7 +135,6 @@
     state.inv.push(id);
     sfx('pickup');
     emit('give', id, fromEl);
-    save();
   }
   function take(id) {
     const i = state.inv.indexOf(id);
@@ -144,7 +142,6 @@
     state.inv.splice(i, 1);
     if (state.sel === id) select(null);
     emit('take', id);
-    save();
   }
   function selected() { return state.sel; }
   function select(id) {
@@ -223,7 +220,6 @@
     try { views[id].update && views[id].update(); } catch (e) { console.error(e); }
     try { views[id].enter && views[id].enter(); } catch (e) { console.error(e); }
     emit('view', id, prev);
-    save();
     if (dur && fade) { fade.style.opacity = 0; await wait(dur); }
     navigating = false;
     if (queuedGo) { const [qid, qopts] = queuedGo; queuedGo = null; go(qid, qopts); }
@@ -248,28 +244,13 @@
     const lvl = state.hint[h.id] || 0;
     const i = Math.min(lvl, h.lines.length - 1);
     const out = { id: h.id, level: i, max: h.lines.length - 1, text: h.lines[i], isAnswer: i === h.lines.length - 1 };
-    if (!peekOnly) { state.hint[h.id] = lvl + 1; save(); emit('hint', out); }
+    if (!peekOnly) { state.hint[h.id] = lvl + 1; emit('hint', out); }
     return out;
   }
 
-  // ---------- save ----------
-  function save() {
-    if (!state.started || G.debugMode) return;
-    try { localStorage.setItem(SAVE_KEY, JSON.stringify({ flags: state.flags, inv: state.inv, view: state.view, hint: state.hint })); } catch (e) { }
-  }
-  function hasSave() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY)); return !!(s && Object.keys(s.flags || {}).length); } catch (e) { return false; } }
-  function load() {
-    try {
-      const s = JSON.parse(localStorage.getItem(SAVE_KEY));
-      if (!s) return false;
-      state.flags = s.flags || {}; state.inv = s.inv || []; state.hint = s.hint || {};
-      state.view = views[s.view] ? s.view : 'north';
-      if (state.flags.finished) { resetSave(); return false; }
-      return true;
-    } catch (e) { return false; }
-  }
-  function resetSave() {
-    try { localStorage.removeItem(SAVE_KEY); } catch (e) { }
+  // ---------- fresh start (progress is never saved: every page load is a new game) ----------
+  function resetState() {
+    try { localStorage.removeItem(SAVE_KEY); localStorage.removeItem('mothkeeper.elapsed'); } catch (e) { }
     state.flags = {}; state.inv = []; state.hint = {}; state.sel = null; state.view = 'north';
   }
 
@@ -282,18 +263,16 @@
     show(state.view);
     refresh();
   }
-  function start(opts) {
-    opts = opts || {};
-    if (opts.continue) load(); else resetSave();
+  function start() {
+    resetState();
     state.started = true;
     show(state.view);
     refresh();
     Object.values(views).forEach(v => { if (v.id === state.view && v.enter) v.enter(); });
     emit('view', state.view, null);
     emit('start');
-    save();
   }
-  function finish() { set('finished', true); emit('finish'); try { localStorage.removeItem(SAVE_KEY); } catch (e) { } }
+  function finish() { set('finished', true); emit('finish'); }
 
   // ---------- debug ----------
   const debug = {
@@ -311,7 +290,7 @@
     say, sfx, busy, isBusy, hotspot,
     go, back, turn, view, refresh,
     currentHint, nextHint,
-    save, load, hasSave, resetSave, init, start, finish,
+    init, start, finish,
     debug, debugMode: false,
   };
 })();
