@@ -1075,7 +1075,7 @@
       await G.wait(150);
       // the sash swings outward
       G.sfx('windowCreak');
-      await G.tween(1300, e => setOpen(R, e), 'inOut');
+      await G.tween(1900, e => setOpen(R, e), 'inOut');
       G.sfx('wind');
       R.root.classList.add('win-open');
       await G.tween(900, (e, t) => R.wash.setAttribute('opacity', f(Math.sin(t * Math.PI) * 0.16)), 'linear');
